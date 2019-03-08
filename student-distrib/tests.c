@@ -59,13 +59,22 @@ int idt_test(){
 void paging_test(){
 
 	char * kernel_memory_start = (char*) 0x0400000;
-	char * kernel_memory_end = (char*)0x04fffff;
+	char * kernel_memory_end = (char*)0x07fffff;
 	char * kernel_memory = (char*)0x04abcde;
 
 	char * video_memory_start = (char*)0x000b8000;
 	char * video_memory_end =(char*) 0x000b8fff;
 	char * video_memory = (char*)0x000b8abc;
 	
+	/*char * bad_video_memory_start = (char*)0x000b7fff;
+	printf("bad video memory start: %x\n" , * bad_video_memory_start);*/
+	/*char * bad_video_memory_end = (char*)0x000b9000;
+	printf("bad video memory end: %x\n" , * bad_video_memory_end);*/
+	/*char * bad_kernel_memory_start = (char*)0x03fffff;
+	printf("bad kernel memory start: %x\n" , * bad_kernel_memory_start);*/
+	/*char * bad_kernel_memory_end = (char*)0x0800000;
+	printf("bad kernel memory end: %x\n" , * bad_kernel_memory_end);*/
+
 
 	printf("data at beginning of kernel memory: %x\n" , * kernel_memory_start);
 
