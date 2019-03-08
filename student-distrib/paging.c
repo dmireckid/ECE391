@@ -25,16 +25,16 @@ void initialize_page() {
 	directory_entry_array[0].present = 1;
 	directory_entry_array[0].read_write = 1;
 	directory_entry_array[0].page_size = 0;
-	directory_entry_array[0].p_table_addr = (int)table_entry_array;
+	directory_entry_array[0].p_table_addr = ((int)table_entry_array)>>12;	// address has to be mapped from 4 kB
 	table_entry_array[VIDEO_ADDR/KB_4].present = 1;
 	table_entry_array[VIDEO_ADDR/KB_4].read_write = 1;
-	table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = VIDEO_ADDR/KB_4;	// address has to be mapped from 4 kB
+	table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = VIDEO_ADDR/KB_4;		// address has to be mapped from 4 kB
 
 	/* kernel space is at 4 MB (0x400000), in other words in index 1 of the directory_entry_array */
 	directory_entry_array[1].present = 1;
 	directory_entry_array[1].read_write = 1;
-	directory_entry_array[1].page_size = 1;								// kernel space is 4 MB
-	directory_entry_array[1].p_table_addr = KERNEL_ADDR>>12;			// address has to be mapped from 4 MB, so shift physical address to right by 12 (other 10 bits accomodated by reserved and PAT bits)
+	directory_entry_array[1].page_size = 1;									// kernel space is 4 MB
+	directory_entry_array[1].p_table_addr = KERNEL_ADDR>>12;				// address has to be mapped from 4 MB, so shift physical address to right by 12 (other 10 bits accomodated by reserved and PAT bits)
 	
 	/* enable paging through assembly linkage */
 	enable_paging(directory_entry_array);

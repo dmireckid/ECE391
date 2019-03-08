@@ -7,18 +7,18 @@
 # enable paging by properly setting the control register values
 enable_paging:
 	# store the pointer of the page directory in CR3
-	push %ebp
-	mov %esp, %ebp
-	mov 8(%esp), %eax
-	mov %eax, %cr3
-	mov %ebp, %esp
-	pop %ebp
+	pushl %ebp
+	movl %esp, %ebp
+	movl 8(%esp), %eax
+	movl %eax, %cr3
+	# enable the 4MB page extension in CR4
+	movl %cr4, %eax
+	orl $0x10, %eax
+	movl %eax, %cr4
 	# set bit 32 in CR0 to 1 to enable paging
-	push %ebp
-	mov %esp, %ebp
-	mov %cr0, %eax
-	or $0x80000000, %eax
-	mov %eax, %cr0
-	mov %ebp, %esp
-	pop %ebp
+	movl %cr0, %eax
+	orl $0x80000001, %eax
+	movl %eax, %cr0
+	movl %ebp, %esp
+	popl %ebp
 	ret
