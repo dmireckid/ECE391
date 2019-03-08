@@ -1,3 +1,6 @@
+/* paging_assem.h - Enable paging
+ */
+
 #ifndef _PAGING_ASSEM
 #define _PAGING_ASSEM
 

@@ -1,3 +1,5 @@
+# paging_assem.S - Enable paging
+
 #include "paging_assem.h"
 
 .text
