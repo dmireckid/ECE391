@@ -47,6 +47,36 @@ int idt_test(){
 
 // add more tests here
 
+void paging_test(){
+
+	char * kernel_memory_start = (char*) 0x04000000;
+	char * kernel_memory_end = (char*)0x04ffffff;
+	char * kernel_memory = (char*)0x04abcdef;
+
+	char * video_memory_start = (char*)0x000b8000;
+	char * video_memory_end =(char*) 0x000b8fff;
+	char * video_memory = (char*)0x000b8abc;
+	
+
+	printf("data at beginning of kernel memory %x\n" , * kernel_memory_start);
+	
+	printf("data at end of kernel memory %x\n" , * kernel_memory_end);
+	
+	printf("data inside of kernel memory %x\n" , * kernel_memory);
+	
+	printf("data at beginning of video memory %x\n" , * video_memory_start);
+	
+	printf("data at end of video memory %x\n" , * video_memory_end);
+	
+	printf("data inside of video memory %x\n" , * video_memory);
+	
+	int a = 5; int* a_ptr = &a;
+
+	printf("a_ptr %x \n",a_ptr);
+
+	printf("a_ptr deref %u \n",*a_ptr);	
+}
+
 /* Checkpoint 2 tests */
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
