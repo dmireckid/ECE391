@@ -34,7 +34,7 @@ void initialize_page() {
 	directory_entry_array[1].present = 1;
 	directory_entry_array[1].read_write = 1;
 	directory_entry_array[1].page_size = 1;									// kernel space is 4 MB
-	directory_entry_array[1].p_table_addr = KERNEL_ADDR>>10;				// address has to be mapped from 4 MB
+	directory_entry_array[1].p_table_addr = KERNEL_ADDR>>12;				// address has to be mapped from 4 MB, so shift physical address to right by 12 (other 10 bits accomodated by reserved and PAT bits)
 	
 	/* enable paging through assembly linkage */
 	enable_paging(directory_entry_array);
