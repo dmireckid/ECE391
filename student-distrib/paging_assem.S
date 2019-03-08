@@ -15,7 +15,7 @@ enable_paging:
 	movl %cr4, %eax
 	orl $0x10, %eax
 	movl %eax, %cr4
-	# set bit 32 in CR0 to 1 to enable paging
+	# set bit 0 (PE) and bit 31 (PG) in CR0 to 1 to enable paging
 	movl %cr0, %eax
 	orl $0x80000001, %eax
 	movl %eax, %cr0
