@@ -4,10 +4,18 @@
 #include "paging.h"
 #include "paging_assem.h"
 
+/*
+ * initialize_page
+ *   DESCRIPTION: Initializes paging in the kernel.
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: initializes and enables paging
+ */
 void initialize_page() {
 	
 	int j;
-	/* set all values in all page directory and table entries to 0 */
+	/* set all values in all page directory entries and table entries to 0 */
 	for (j = 0; j < NUM_ENTRIES; j++) {
 		directory_entry_array[j].val = 0;
 		table_entry_array[j].val = 0;
@@ -17,10 +25,10 @@ void initialize_page() {
 	directory_entry_array[0].present = 1;
 	directory_entry_array[0].read_write = 1;
 	directory_entry_array[0].page_size = 0;
-	directory_entry_array[0].p_table_addr = table_entry_array;
-	table_entry_array[VIDEO_ADDR/4_KB].present = 1;
-	table_entry_array[VIDEO_ADDR/4_KB].read_write = 1;
-	table_entry_array[VIDEO_ADDR/4_KB].p_base_address = VIDEO_ADDR/4_KB;	// address has to be mapped from 4 kB
+	directory_entry_array[0].p_table_addr = (int)table_entry_array;
+	table_entry_array[VIDEO_ADDR/KB_4].present = 1;
+	table_entry_array[VIDEO_ADDR/KB_4].read_write = 1;
+	table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = VIDEO_ADDR/KB_4;	// address has to be mapped from 4 kB
 
 	/* kernel space is at 4 MB (0x400000), in other words in index 1 of the directory_entry_array */
 	directory_entry_array[1].present = 1;

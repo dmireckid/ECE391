@@ -4,9 +4,11 @@
 #ifndef _PAGING
 #define _PAGING
 
+#include "types.h"
 
-#define 4_KB	4096
-#define 4_MB	4194304
+
+#define KB_4	4096
+#define MB_4	4194304
 
 #define KERNEL_ADDR		0x400000
 #define VIDEO_ADDR		0xB8000
@@ -15,7 +17,7 @@
 
 
 /* struct for page directory entry */
-typedef struct page_directory_entry{
+typedef struct page_directory_entry {
 	union {
 		uint32_t val;
 		struct {
@@ -35,7 +37,7 @@ typedef struct page_directory_entry{
 } page_directory_entry_t;
 
 /* struct for page table entry */
-typedef struct page_table_entry{
+typedef struct page_table_entry {
 	union {
 		uint32_t val;
 		struct {
@@ -56,10 +58,12 @@ typedef struct page_table_entry{
 
 
 /* global arrays for directory and table entries */
-page_directory_entry_t directory_entry_array[NUM_ENTRIES] __attribute__((aligned (4_KB)));
+page_directory_entry_t directory_entry_array[NUM_ENTRIES] __attribute__((aligned (KB_4)));
 
-page_table_entry_t	table_entry_array[NUM_ENTRIES] __attribute__((aligned (4_KB)));
+page_table_entry_t	table_entry_array[NUM_ENTRIES] __attribute__((aligned (KB_4)));
 
 
 /* function to initialize paging */
 extern void initialize_page();
+
+#endif
