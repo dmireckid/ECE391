@@ -141,6 +141,6 @@ void paging_test(){
 void launch_tests(){
 	//TEST_OUTPUT("idt_test", idt_test());
 	// launch your tests here
-	paging_test();
-	TEST_OUTPUT("paging_struct_test", paging_struct_test());
+	//paging_test();
+	//TEST_OUTPUT("paging_struct_test", paging_struct_test());
 }
