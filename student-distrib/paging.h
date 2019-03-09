@@ -60,7 +60,7 @@ typedef struct page_table_entry {
 /* global arrays for directory and table entries */
 page_directory_entry_t directory_entry_array[NUM_ENTRIES] __attribute__((aligned (KB_4)));
 
-page_table_entry_t	table_entry_array[NUM_ENTRIES] __attribute__((aligned (KB_4)));
+page_table_entry_t table_entry_array[NUM_ENTRIES] __attribute__((aligned (KB_4)));
 
 
 /* function to initialize paging */

@@ -2,6 +2,8 @@
 #include "x86_desc.h"
 #include "lib.h"
 
+#include "paging.h"
+
 #define PASS 1
 #define FAIL 0
 
@@ -47,13 +49,45 @@ int idt_test(){
 
 // add more tests here
 
-/* Paging Test - Example
+/* Paging Struct Test
+ * 
+ * Asserts that paging structure values are correct
+ * Inputs: None
+ * Outputs: None
+ * Side Effects: None
+ * Coverage: Paging structure values
+ * Files: paging.h/c
+ */
+int paging_struct_test(){
+	TEST_HEADER;
+
+	if (directory_entry_array[0].val != 0x3+0x20+(int)table_entry_array)
+		return FAIL;
+
+	if (directory_entry_array[1].val != 0x83+0x60+KERNEL_ADDR)
+		return FAIL;
+	
+	if (table_entry_array[VIDEO_ADDR/KB_4].val != 0x3+0x60+VIDEO_ADDR)
+		return FAIL;
+
+	int i;
+	for (i = 0; i < NUM_ENTRIES; i++) {
+		if (i > 1 && directory_entry_array[i].val != 0)
+			return FAIL;
+		if (i != VIDEO_ADDR/KB_4 && table_entry_array[i].val != 0)
+			return FAIL;
+	}
+	
+	return PASS;
+}
+
+/* Paging Test
  * 
  * Asserts that video memory and kernel memory are paged properly
  * Inputs: None
  * Outputs: None
  * Side Effects: None
- * Coverage: , IDT definition
+ * Coverage: Paged addresses
  * Files: paging.h/c, paging.h/S
  */
 void paging_test(){
@@ -74,6 +108,8 @@ void paging_test(){
 	printf("bad kernel memory start: %x\n" , * bad_kernel_memory_start);*/
 	/*char * bad_kernel_memory_end = (char*)0x0800000;
 	printf("bad kernel memory end: %x\n" , * bad_kernel_memory_end);*/
+	/*int* bad_pointer = NULL;
+	printf("bad pointer: %d\n", *bad_pointer);*/
 
 
 	printf("data at beginning of kernel memory: %x\n" , * kernel_memory_start);
@@ -106,4 +142,5 @@ void launch_tests(){
 	//TEST_OUTPUT("idt_test", idt_test());
 	// launch your tests here
 	paging_test();
+	TEST_OUTPUT("paging_struct_test", paging_struct_test());
 }

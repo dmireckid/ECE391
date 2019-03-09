@@ -25,7 +25,7 @@ void initialize_page() {
 	directory_entry_array[0].present = 1;
 	directory_entry_array[0].read_write = 1;
 	directory_entry_array[0].page_size = 0;
-	directory_entry_array[0].p_table_addr = ((int)table_entry_array)>>12;	// address has to be mapped from 4 kB
+	directory_entry_array[0].p_table_addr = ((int)table_entry_array)>>12;	// address has to be mapped from 4 kB, so shift physical address to right by 12
 	table_entry_array[VIDEO_ADDR/KB_4].present = 1;
 	table_entry_array[VIDEO_ADDR/KB_4].read_write = 1;
 	table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = VIDEO_ADDR/KB_4;		// address has to be mapped from 4 kB
