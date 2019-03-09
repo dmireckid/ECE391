@@ -80,9 +80,6 @@ int paging_struct_test(){
 	
 	return PASS;
 }
-void launch_struct_test() {
-	TEST_OUTPUT("paging_struct_test", paging_struct_test());
-}
 
 /* Paging Test
  * 
