@@ -1,8 +1,6 @@
 #  rtc_asm.S  assembly linkage for rtc interrupts
 #define ASM 1
-
-
-.text
+#include "rtc.h"
 
 .globl rtc_handler
 

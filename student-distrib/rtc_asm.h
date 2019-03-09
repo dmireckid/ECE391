@@ -7,7 +7,4 @@
 #define _RTC_ASM_H
 
 
-
 extern void rtc_handler();
-
-#endif

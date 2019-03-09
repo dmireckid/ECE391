@@ -1,13 +1,11 @@
 /* rtc.h - RTC init and interrupt
  */
 
-#ifndef _RTC_H
-#define _RTC_H
+#ifndef _rtc
+#define _rtc
 
 
 
-extern void init_rtc(void);
+void init_rtc();
 
-extern void rtc_interrupt(void);
-
-#endif
+void rtc_interrupt();
