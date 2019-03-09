@@ -2,6 +2,8 @@
 #include "x86_desc.h"
 #include "lib.h"
 
+#include "paging.h"
+
 #define PASS 1
 #define FAIL 0
 
@@ -47,6 +49,88 @@ int idt_test(){
 
 // add more tests here
 
+/* Paging Struct Test
+ * 
+ * Asserts that paging structure values are correct
+ * Inputs: None
+ * Outputs: None
+ * Side Effects: None
+ * Coverage: Paging structure values
+ * Files: paging.h/c
+ */
+int paging_struct_test(){
+	TEST_HEADER;
+
+	if (directory_entry_array[0].val != 0x3+0x20+(int)table_entry_array)
+		return FAIL;
+
+	if (directory_entry_array[1].val != 0x83+0x60+KERNEL_ADDR)
+		return FAIL;
+	
+	if (table_entry_array[VIDEO_ADDR/KB_4].val != 0x3+0x60+VIDEO_ADDR)
+		return FAIL;
+
+	int i;
+	for (i = 0; i < NUM_ENTRIES; i++) {
+		if (i > 1 && directory_entry_array[i].val != 0)
+			return FAIL;
+		if (i != VIDEO_ADDR/KB_4 && table_entry_array[i].val != 0)
+			return FAIL;
+	}
+	
+	return PASS;
+}
+
+/* Paging Test
+ * 
+ * Asserts that video memory and kernel memory are paged properly
+ * Inputs: None
+ * Outputs: None
+ * Side Effects: None
+ * Coverage: Paged addresses
+ * Files: paging.h/c, paging.h/S
+ */
+void paging_test(){
+
+	char * kernel_memory_start = (char*) 0x0400000;
+	char * kernel_memory_end = (char*)0x07fffff;
+	char * kernel_memory = (char*)0x04abcde;
+
+	char * video_memory_start = (char*)0x000b8000;
+	char * video_memory_end =(char*) 0x000b8fff;
+	char * video_memory = (char*)0x000b8abc;
+	
+	/*char * bad_video_memory_start = (char*)0x000b7fff;
+	printf("bad video memory start: %x\n" , * bad_video_memory_start);*/
+	/*char * bad_video_memory_end = (char*)0x000b9000;
+	printf("bad video memory end: %x\n" , * bad_video_memory_end);*/
+	/*char * bad_kernel_memory_start = (char*)0x03fffff;
+	printf("bad kernel memory start: %x\n" , * bad_kernel_memory_start);*/
+	/*char * bad_kernel_memory_end = (char*)0x0800000;
+	printf("bad kernel memory end: %x\n" , * bad_kernel_memory_end);*/
+	/*int* bad_pointer = NULL;
+	printf("bad pointer: %d\n", *bad_pointer);*/
+
+
+	printf("data at beginning of kernel memory: %x\n" , * kernel_memory_start);
+
+	printf("data at end of kernel memory: %x\n" , * kernel_memory_end);
+	
+	printf("data inside of kernel memory: %x\n" , * kernel_memory);
+	
+	printf("data at beginning of video memory: %x\n" , * video_memory_start);
+	
+	printf("data at end of video memory: %x\n" , * video_memory_end);
+	
+	printf("data inside of video memory: %x\n" , * video_memory);
+
+	int a = 5; int* a_ptr = &a;
+
+	printf("a_ptr: %x \n",a_ptr);
+
+	printf("a_ptr deref: %u \n",*a_ptr);
+}
+
 /* Checkpoint 2 tests */
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
@@ -55,6 +139,8 @@ int idt_test(){
 
 /* Test suite entry point */
 void launch_tests(){
-	TEST_OUTPUT("idt_test", idt_test());
+	//TEST_OUTPUT("idt_test", idt_test());
 	// launch your tests here
+	paging_test();
+	TEST_OUTPUT("paging_struct_test", paging_struct_test());
 }
