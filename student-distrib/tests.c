@@ -94,24 +94,24 @@ int paging_test(){
 	TEST_HEADER;
 
 	/* check to see if the memory address right before the start of video memory (0xb7fff) causes a page fault */
-	//prints("Testing dereferenced pointer before start of video memory: \n");
+	//puts("Testing dereferenced pointer before start of video memory: \n");
 	//printf("%x\n", * (char*)0x000b7fff);
 	
 	/* check to see if the memory address right after the end of video memory (0xb9000) causes a page fault */
-	//prints("Testing dereferenced pointer after end of video memory: \n")
+	//puts("Testing dereferenced pointer after end of video memory: \n");
 	//printf("%x\n", * (char*)0x000b9000);
 	
 	/* check to see if the memory address right before the beginning of kernel memory (0x3fffff) causes a page fault */
-	//prints("Testing dereferenced pointer before start of kernel memory: \n");
+	//puts("Testing dereferenced pointer before start of kernel memory: \n");
 	//printf("%x\n", * (char*)0x03fffff);
 	
 	/* check to see if the memory address right after the end of kernel memory (0x800000) causes a page fault */
-	//prints("Testing dereferenced pointer after end of kernel memory: \n")
+	//puts("Testing dereferenced pointer after end of kernel memory: \n");
 	//printf("%x\n", * (char*)0x0800000);
 	
 	/* check to see if a NULL pointer returns a page fault */
-	//prints("Testing dereferenced NULL pointer: \n")
-	// printf("bad pointer: %d\n", * (int*)NULL);
+	//puts("Testing dereferenced NULL pointer: \n");
+	//printf("bad pointer: %d\n", * (int*)NULL);
 
 
 	char * kernel_memory_start = (char*) 0x0400000;
