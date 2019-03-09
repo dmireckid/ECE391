@@ -8,6 +8,7 @@
 #include "i8259.h"
 #include "debug.h"
 #include "tests.h"
+#include "keyboard.h"
 
 #define RUN_TESTS
 
@@ -136,8 +137,16 @@ void entry(unsigned long magic, unsigned long addr) {
         ltr(KERNEL_TSS);
     }
 
+    /* Disable all interrupts */
+    //for (uint32_t irq_num=0; irq_num<16; irq_num++) { disable_irq(irq_num); }
+    outb(0xFF, MASTER_DATA);
+    outb(0xFF, SLAVE_DATA);
+
     /* Init the PIC */
     i8259_init();
+
+    /* Init the keyboard */
+    keyboard_init();
 
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
