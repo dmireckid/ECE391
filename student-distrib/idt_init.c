@@ -3,6 +3,9 @@
 #include "interrupt_handlers.h"
 #include "lib.h"
 
+#include "keyboard_asm.h"
+#include "rtc_asm.h"
+
 void idt_init(){
 	static void (*functions[21]) = {divide_error, debug, nmi, breakpoint, overflow, bound_range, 
 									invalid_op, device_na, double_fault, seg_overrun, invalid_tss,
@@ -39,8 +42,8 @@ void idt_init(){
 		}
 	}
 	//SET_IDT_ENTRY(idt[0x20], );		//PIC handler
-	//SET_IDT_ENTRY(idt[0x21], keyboard_handler);	//keyboard handler
-	//SET_IDT_ENTRY(idt[0x28], rtc_handler); 		//RTC handler
+	SET_IDT_ENTRY(idt[0x21], keyboard_handler);	//keyboard handler
+	SET_IDT_ENTRY(idt[0x28], rtc_handler); 		//RTC handler
 	//SET_IDT_ENTRY(idt[0x80], syscall_handler);		//syscall handler
 }
 
