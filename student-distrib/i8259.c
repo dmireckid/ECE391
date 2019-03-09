@@ -11,23 +11,26 @@ uint8_t slave_mask;  /* IRQs 8-15 */
 
 /* Initialize the 8259 PIC */
 void i8259_init(void) {
+    outb(0xFF, MASTER_DATA);            //mask (close) all IRQs
+    outb(0xFF, SLAVE_DATA);
+
     master_mask = inb(MASTER_DATA);     //save current masks
     slave_mask = inb(SLAVE_DATA);
 
-    outb(MASTER_COMMAND, ICW1);         //enter init mode (0x11)
-    outb(SLAVE_COMMAND, ICW1);
+    outb(ICW1, MASTER_COMMAND);         //enter init mode (0x11)
+    outb(ICW1, SLAVE_COMMAND);
 
-    outb(MASTER_DATA, ICW2_MASTER);     //set vector offsets (0x20 and 0x28)
-    outb(SLAVE_DATA, ICW2_SLAVE);
+    outb(ICW2_MASTER, MASTER_DATA);     //set vector offsets (0x20 and 0x28)
+    outb(ICW2_SLAVE, SLAVE_DATA);
 
-    outb(MASTER_DATA, ICW3_MASTER);     //tell master that slave is at IRQ2 (0x04)
-    outb(SLAVE_DATA, ICW3_SLAVE);       //tell slave that it has master
+    outb(ICW3_MASTER, MASTER_DATA);     //tell master that slave is at IRQ2 (0x04)
+    outb(ICW3_SLAVE, SLAVE_DATA);       //tell slave that it has master
 
-    outb(MASTER_DATA, ICW4);            //give info about environment
-    outb(SLAVE_DATA, ICW4);
+    outb(ICW4, MASTER_DATA);            //give info about environment
+    outb(ICW4, SLAVE_DATA);
 
-    outb(MASTER_DATA, master_mask);     //restore masks
-    outb(SLAVE_DATA, slave_mask);
+    outb(master_mask, MASTER_DATA);     //restore masks
+    outb(slave_mask, SLAVE_DATA);
 }
 
 /* Enable (unmask) the specified IRQ */
@@ -44,7 +47,7 @@ void enable_irq(uint32_t irq_num) {
 
     mask_prev = inb(select);
     mask_new = mask_prev & ~(1<<irq_num);   //unmask irq_num by making the value zero
-    outb(select, mask_new);                 //ie. 0xXXXXXX0X if irq_num is 1
+    outb(mask_new, select);                 //ie. 0xXXXXXX0X if irq_num is 1
 }
 
 /* Disable (mask) the specified IRQ */
@@ -61,13 +64,13 @@ void disable_irq(uint32_t irq_num) {
 
     mask_prev = inb(select);
     mask_new = mask_prev | (1<<irq_num);    //mask irq_num by making the value one
-    outb(select, mask_new);                 //ie. 0xXXXXXX1X if irq_num is 1
+    outb(mask_new, select);                 //ie. 0xXXXXXX1X if irq_num is 1
 }
 
 /* Send end-of-interrupt signal for the specified IRQ */
 void send_eoi(uint32_t irq_num) {
+    outb(EOI|irq_num, MASTER_COMMAND);      //sends EOI signal to MASTER regardless of irq location
     if (irq_num>=8) {
-        outb(SLAVE_COMMAND, EOI);   //sends EOI signal to SLAVE if irq is on slave
+        outb(EOI|(irq_num-8), SLAVE_COMMAND);   //sends EOI signal to SLAVE if irq is on slave
     }
-    outb(MASTER_COMMAND, EOI);      //sends EOI signal to MASTER regardless of irq location
 }

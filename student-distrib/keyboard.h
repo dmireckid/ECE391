@@ -2,21 +2,13 @@
  * vim:ts=4 noexpandtab
  */
 
-#ifndef KEYBOARD_H
-#define KEYBOARD_H
-
-#include "lib.h"
-#include "i8259.h"
+#ifndef _KEYBOARD_H
+#define _KEYBOARD_H
 
 /* Keyboard IRQ number and ports to communicate*/
 #define KEYBOARD_IRQ    1
 #define KEYBOARD_DATA   0x60
 #define KEYBOARD_STATUS 0x64
-
-/* maps keycode to ASCII character code */
-char keymap[256] =  {   '\0', 27, /* 0x00: not used, 0x01: esc key */
-                        '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' /* 0x02~0x0B: numbers 1~9 and 0 */ 
-                    };
 
 void keyboard_init(void);
 

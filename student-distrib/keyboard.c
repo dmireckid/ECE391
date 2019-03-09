@@ -3,14 +3,21 @@
  */
 
 #include "keyboard.h"
+#include "lib.h"
+#include "i8259.h"
+
+/* maps keycode to ASCII character code */
+char keymap[256] =  {   '\0', (char)27, /* 0x00: not used, 0x01: esc key */
+                        '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' /* 0x02~0x0B: numbers 1~9 and 0 */ 
+                    };
 
 /* enable IRQ1 to open keyboard interrupt */
-void keyboard_init(void) {
+void keyboard_init() {
     enable_irq(1);
 }
 
 /* executed at keyboard interrupt, prints out pressed key on screen */
-void keyboard_handler_function(void) {
+void keyboard_handler_function() {  
     /* contains keyboard status data */
     unsigned char status;
 
@@ -30,6 +37,7 @@ void keyboard_handler_function(void) {
         /* do we need this? */
         if (keycode<0) return; 
         /* prints the pressed key on screen */
-        putc(keymap[keycode]);
+        putc(keymap[(int)keycode]);
+        putc('\n');
     }
 }
