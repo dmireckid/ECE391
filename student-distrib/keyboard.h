@@ -14,8 +14,8 @@
 #define KEYBOARD_STATUS 0x64
 
 /* maps keycode to ASCII character code */
-char keymap[256] =  {   '\0', '27', /* 0x00: not used, 0x01: esc key */
-                        '49', '50', '51', '52', '53', '54', '55', '56', '57', '48' /* 0x02~0x0B: numbers 1~9 and 0 */ 
+char keymap[256] =  {   '\0', 27, /* 0x00: not used, 0x01: esc key */
+                        '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' /* 0x02~0x0B: numbers 1~9 and 0 */ 
                     };
 
 void keyboard_init(void);
