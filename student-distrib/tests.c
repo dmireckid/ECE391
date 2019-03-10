@@ -57,6 +57,27 @@ int idt_test(){
 
 // add more tests here
 
+/* IDT Value Test
+ * 
+ * Asserts that all IDT entries contain values
+ * Inputs: None
+ * Outputs: None
+ * Side Effects: None
+ * Coverage: IDT values
+ * Files: idt_init.h/c
+ */
+int idt_val_test(){
+	TEST_HEADER;
+	
+	int i;
+	for (i = 0; i < NUM_VEC; i++) {
+		if (idt[i].val == 0)
+			return FAIL;
+	}
+	
+	return PASS;
+}
+
 /* Paging Struct Test
  * 
  * Asserts that paging structure values are correct
@@ -160,6 +181,7 @@ int paging_test(){
 void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
 	// launch your tests here
+	TEST_OUTPUT("idt_val_test", idt_val_test());
 	TEST_OUTPUT("paging_struct_test", paging_struct_test());
 	TEST_OUTPUT("paging_test", paging_test());
 }
