@@ -11,7 +11,7 @@
 #define RTC_MDR	0x71	//Data Register / CMOS register
 #define RTC_IRQ_LINE 8
 
-//
+// rtc register addresses
 #define RTC_REGISTER_A	0x0A
 #define	RTC_REGISTER_B	0x0B
 #define	RTC_REGISTER_C	0x0C
@@ -21,6 +21,15 @@
 #define A_2_Hz 0x0F //control register A 2 Hz setting
 #define init_B 0x40 //control register B Interrupt enable setting
 
+
+/*
+ *	init_rtc()
+ *  DESCRIPTION: turns on the oscillator at 2 Hz, enable periodic interrupts
+ *	INPUTS:none
+ *	OUTPUTS: turns on the oscillator at 2 Hz, enable periodic interrupts
+ *	RETURN VALUE:none
+ *	SIDE EFFECTS: RTC interrupts happen
+ */
 void init_rtc(void){
 
 	
@@ -34,7 +43,7 @@ void init_rtc(void){
 	//set oscillator frequency
 	outb( RTC_REGISTER_A, RTC_MAR);
 	reg_a = (uint8_t)inb(RTC_MDR);
-	reg_a |= A_2_Hz;
+	reg_a |= A_2_Hz;//set bottom 4 bits
 	outb( RTC_REGISTER_A, RTC_MAR);
 	outb( reg_a,RTC_MDR);
 	
@@ -42,7 +51,7 @@ void init_rtc(void){
 	
 	outb( RTC_REGISTER_B,RTC_MAR);
 	uint8_t reg_b = (uint8_t)inb(RTC_MDR);
-	//toggle the interrupt enable bit
+	//toggle the interrupt enable bit (bit 6)
 	reg_b |= init_B;
 	outb( RTC_REGISTER_B,RTC_MAR);
 	outb(reg_b,RTC_MDR);
@@ -54,13 +63,22 @@ void init_rtc(void){
 	
 }
 
-
+/*
+ *	rtc_interrupt()
+ *  DESCRIPTION:called by rtc_handler which is the function pointed to in the IDT for IRQ line 8
+ *	INPUTS:none
+ *	OUTPUTS: sends eoi to pic, screws up the video memory by calling test interrupts
+ *	RETURN VALUE:none
+ *	SIDE EFFECTS: screws up video memory
+ */
 void rtc_interrupt(void){
+	send_eoi(RTC_IRQ_LINE);
+	
 	//read register C so interrupt is cleared from the RTC
 	outb( RTC_REGISTER_C, RTC_MAR);
 	inb(RTC_MDR);
+	
 	//required functionality for cp1
-	send_eoi(RTC_IRQ_LINE);
 	test_interrupts();
-
+	
 }
