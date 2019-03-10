@@ -57,6 +57,22 @@ int idt_test(){
 
 // add more tests here
 
+/* Garbage Input/Output Test
+ * 
+ * Asserts that incorrect inputs/outputs produce errors/exceptions
+ * Inputs: None
+ * Outputs: None
+ * Side Effects: None
+ * Coverage: Garbage inputs/outputs
+ * Files: idt_init.h/c
+ */
+ int division_test(){
+	 volatile int a=1;
+	 volatile int b=0;
+	 volatile int c=a/b;	//attempt to divide by zero to throw an exception
+	 return c;
+ }
+
 /* IDT Value Test
  * 
  * Asserts that all IDT entries contain values
@@ -181,6 +197,8 @@ int paging_test(){
 void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
 	// launch your tests here
+	//division_test();
+	//asm volatile("int $19");
 	TEST_OUTPUT("idt_val_test", idt_val_test());
 	TEST_OUTPUT("paging_struct_test", paging_struct_test());
 	TEST_OUTPUT("paging_test", paging_test());
