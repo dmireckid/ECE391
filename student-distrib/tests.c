@@ -13,6 +13,14 @@
 #define TEST_OUTPUT(name, result)	\
 	printf("[TEST %s] Result = %s\n", name, (result) ? "PASS" : "FAIL");
 
+/*
+ * assertion_failure
+ *   DESCRIPTION: Directly call an entry in the IDT
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: causes an exception or interrupt
+ */
 static inline void assertion_failure(){
 	/* Use exception #15 for assertions, otherwise
 	   reserved by Intel */
@@ -61,13 +69,13 @@ int idt_test(){
 int paging_struct_test(){
 	TEST_HEADER;
 
-	if (directory_entry_array[0].val != 0x3+0x20+(int)table_entry_array)
+	if (directory_entry_array[0].val != DIREC_0_BITS+(int)table_entry_array)
 		return FAIL;
 
-	if (directory_entry_array[1].val != 0x83+0x60+KERNEL_ADDR)
+	if (directory_entry_array[1].val != DIREC_1_BITS+KERNEL_ADDR)
 		return FAIL;
 	
-	if (table_entry_array[VIDEO_ADDR/KB_4].val != 0x3+0x60+VIDEO_ADDR)
+	if (table_entry_array[VIDEO_ADDR/KB_4].val != TABLE_23_BITS+VIDEO_ADDR)
 		return FAIL;
 
 	int i;
@@ -114,32 +122,29 @@ int paging_test(){
 	//printf("bad pointer: %d\n", * (int*)NULL);
 
 
-	char * kernel_memory_start = (char*) 0x0400000;
-	char * kernel_memory_end = (char*)0x07fffff;
-	char * kernel_memory = (char*)0x04abcde;
+	/* check to see if addresses at beginning, middle, and end of kernel and video memory are paged */
+	char * kernel_memory_start = (char*)KERNEL_ADDR_S;
+	char * kernel_memory_end = (char*)KERNEL_ADDR_E;
+	char * kernel_memory = (char*)KERNEL_ADDR_M;
 
-	char * video_memory_start = (char*)0x000b8000;
-	char * video_memory_end =(char*) 0x000b8fff;
-	char * video_memory = (char*)0x000b8abc;
+	char * video_memory_start = (char*)VIDEO_ADDR_S;
+	char * video_memory_end =(char*)VIDEO_ADDR_E;
+	char * video_memory = (char*)VIDEO_ADDR_M;
 
 	printf("data at beginning of kernel memory: %x\n" , * kernel_memory_start);
-
 	printf("data at end of kernel memory: %x\n" , * kernel_memory_end);
-	
 	printf("data inside of kernel memory: %x\n" , * kernel_memory);
-	
 	printf("data at beginning of video memory: %x\n" , * video_memory_start);
-	
 	printf("data at end of video memory: %x\n" , * video_memory_end);
-	
 	printf("data inside of video memory: %x\n" , * video_memory);
 
-	int a = 5; int* a_ptr = &a;
 
+	/* check to see if an initialized pointer lies within the kernel memory */
+	int a = FIVE; int* a_ptr = &a;
 	printf("a_ptr: %x \n",a_ptr);
-
 	printf("a_ptr deref: %u \n",*a_ptr);
-	
+
+
 	return PASS;
 }
 

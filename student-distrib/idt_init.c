@@ -1,6 +1,5 @@
 #include "idt_init.h"
 #include "x86_desc.h"
-#include "interrupt_handlers.h"
 #include "lib.h"
 
 #include "keyboard_asm.h"
