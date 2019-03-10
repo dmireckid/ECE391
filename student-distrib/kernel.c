@@ -145,6 +145,7 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Init the keyboard */
     keyboard_init();
 
+    /* init the RTC */
     init_rtc();
 
     /* Initialize devices, memory, filesystem, enable device interrupts on the
@@ -152,7 +153,6 @@ void entry(unsigned long magic, unsigned long addr) {
     initialize_page();
 
     /* Enable interrupts */
-    
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
      * without showing you any output */
