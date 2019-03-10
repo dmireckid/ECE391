@@ -10,8 +10,10 @@
 #define KEYBOARD_DATA   0x60
 #define KEYBOARD_STATUS 0x64
 
+/* Initializes keyboard */
 void keyboard_init(void);
 
+/* Handles input from keyboard and prints it on screen */
 void keyboard_handler_function(void);
 
 #endif /* KEYBOARD_H */

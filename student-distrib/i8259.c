@@ -5,7 +5,15 @@
 #include "i8259.h"
 #include "lib.h"
 
-/* Initialize the 8259 PIC */
+/* 
+ * i8259_init()
+ *   Description: Initialize the 8259 PIC 
+ *         Input: None
+ *        Output: None
+ *        Return: None
+ *  Side Effects: Initializes both PIC chips while preserving the mask registers
+ */
+
 void i8259_init(void) {
     /* Interrupt masks to determine which interrupts are enabled and disabled */
     uint8_t master_mask; /* IRQs 0-7  */
@@ -33,7 +41,15 @@ void i8259_init(void) {
     outb(slave_mask, SLAVE_DATA);
 }
 
-/* Enable (unmask) the specified IRQ */
+/* 
+ * enable_irq()
+ *   Description: Enables the specified IRQ 
+ *         Input: The IRQ number
+ *        Output: None
+ *        Return: None
+ *  Side Effects: Enables the specified IRQ number by writing a new mask register value
+ */
+
 void enable_irq(uint32_t irq_num) {
     uint16_t    select;                     //port number for desired PIC
     uint8_t     mask_prev, mask_new;        //8-bit mask register value
@@ -45,17 +61,25 @@ void enable_irq(uint32_t irq_num) {
         irq_num -= 8;                       //subtract 8 from irq_num for correct offset
     }
 
-    if(select==SLAVE_DATA) {
-        /* if irq_num is on SLAVE, also enable IRQ on MASTER where SLAVE is connected */
-        enable_irq(SLAVE_IRQ_ON_MASTER);
-	}
-
     mask_prev = inb(select);
     mask_new = mask_prev & ~(1<<irq_num);   //unmask irq_num by making the value zero
-    outb(mask_new, select);                 //ie. 0xXXXXXX0X if irq_num is 1
+    outb(mask_new, select);                 //(1<<irq_num) is 0x11111101 if irq_num is 1
+
+    if(select==SLAVE_DATA && mask_prev==0xFF) {
+        /* if this is the first time enabling anything on SLAVE, enable IRQ on MASTER where SLAVE is connected */
+        enable_irq(SLAVE_IRQ_ON_MASTER);
+	}
 }
 
-/* Disable (mask) the specified IRQ */
+/* 
+ * disable_irq()
+ *   Description: Disables the specified IRQ 
+ *         Input: The IRQ number
+ *        Output: None
+ *        Return: None
+ *  Side Effects: Disables the specified IRQ number by writing a new mask register value
+ */
+
 void disable_irq(uint32_t irq_num) {
     uint16_t    select;                     //port number for desired PIC
     uint8_t     mask_prev, mask_new;        //8-bit mask register value
@@ -67,17 +91,25 @@ void disable_irq(uint32_t irq_num) {
         irq_num -= 8;                       //subtract 8 from irq_num for correct offset
     }
 
-    if(select==SLAVE_DATA) {
-        /* if irq_num is on SLAVE, also disable IRQ on MASTER where SLAVE is connected */
-        disable_irq(SLAVE_IRQ_ON_MASTER);
-	}
-
     mask_prev = inb(select);
     mask_new = mask_prev | (1<<irq_num);    //mask irq_num by making the value one
-    outb(mask_new, select);                 //ie. 0xXXXXXX1X if irq_num is 1
+    outb(mask_new, select);                 //(1<<irq_num) is 0x00000010 if irq_num is 1
+
+    if(select==SLAVE_DATA && mask_new==0xFF) {
+        /* if there is nothing enabled on SLAVE, disable IRQ on MASTER where SLAVE is connected */
+        disable_irq(SLAVE_IRQ_ON_MASTER);
+	}
 }
 
-/* Send end-of-interrupt signal for the specified IRQ */
+/* 
+ * send_eoi()
+ *   Description: Sends EOI signal to the specified IRQ number 
+ *         Input: The IRQ number
+ *        Output: None
+ *        Return: None
+ *  Side Effects: Sends EOI signal to the IRQ number correcly according to the location of the IRQ
+ */
+
 void send_eoi(uint32_t irq_num) {
     if (irq_num>=8) {
         outb(EOI|(irq_num-8), SLAVE_COMMAND);           //sends EOI signal to SLAVE if irq is on slave

@@ -18,12 +18,26 @@ char keymap[256] =  {   '\0', '\0' /*0x01: escape*/,							/* 0x00: not used, 0x
 						',', '.', '/'												/* 0x33~0x35 */
                     };
 
-/* enable IRQ1 to open keyboard interrupt */
+/* 
+ * keyboard_init()
+ *   Description: Initializes keyboard
+ *         Input: None
+ *        Output: None
+ *        Return: None
+ *  Side Effects: Initializes keyboard by enabling the KEYBOARD_IRQ
+ */
 void keyboard_init() {
     enable_irq(KEYBOARD_IRQ);
 }
 
-/* executed at keyboard interrupt, prints out pressed key on screen */
+/* 
+ * keyboard_handler_function()
+ *   Description: Handles an inputted keycode from keyboard and prints the corresponding character on screen 
+ *         Input: None
+ *        Output: None
+ *        Return: None
+ *  Side Effects: Sends EOI to KEYBOARD_IRQ and prints an input on the screen
+ */
 void keyboard_handler_function() {
     /* signal EOI to allow further IRQs */
     send_eoi(KEYBOARD_IRQ);
