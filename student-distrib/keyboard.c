@@ -15,7 +15,7 @@ char keymap[256] =  {   '\0', '\0' /*0x01: escape*/,							/* 0x00: not used, 0x
 						'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l',				/* 0x1E~0x26: letters a~l */
 						';', '\'', '`', '\0' /*0x2A: left shift*/, '\\',			/* 0x27~0x2B */
 						'z', 'x', 'c', 'v', 'b', 'n', 'm',							/* 0x2C~0x32: letters z~m */
-						',', '.', '/',												/* 0x33~0x35 */
+						',', '.', '/'												/* 0x33~0x35 */
                     };
 
 /* enable IRQ1 to open keyboard interrupt */
@@ -29,16 +29,17 @@ void keyboard_handler_function() {
     send_eoi(KEYBOARD_IRQ);
 
     /* contains keyboard status and keycode */
-    unsigned char status, keycode;
+    char status, keycode;
 
     /* get status number */
-    status = (unsigned char)(inb(KEYBOARD_STATUS));
+    status = (char)(inb(KEYBOARD_STATUS));
 
     /* if status is zero, there is no data to read */
     if (status & 0x01) {
         /* get keycode */
-        keycode = (unsigned char)(inb(KEYBOARD_DATA));
-
+        keycode = (char)(inb(KEYBOARD_DATA));
+        /* prevent unwanted negative inputs */
+        if (keycode<0) return;
         /* prints the pressed key on screen */
         putc(keymap[(int)keycode]);
     }
