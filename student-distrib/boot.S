@@ -26,11 +26,19 @@ _start:
 continue:
     # Load the GDT
 	lgdt gdt_desc
+	
+	# Load the IDT
 	lidt idt_desc_ptr
+	
+	# Save registers for function call
 	pushl %eax
 	pushl %ecx
 	pushl %edx
+	
+	# Initialize IDT
 	call idt_init
+	
+	# Pop the saved registers
 	popl %edx
 	popl %ecx
 	popl %eax
