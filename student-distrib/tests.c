@@ -101,24 +101,19 @@ int paging_struct_test(){
 int paging_test(){
 	TEST_HEADER;
 
-	/* check to see if the memory address right before the start of video memory (0xb7fff) causes a page fault */
-	//puts("Testing dereferenced pointer before start of video memory: \n");
-	//printf("%x\n", * (char*)0x000b7fff);
+	/* uncomment to check if the memory address right before the start of video memory (0xb7fff) causes a page fault */
+	//printf("%x\n", * (char*)(VIDEO_ADDR_S-1));
 	
-	/* check to see if the memory address right after the end of video memory (0xb9000) causes a page fault */
-	//puts("Testing dereferenced pointer after end of video memory: \n");
-	//printf("%x\n", * (char*)0x000b9000);
+	/* uncomment to check if the memory address right after the end of video memory (0xb9000) causes a page fault */
+	//printf("%x\n", * (char*)(VIDEO_ADDR_E+1));
 	
-	/* check to see if the memory address right before the beginning of kernel memory (0x3fffff) causes a page fault */
-	//puts("Testing dereferenced pointer before start of kernel memory: \n");
-	//printf("%x\n", * (char*)0x03fffff);
+	/* uncomment to check if the memory address right before the beginning of kernel memory (0x3fffff) causes a page fault */
+	//printf("%x\n", * (char*)(KERNEL_ADDR_S-1));
 	
-	/* check to see if the memory address right after the end of kernel memory (0x800000) causes a page fault */
-	//puts("Testing dereferenced pointer after end of kernel memory: \n");
-	//printf("%x\n", * (char*)0x0800000);
+	/* uncomment to check if the memory address right after the end of kernel memory (0x800000) causes a page fault */
+	//printf("%x\n", * (char*)(KERNEL_ADDR_E+1));
 	
-	/* check to see if a NULL pointer returns a page fault */
-	//puts("Testing dereferenced NULL pointer: \n");
+	/* uncomment to check if a NULL pointer returns a page fault */
 	//printf("bad pointer: %d\n", * (int*)NULL);
 
 
@@ -154,7 +149,14 @@ int paging_test(){
 /* Checkpoint 5 tests */
 
 
-/* Test suite entry point */
+/*
+ * launch_tests
+ *   DESCRIPTION: Launch our test cases to prove that our code works
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: executes our test functions and returns FAIL or PASS for each one
+ */
 void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
 	// launch your tests here
