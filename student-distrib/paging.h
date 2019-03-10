@@ -23,14 +23,14 @@ typedef struct page_directory_entry {
 		struct {
 			uint32_t present		: 1;
 			uint32_t read_write		: 1;
-			uint32_t user_super		: 1;	// set to 0
-			uint32_t write_through	: 1;	// set to 0
-			uint32_t cache_disabled	: 1;	// set to 0
-			uint32_t accessed		: 1;	// set to 0
-			uint32_t reserved		: 1;	// set to 0
+			uint32_t user_super		: 1;
+			uint32_t write_through	: 1;
+			uint32_t cache_disabled	: 1;
+			uint32_t accessed		: 1;
+			uint32_t reserved		: 1;
 			uint32_t page_size		: 1;	// set to 0 for 4 kB, 1 for 1 MB
-			uint32_t global_page	: 1;	// set to 0
-			uint32_t available		: 3;	// set to 0
+			uint32_t global_page	: 1;
+			uint32_t available		: 3;
 			uint32_t p_table_addr	: 20;	// page table base address
 	    } __attribute__ ((packed));
     };

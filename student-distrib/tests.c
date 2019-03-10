@@ -106,15 +106,28 @@ int idt_val_test(){
 int paging_struct_test(){
 	TEST_HEADER;
 
+	/*	check to see if index 0 of the directory holds the correct bits: 
+	*	Bits 0 (present), 1 (read/write), and 5 (accessed) should be set to 1
+	*	The base address to paging table should be there as well
+	*/
 	if (directory_entry_array[0].val != DIREC_0_BITS+(int)table_entry_array)
 		return FAIL;
 
+	/*	check to see if index 1 of the directory holds the correct bits: 
+	*	Bits 0 (present), 1 (read/write), 5 (accessed), 6 (dirty), and 7 (page size) should be set to 1
+	*	The base physical address to kernel memory should be there as well
+	*/
 	if (directory_entry_array[1].val != DIREC_1_BITS+KERNEL_ADDR)
 		return FAIL;
-	
+
+	/*	check to see if index 23 of the table holds the correct bits: 
+	*	Bits 0 (present), 1 (read/write), 5 (accessed), and 6 (dirty) should be set to 1
+	*	The base physical address to video memory should be there as well
+	*/
 	if (table_entry_array[VIDEO_ADDR/KB_4].val != TABLE_23_BITS+VIDEO_ADDR)
 		return FAIL;
 
+	/*	run through the entire page directory and page table to see that every other entry is set to 0 */
 	int i;
 	for (i = 0; i < NUM_ENTRIES; i++) {
 		if (i > 1 && directory_entry_array[i].val != 0)
