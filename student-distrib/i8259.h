@@ -17,6 +17,9 @@
 #define SLAVE_COMMAND       SLAVE_8259_PORT
 #define SLAVE_DATA          SLAVE_8259_PORT+1
 
+/* where SLAVE is located on MASTER */
+#define SLAVE_IRQ_ON_MASTER 2
+
 
 /* Initialization control words to init each PIC.
  * See the Intel manuals for details on the meaning

@@ -5,12 +5,12 @@
 #include "i8259.h"
 #include "lib.h"
 
-/* Interrupt masks to determine which interrupts are enabled and disabled */
-uint8_t master_mask; /* IRQs 0-7  */
-uint8_t slave_mask;  /* IRQs 8-15 */
-
 /* Initialize the 8259 PIC */
 void i8259_init(void) {
+    /* Interrupt masks to determine which interrupts are enabled and disabled */
+    uint8_t master_mask; /* IRQs 0-7  */
+    uint8_t slave_mask;  /* IRQs 8-15 */
+
     outb(0xFF, MASTER_DATA);            //mask (close) all IRQs
     outb(0xFF, SLAVE_DATA);
 
@@ -69,8 +69,10 @@ void disable_irq(uint32_t irq_num) {
 
 /* Send end-of-interrupt signal for the specified IRQ */
 void send_eoi(uint32_t irq_num) {
-    outb(EOI|irq_num, MASTER_COMMAND);      //sends EOI signal to MASTER regardless of irq location
     if (irq_num>=8) {
-        outb(EOI|(irq_num-8), SLAVE_COMMAND);   //sends EOI signal to SLAVE if irq is on slave
+        outb(EOI|(irq_num-8), SLAVE_COMMAND);           //sends EOI signal to SLAVE if irq is on slave
+        outb(EOI|SLAVE_IRQ_ON_MASTER, MASTER_COMMAND);  //sends EOI signal to MASTER IRQ where slave is
+    } else {
+        outb(EOI|irq_num, MASTER_COMMAND);              //sends EOI signal to MASTER if irq is on master
     }
 }
