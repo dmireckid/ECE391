@@ -45,6 +45,11 @@ void enable_irq(uint32_t irq_num) {
         irq_num -= 8;                       //subtract 8 from irq_num for correct offset
     }
 
+    if(select==SLAVE_DATA) {
+        /* if irq_num is on SLAVE, also enable IRQ on MASTER where SLAVE is connected */
+        enable_irq(SLAVE_IRQ_ON_MASTER);
+	}
+
     mask_prev = inb(select);
     mask_new = mask_prev & ~(1<<irq_num);   //unmask irq_num by making the value zero
     outb(mask_new, select);                 //ie. 0xXXXXXX0X if irq_num is 1
@@ -61,6 +66,11 @@ void disable_irq(uint32_t irq_num) {
         select = SLAVE_DATA;                //IRQ is on SLAVE, so select SLAVE
         irq_num -= 8;                       //subtract 8 from irq_num for correct offset
     }
+
+    if(select==SLAVE_DATA) {
+        /* if irq_num is on SLAVE, also disable IRQ on MASTER where SLAVE is connected */
+        disable_irq(SLAVE_IRQ_ON_MASTER);
+	}
 
     mask_prev = inb(select);
     mask_new = mask_prev | (1<<irq_num);    //mask irq_num by making the value one
