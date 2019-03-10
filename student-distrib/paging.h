@@ -7,8 +7,8 @@
 #include "types.h"
 
 
-#define KB_4	4096
-#define MB_4	4194304
+#define KB_4		4096
+#define SHIFT_12	12
 
 #define KERNEL_ADDR		0x400000
 #define VIDEO_ADDR		0xB8000
@@ -31,7 +31,7 @@ typedef struct page_directory_entry {
 			uint32_t page_size		: 1;	// set to 0 for 4 kB, 1 for 1 MB
 			uint32_t global_page	: 1;	// set to 0
 			uint32_t available		: 3;	// set to 0
-			uint32_t p_table_addr	: 20;	// page table address
+			uint32_t p_table_addr	: 20;	// page table base address
 	    } __attribute__ ((packed));
     };
 } page_directory_entry_t;
