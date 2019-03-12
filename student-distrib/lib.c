@@ -247,11 +247,11 @@ void putc(uint8_t c) {
 		}
         screen_x %= NUM_COLS;
     }
-    update_cursor(screen_x, screen_y);
 	if (screen_y == NUM_ROWS) {
 		scroll_down();
 		screen_y--;
 	}
+    update_cursor(screen_x, screen_y);
 }
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
