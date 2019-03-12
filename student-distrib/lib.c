@@ -26,7 +26,7 @@ void lctrl(void) {
 /* void backspace(void);
  * Inputs: void
  * Return Value: none
- * Function: Removes the most recently written character */
+ * Function: Removes the most recently written character and repositions the cursor */
 void backspace(void) {
 	/* if the cursor is on the left edge, place the cursor on the right edge and move it up by 1 */
 	if (screen_x == 0) {
@@ -45,6 +45,26 @@ void backspace(void) {
 	screen_x--;
 	*(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = ' ';
 	*(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+}
+
+/* void scroll_down(void);
+ * Inputs: void
+ * Return Value: none
+ * Function: Moves the text up when a new line is made at the bottom of the screen */
+void scroll_down(void) {
+	int row;
+	int column;
+	for (row = 1; row < NUM_ROWS; row++) {
+		for (column = 0; column < NUM_COLS; column++) {
+			*(uint8_t *)(video_mem + ((NUM_COLS * (row-1) + column) << 1)) = *(uint8_t *)(video_mem + ((NUM_COLS * row + column) << 1));
+			*(uint8_t *)(video_mem + ((NUM_COLS * (row-1) + column) << 1) + 1) = ATTRIB;
+
+			if (row == NUM_ROWS-1) {
+				*(uint8_t *)(video_mem + ((NUM_COLS * row + column) << 1)) = ' ';
+				*(uint8_t *)(video_mem + ((NUM_COLS * row + column) << 1) + 1) = ATTRIB;
+			}
+		}
+	}
 }
 
 /* void clear(void);
@@ -210,9 +230,15 @@ void putc(uint8_t c) {
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
         screen_x++;
-        screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
+        if (screen_x == NUM_COLS) {
+			screen_y++;
+		}
         screen_x %= NUM_COLS;
     }
+	if (screen_y == NUM_ROWS) {
+		scroll_down();
+		screen_y--;
+	}
 }
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);

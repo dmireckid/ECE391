@@ -15,8 +15,12 @@ int8_t *strrev(int8_t* s);
 uint32_t strlen(const int8_t* s);
 void clear(void);
 
+/* clear the screen and put the cursor on top */
 void lctrl(void);
+/* move back one position and clear the previously printed char */
 void backspace(void);
+/* move the text up if the cursor reaches the bottom */
+void scroll_down(void);
 
 
 void* memset(void* s, int32_t c, uint32_t n);
