@@ -20,6 +20,9 @@
 /* where SLAVE is located on MASTER */
 #define SLAVE_IRQ_ON_MASTER 2
 
+/* Number of IRQs on MASTER */
+#define IRQS_ON_MASTER   8
+
 
 /* Initialization control words to init each PIC.
  * See the Intel manuals for details on the meaning

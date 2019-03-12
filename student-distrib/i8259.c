@@ -54,11 +54,11 @@ void enable_irq(uint32_t irq_num) {
     uint16_t    select;                     //port number for desired PIC
     uint8_t     mask_prev, mask_new;        //8-bit mask register value
 
-    if (irq_num<8) {
+    if (irq_num<IRQS_ON_MASTER) {
         select = MASTER_DATA;               //IRQ is on MASTER, so select MASTER
     } else {
         select = SLAVE_DATA;                //IRQ is on SLAVE, so select SLAVE
-        irq_num -= 8;                       //subtract 8 from irq_num for correct offset
+        irq_num -= IRQS_ON_MASTER;          //subtract 8 from irq_num for correct offset
     }
 
     mask_prev = inb(select);
@@ -88,7 +88,7 @@ void disable_irq(uint32_t irq_num) {
         select = MASTER_DATA;               //IRQ is on MASTER, so select MASTER
     } else {
         select = SLAVE_DATA;                //IRQ is on SLAVE, so select SLAVE
-        irq_num -= 8;                       //subtract 8 from irq_num for correct offset
+        irq_num -= IRQS_ON_MASTER;                       //subtract 8 from irq_num for correct offset
     }
 
     mask_prev = inb(select);
@@ -111,10 +111,10 @@ void disable_irq(uint32_t irq_num) {
  */
 
 void send_eoi(uint32_t irq_num) {
-    if (irq_num>=8) {
-        outb(EOI|(irq_num-8), SLAVE_COMMAND);           //sends EOI signal to SLAVE if irq is on slave
-        outb(EOI|SLAVE_IRQ_ON_MASTER, MASTER_COMMAND);  //sends EOI signal to MASTER IRQ where slave is
+    if (irq_num>=IRQS_ON_MASTER) {
+        outb(EOI|(irq_num-IRQS_ON_MASTER), SLAVE_COMMAND);  //sends EOI signal to SLAVE if irq is on slave
+        outb(EOI|SLAVE_IRQ_ON_MASTER, MASTER_COMMAND);      //sends EOI signal to MASTER IRQ where slave is
     } else {
-        outb(EOI|irq_num, MASTER_COMMAND);              //sends EOI signal to MASTER if irq is on master
+        outb(EOI|irq_num, MASTER_COMMAND);                  //sends EOI signal to MASTER if irq is on master
     }
 }
