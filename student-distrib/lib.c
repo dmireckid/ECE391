@@ -12,6 +12,16 @@ static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
 
+void update_cursor(int screen_x, int screen_y)
+{
+	uint16_t pos = screen_y * NUM_COLS + screen_x;
+ 
+	outb(0x0F, 0x3D4);
+	outb((uint8_t)(pos & 0xFF), 0x3D5);
+	outb(0x0E, 0x3D4);
+	outb((uint8_t)((pos >> 8) & 0xFF), 0x3D5);
+}
+
 /* void lctrl(void);
  * Inputs: void
  * Return Value: none
@@ -21,6 +31,7 @@ void lctrl(void) {
 	clear();
 	screen_x = 0;
 	screen_y = 0;
+    update_cursor(screen_x, screen_y);
 }
 
 /* void backspace(void);
@@ -45,6 +56,7 @@ void backspace(void) {
 	screen_x--;
 	*(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = ' ';
 	*(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+    update_cursor(screen_x, screen_y);
 }
 
 /* void clear(void);
@@ -212,6 +224,7 @@ void putc(uint8_t c) {
         screen_x++;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
         screen_x %= NUM_COLS;
+        update_cursor(screen_x, screen_y);
     }
 }
 
