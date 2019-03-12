@@ -18,6 +18,12 @@ char keymap[256] =  {   '\0', '\0' /*0x01: escape*/,							/* 0x00: not used, 0x
 						',', '.', '/'												/* 0x33~0x35 */
                     };
 
+/* flags for Left Shift, Right Shift, and Caps Lock */
+uint8_t lshift = 0;
+uint8_t rshift = 0;
+uint8_t shift_pressed = 0;
+uint8_t caps_lock = 0;
+
 /* 
  * keyboard_init()
  *   Description: Initializes keyboard
@@ -43,18 +49,70 @@ void keyboard_handler_function() {
     send_eoi(KEYBOARD_IRQ);
 
     /* contains keyboard status and keycode */
-    char status, keycode;
+    uint8_t status, keycode;
 
     /* get status number */
-    status = (char)(inb(KEYBOARD_STATUS));
+    status = (uint8_t)(inb(KEYBOARD_STATUS));
 
     /* if status is zero, there is no data to read */
     if (status & 0x01) {
         /* get keycode */
-        keycode = (char)(inb(KEYBOARD_DATA));
-        /* prevent unwanted negative inputs */
-        if (keycode<0) return;
-        /* prints the pressed key on screen */
-        putc(keymap[(int)keycode]);
+        keycode = (uint8_t)(inb(KEYBOARD_DATA));
+
+		/* if the key that's pressed is L-CTRL, clear the screen and put the cursor at the top */
+		if ((uint8_t)keycode == LCTRL) {
+			lctrl();
+			return;
+		}
+		
+		/* if the key that's pressed is Backspace, clear the previously entered symbol and move the cursor back */
+		if ((uint8_t)keycode == BACKSPACE) {
+			backspace();
+			return;
+		}
+		
+		/* if the key that's pressed is Caps Lock, toggle the caps_lock flag */
+		if ((uint8_t)keycode == CAPSLOCK) {
+			if ( caps_lock == 0 )
+				caps_lock = 1;
+			else
+				caps_lock = 0;
+			return;
+		}
+		
+		/* if the key that's pressed is Left Shift or Right Shift, toggle their respective flags */
+		if ((uint8_t)keycode == LSHIFT_P) {
+			lshift = 1;
+			return;
+		}
+		if ((uint8_t)keycode == RSHIFT_P) {
+			rshift = 1;
+			return;
+		}
+		/* if either of the shift flags are toggled, then toggle the shift_pressed flag */
+		if ( lshift == 1 || rshift == 1 )
+			shift_pressed = 1;
+		else
+			shift_pressed = 0;
+		
+		/* if the keycode received is a release, don't do anything unless it's a release from a Shift key */
+		if ( (uint8_t)keycode >= ESCAPE_R ) {
+			if ( (uint8_t)keycode == LSHIFT_R ) {
+				lshift = 0;
+			}
+			if ( (uint8_t)keycode == RSHIFT_R ) {
+				rshift = 0;
+			}
+			return;
+		}
+
+        /* prints the pressed key on screen while checking if Caps Lock has been toggled and/or if Shift is being pressed */
+        if ( (caps_lock^shift_pressed) == 1 ) {
+			if ( (((uint8_t)keycode >= Q_MAP) && ((uint8_t)keycode <= P_MAP)) || (((uint8_t)keycode >= A_MAP) && ((uint8_t)keycode <= L_MAP)) || (((uint8_t)keycode >= Z_MAP) && ((uint8_t)keycode <= M_MAP)) ) {
+				putc(keymap[(uint8_t)keycode]-CAP_OFFSET);
+				return;
+			}
+		}
+		putc(keymap[(uint8_t)keycode]);
     }
 }

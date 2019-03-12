@@ -12,6 +12,41 @@ static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
 
+/* void lctrl(void);
+ * Inputs: void
+ * Return Value: none
+ * Function: Clears video memory and puts cursor on top */
+void lctrl(void) {
+	/* clear the entire screen and put the cursor in the upper left corner */
+	clear();
+	screen_x = 0;
+	screen_y = 0;
+}
+
+/* void backspace(void);
+ * Inputs: void
+ * Return Value: none
+ * Function: Removes the most recently written character */
+void backspace(void) {
+	/* if the cursor is on the left edge, place the cursor on the right edge and move it up by 1 */
+	if (screen_x == 0) {
+		/* if the cursor is on the upper left corner, do nothing */
+		if (screen_y == 0) {
+			return;
+		}
+		screen_y--;
+		screen_x = NUM_COLS-1;
+		/* clear the position by replacing it with a Space */
+		*(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = ' ';
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+		return;
+	}
+	/* move the cursor to the left by 1 and clear the position by replacing it with a Space */
+	screen_x--;
+	*(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = ' ';
+	*(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+}
+
 /* void clear(void);
  * Inputs: void
  * Return Value: none
@@ -175,8 +210,8 @@ void putc(uint8_t c) {
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
         screen_x++;
-        screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
+        screen_x %= NUM_COLS;
     }
 }
 
