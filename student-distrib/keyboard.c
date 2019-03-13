@@ -7,7 +7,7 @@
 #include "i8259.h"
 
 /* maps keycode to ASCII character code */
-char keymap[256] =  {   '\0', '\0' /*0x01: escape*/,							/* 0x00: not used, 0x01: esc key */
+char keymap[NUM_ASCII] =  {   '\0', '\0' /*0x01: escape*/,							/* 0x00: not used, 0x01: esc key */
                         '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',			/* 0x02~0x0B: numbers 1~9 and 0 */ 
 						'-', '=', '\0' /*0x0E: backspace*/, '\0' /*0x0F: tab*/,		/* 0x0C~0x0F */
 						'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',			/* 0x10~0x19: letters q~p */
@@ -18,9 +18,10 @@ char keymap[256] =  {   '\0', '\0' /*0x01: escape*/,							/* 0x00: not used, 0x
 						',', '.', '/'												/* 0x33~0x35 */
                     };
 
-/* flags for Left Shift, Right Shift, Left Control, Right Control, and Caps Lock */
-uint8_t lctrl = 0;
-uint8_t rctrl = 0;
+char shift_symbol[NUM_ASCII];
+
+/* flags for Shift, Control, and Caps Lock */
+uint8_t ctrl = 0;
 uint8_t shift_pressed = 0;
 uint8_t caps_lock = 0;
 
@@ -34,6 +35,18 @@ uint8_t caps_lock = 0;
  */
 void keyboard_init() {
     enable_irq(KEYBOARD_IRQ);
+	shift_init();
+}
+
+/* 
+ * shift_init()
+ *   Description: Initializes the shift_symbol map
+ *         Input: None
+ *        Output: None
+ *        Return: None
+ *  Side Effects: Initializes the shift_symbol map by setting all symbols to their respective shift versions
+ */
+void shift_init() {
 }
 
 /* 
@@ -64,8 +77,8 @@ void keyboard_handler_function() {
 			if ( (uint8_t)keycode == LSHIFT_R || (uint8_t)keycode == RSHIFT_R ) {
 				shift_pressed = 0;
 			}
-			if ( (uint8_t)keycode == LCTRL_R ) {
-				lctrl = 0;
+			if ( (uint8_t)keycode == CTRL_R ) {
+				ctrl--;
 			}
 			return;
 		}
@@ -74,9 +87,9 @@ void keyboard_handler_function() {
 		if ( (uint8_t)keycode == LALT )
 			return;
 
-		/* if the key that's pressed is Left Control, set its flag to 1 */
-		if ((uint8_t)keycode == LCTRL_P) {
-			lctrl = 1;
+		/* if the key that's pressed is Control, set its flag to 1 */
+		if ( (uint8_t)keycode == CTRL_P ) {
+			ctrl++;
 			return;
 		}
 		
@@ -95,7 +108,7 @@ void keyboard_handler_function() {
 			return;
 		}
 		
-		/* if the key that's pressed is Left Shift or Right Shift, toggle their respective flags */
+		/* if the key that's pressed is Left Shift or Right Shift, toggle the shift_pressed flag */
 		if ((uint8_t)keycode == LSHIFT_P || (uint8_t)keycode == RSHIFT_P) {
 			shift_pressed = 1;
 			return;
@@ -108,7 +121,8 @@ void keyboard_handler_function() {
 				return;
 			}
 		}
-		if ( lctrl == 1 && keymap[(uint8_t)keycode] == 'l' ) {
+		/* if ctrl is currently being pressed and the character being entered is 'l', clear the screen and put the cursor on top */
+		if ( ctrl > 0 && keymap[(uint8_t)keycode] == 'l' ) {
 			ctrl_l();
 			return;
 		}
