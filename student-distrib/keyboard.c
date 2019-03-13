@@ -18,9 +18,9 @@ char keymap[256] =  {   '\0', '\0' /*0x01: escape*/,							/* 0x00: not used, 0x
 						',', '.', '/'												/* 0x33~0x35 */
                     };
 
-/* flags for Left Shift, Right Shift, and Caps Lock */
-uint8_t lshift = 0;
-uint8_t rshift = 0;
+/* flags for Left Shift, Right Shift, Left Control, Right Control, and Caps Lock */
+uint8_t lctrl = 0;
+uint8_t rctrl = 0;
 uint8_t shift_pressed = 0;
 uint8_t caps_lock = 0;
 
@@ -61,18 +61,22 @@ void keyboard_handler_function() {
 
 		/* if the keycode received is anything above F1 being pressed, don't do anything unless it's a release from a Shift key or Control key */
 		if ( (uint8_t)keycode >= F1_P ) {
-			if ( (uint8_t)keycode == LSHIFT_R ) {
-				lshift = 0;
+			if ( (uint8_t)keycode == LSHIFT_R || (uint8_t)keycode == RSHIFT_R ) {
+				shift_pressed = 0;
 			}
-			if ( (uint8_t)keycode == RSHIFT_R ) {
-				rshift = 0;
+			if ( (uint8_t)keycode == LCTRL_R ) {
+				lctrl = 0;
 			}
 			return;
 		}
+		
+		/* if the keycode received is Left Alt, don't do anything */
+		if ( (uint8_t)keycode == LALT )
+			return;
 
-		/* if the key that's pressed is L-CTRL, clear the screen and put the cursor at the top */
-		if ((uint8_t)keycode == LCTRL) {
-			ctrl_l();
+		/* if the key that's pressed is Left Control, set its flag to 1 */
+		if ((uint8_t)keycode == LCTRL_P) {
+			lctrl = 1;
 			return;
 		}
 		
@@ -92,20 +96,10 @@ void keyboard_handler_function() {
 		}
 		
 		/* if the key that's pressed is Left Shift or Right Shift, toggle their respective flags */
-		if ((uint8_t)keycode == LSHIFT_P) {
-			lshift = 1;
-			return;
-		}
-		if ((uint8_t)keycode == RSHIFT_P) {
-			rshift = 1;
-			return;
-		}
-
-		/* if either of the shift flags are toggled, then toggle the shift_pressed flag */
-		if ( lshift == 1 || rshift == 1 )
+		if ((uint8_t)keycode == LSHIFT_P || (uint8_t)keycode == RSHIFT_P) {
 			shift_pressed = 1;
-		else
-			shift_pressed = 0;
+			return;
+		}
 
         /* prints the pressed key on screen while checking if Caps Lock has been toggled and/or if Shift is being pressed */
         if ( (caps_lock^shift_pressed) == 1 ) {
@@ -113,6 +107,10 @@ void keyboard_handler_function() {
 				putc(keymap[(uint8_t)keycode]-CAP_OFFSET);
 				return;
 			}
+		}
+		if ( lctrl == 1 && keymap[(uint8_t)keycode] == 'l' ) {
+			ctrl_l();
+			return;
 		}
 		putc(keymap[(uint8_t)keycode]);
     }

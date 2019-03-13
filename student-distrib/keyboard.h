@@ -11,8 +11,11 @@
 #define KEYBOARD_STATUS 0x64
 
 #define F1_P			0x3B
+#define LALT			0x38
 
-#define LCTRL			0x1D
+#define LCTRL_P			0x1D
+#define LCTRL_R			0x9D
+
 #define BACKSPACE		0x0E
 
 #define CAPSLOCK		0x3A
