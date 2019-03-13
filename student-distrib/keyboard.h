@@ -10,7 +10,7 @@
 #define KEYBOARD_DATA   0x60
 #define KEYBOARD_STATUS 0x64
 
-#define ESCAPE_R		0x81
+#define F1_P			0x3B
 
 #define LCTRL			0x1D
 #define BACKSPACE		0x0E

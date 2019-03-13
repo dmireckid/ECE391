@@ -59,9 +59,20 @@ void keyboard_handler_function() {
         /* get keycode */
         keycode = (uint8_t)(inb(KEYBOARD_DATA));
 
+		/* if the keycode received is anything above F1 being pressed, don't do anything unless it's a release from a Shift key or Control key */
+		if ( (uint8_t)keycode >= F1_P ) {
+			if ( (uint8_t)keycode == LSHIFT_R ) {
+				lshift = 0;
+			}
+			if ( (uint8_t)keycode == RSHIFT_R ) {
+				rshift = 0;
+			}
+			return;
+		}
+
 		/* if the key that's pressed is L-CTRL, clear the screen and put the cursor at the top */
 		if ((uint8_t)keycode == LCTRL) {
-			lctrl();
+			ctrl_l();
 			return;
 		}
 		
@@ -89,22 +100,12 @@ void keyboard_handler_function() {
 			rshift = 1;
 			return;
 		}
+
 		/* if either of the shift flags are toggled, then toggle the shift_pressed flag */
 		if ( lshift == 1 || rshift == 1 )
 			shift_pressed = 1;
 		else
 			shift_pressed = 0;
-		
-		/* if the keycode received is a release, don't do anything unless it's a release from a Shift key */
-		if ( (uint8_t)keycode >= ESCAPE_R ) {
-			if ( (uint8_t)keycode == LSHIFT_R ) {
-				lshift = 0;
-			}
-			if ( (uint8_t)keycode == RSHIFT_R ) {
-				rshift = 0;
-			}
-			return;
-		}
 
         /* prints the pressed key on screen while checking if Caps Lock has been toggled and/or if Shift is being pressed */
         if ( (caps_lock^shift_pressed) == 1 ) {

@@ -26,7 +26,7 @@ void update_cursor(int screen_x, int screen_y)
  * Inputs: void
  * Return Value: none
  * Function: Clears video memory and puts cursor on top */
-void lctrl(void) {
+void ctrl_l(void) {
 	/* clear the entire screen and put the cursor in the upper left corner */
 	clear();
 	screen_x = 0;

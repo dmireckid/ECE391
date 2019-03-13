@@ -17,7 +17,7 @@ void clear(void);
 
 void update_cursor(int screen_x, int screen_y);
 /* clear the screen and put the cursor on top */
-void lctrl(void);
+void ctrl_l(void);
 /* move back one position and clear the previously printed char */
 void backspace(void);
 /* move the text up if the cursor reaches the bottom */
