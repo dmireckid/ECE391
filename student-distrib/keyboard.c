@@ -5,6 +5,7 @@
 #include "keyboard.h"
 #include "lib.h"
 #include "i8259.h"
+#include "term_driver.h"
 
 /* maps keycode to ASCII character code */
 char keymap[NUM_ASCII] =  {   '\0', '\0' /*0x01: escape*/,							/* 0x00: not used, 0x01: esc key */
@@ -71,6 +72,15 @@ void keyboard_handler_function() {
     if (status & 0x01) {
         /* get keycode */
         keycode = (uint8_t)(inb(KEYBOARD_DATA));
+		
+		/* if the keycode received is Enter, add the character to the line buffer and call the command */
+		if ( keymap[(uint8_t)keycode] == '\n' ) {
+			type_to_buffer('\n');
+			buffer_command();
+			clear_buffer();
+			putc('\n');
+			return;
+		}
 
 		/* if the keycode received is anything above F1 being pressed, don't do anything unless it's a release from a Shift key or Control key */
 		if ( (uint8_t)keycode >= F1_P ) {
@@ -95,6 +105,10 @@ void keyboard_handler_function() {
 		
 		/* if the key that's pressed is Backspace, clear the previously entered symbol and move the cursor back */
 		if ((uint8_t)keycode == BACKSPACE) {
+			/* if the line buffer is empty, don't do anything */
+			if (buffer_count == 0)
+				return;
+			remove_from_buffer();
 			backspace();
 			return;
 		}
@@ -113,19 +127,27 @@ void keyboard_handler_function() {
 			shift_pressed = 1;
 			return;
 		}
+		
+		/* if ctrl is currently being pressed and the character being entered is 'l', clear the screen and put the cursor on top */
+		if ( ctrl > 0 && keymap[(uint8_t)keycode] == 'l' ) {
+			clear_buffer();
+			ctrl_l();
+			return;
+		}
+		
+		/* if the line buffer is full, don't do anything */
+		if (buffer_count == LINE_BUFFER_SIZE-1)
+			return;
 
-        /* prints the pressed key on screen while checking if Caps Lock has been toggled and/or if Shift is being pressed */
+        /* prints the pressed key on screen and stores the character in the line buffer while checking if Caps Lock has been toggled and/or if Shift is being pressed */
         if ( (caps_lock^shift_pressed) == 1 ) {
 			if ( (((uint8_t)keycode >= Q_MAP) && ((uint8_t)keycode <= P_MAP)) || (((uint8_t)keycode >= A_MAP) && ((uint8_t)keycode <= L_MAP)) || (((uint8_t)keycode >= Z_MAP) && ((uint8_t)keycode <= M_MAP)) ) {
+				type_to_buffer(keymap[(uint8_t)keycode]-CAP_OFFSET);
 				putc(keymap[(uint8_t)keycode]-CAP_OFFSET);
 				return;
 			}
 		}
-		/* if ctrl is currently being pressed and the character being entered is 'l', clear the screen and put the cursor on top */
-		if ( ctrl > 0 && keymap[(uint8_t)keycode] == 'l' ) {
-			ctrl_l();
-			return;
-		}
+		type_to_buffer(keymap[(uint8_t)keycode]);
 		putc(keymap[(uint8_t)keycode]);
     }
 }
