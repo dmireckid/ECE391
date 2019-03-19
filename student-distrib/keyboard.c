@@ -19,7 +19,33 @@ char keymap[NUM_ASCII] =  {   '\0', '\0' /*0x01: escape*/,							/* 0x00: not us
 						',', '.', '/'												/* 0x33~0x35 */
                     };
 
-char shift_symbol[NUM_ASCII];
+/* First column contains keycodes for symbol keys */
+/* and the second column contains ascii codes for symbols when shifted */
+char shifted_symbols_map[21][2] = {	/* symbols on number keys */
+									{0x02, '!'},     // 1 to !
+									{0x03, 64},     // 2 to @
+									{0x04, 35},     // 3 to #
+									{0x05, 36},     // 4 to $
+									{0x06, 37},     // 5 to %
+									{0x07, 94},     // 6 to ^
+									{0x08, 38},     // 7 to &
+									{0x09, 42},     // 8 to *
+									{0x0A, 40},     // 9 to (
+									{0x0B, 41},     // 0 to )
+
+									/* other symbols */
+									{0x29, 126},    // ` to ~
+									{0x0C, 95},     // - to _
+									{0x0D, 43},     // = to +
+									{0x1A, 123},    // [ to {
+									{0x1B, 125},    // ] to }
+									{0x2B, 124},    // \ to |
+									{0x27, 58},     // ; to :
+									{0x28, 34},     // ' to "
+									{0x33, 60},     // , to <
+									{0x34, 62},     // . to >
+									{0x35, 63}      // / to ?
+};
 
 /* flags for Shift, Control, and Caps Lock */
 uint8_t ctrl = 0;
@@ -40,14 +66,28 @@ void keyboard_init() {
 }
 
 /* 
- * shift_init()
- *   Description: Initializes the shift_symbol map
- *         Input: None
- *        Output: None
- *        Return: None
- *  Side Effects: Initializes the shift_symbol map by setting all symbols to their respective shift versions
+ * get_shifted_symbol(char keycode)
+ *   Description: Returns the ascii code of shifted symbol if keycode is applicable
+ *         Input: Keycode from keyboard input
+ *        Output: Ascii_value of shifted symbol or 0 if keycode is not found
+ *        Return: (char)ascii_value of shifted symbol or 0 if keycode is not found
+ *  Side Effects: Looks up the table and return the ascii value if keycode is found in the table
  */
-void shift_init() {
+char get_shifted_symbol(char keycode) {
+	uint8_t i;
+	uint8_t ascii_value = 0;
+
+	/* number of rows in the table 'shifted_symbols_map' */
+	uint8_t table_row = sizeof(shifted_symbols_map)/sizeof(shifted_symbols_map[0]);
+
+	for (i=0; i<table_row; i++) {
+		if (keycode==shifted_symbols_map[i][0]) {		// check first column
+			ascii_value = shifted_symbols_map[i][1];	// return second column
+			break;
+		}
+	}
+	/* returns 0 if keycode is not found */
+	return ascii_value;
 }
 
 /* 
@@ -138,6 +178,16 @@ void keyboard_handler_function() {
 		/* if the line buffer is full, don't do anything */
 		if (buffer_count == LINE_BUFFER_SIZE-1)
 			return;
+
+		/* if shift is being pressed and the key is symbol or number, look up that symbol and print */
+		if (shift_pressed) {
+			char found_symbol = get_shifted_symbol(keycode);
+			if (found_symbol>0) {	// if symbol found
+				type_to_buffer(found_symbol);
+				putc(found_symbol);
+				return;
+			}
+		}
 
         /* prints the pressed key on screen and stores the character in the line buffer while checking if Caps Lock has been toggled and/or if Shift is being pressed */
         if ( (caps_lock^shift_pressed) == 1 ) {

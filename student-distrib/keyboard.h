@@ -25,9 +25,6 @@
 #define RSHIFT_P		0x36
 #define RSHIFT_R		0xB6
 
-/* Keycodes for symbols */
-
-
 /* Offset between lower and upper case letters and mapped locations of letters in keycode table */
 #define CAP_OFFSET		32
 #define Q_MAP			0x10
