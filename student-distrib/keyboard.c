@@ -62,7 +62,6 @@ uint8_t caps_lock = 0;
  */
 void keyboard_init() {
     enable_irq(KEYBOARD_IRQ);
-	shift_init();
 }
 
 /* 
