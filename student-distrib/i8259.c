@@ -84,7 +84,7 @@ void disable_irq(uint32_t irq_num) {
     uint16_t    select;                     //port number for desired PIC
     uint8_t     mask_prev, mask_new;        //8-bit mask register value
 
-    if (irq_num<8) {
+    if (irq_num<IRQS_ON_MASTER) {
         select = MASTER_DATA;               //IRQ is on MASTER, so select MASTER
     } else {
         select = SLAVE_DATA;                //IRQ is on SLAVE, so select SLAVE
