@@ -28,14 +28,14 @@ static char* video_mem = (char *)VIDEO;
 void update_cursor(int screen_x, int screen_y)
 {
     /* calculate the indexed location of cursor */
-	uint16_t cur_pos = screen_y * NUM_COLS + screen_x;
+    uint16_t cur_pos = screen_y * NUM_COLS + screen_x;
     
     /* send 0x0E to the VGA controller to tell it that we are sending higher byte of cursor position */
     outb(SENDING_POSITION_HIGH, CURSOR_COMMAND);
-	outb((uint8_t)(cur_pos >> 8), CURSOR_DATA);
+    outb((uint8_t)(cur_pos >> 8), CURSOR_DATA);
     /* send 0x0F to tell that we are sending lower byte */
-	outb(SENDING_POSITION_LOW, CURSOR_COMMAND);
-	outb((uint8_t)(cur_pos), CURSOR_DATA);
+    outb(SENDING_POSITION_LOW, CURSOR_COMMAND);
+    outb((uint8_t)(cur_pos), CURSOR_DATA);
 }
 
 /* void ctrl_l(void);
