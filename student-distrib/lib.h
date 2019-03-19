@@ -15,6 +15,7 @@ int8_t *strrev(int8_t* s);
 uint32_t strlen(const int8_t* s);
 void clear(void);
 
+/* moves the cursor to desired screen location */
 void update_cursor(int screen_x, int screen_y);
 /* clear the screen and put the cursor on top */
 void ctrl_l(void);

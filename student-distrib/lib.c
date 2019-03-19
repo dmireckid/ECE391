@@ -8,21 +8,37 @@
 #define NUM_ROWS    25
 #define ATTRIB      0x7
 
+/* predefined numbers for moving the cursor on screen */
+#define CURSOR_COMMAND  0x3D4
+#define CURSOR_DATA     0x3D5
+#define SENDING_POSITION_HIGH   0x0E
+#define SENDING_POSITION_LOW    0x0F
+
 static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
 
+/* void update_corsor(int screen_x, int screen_y)
+ *  Inputs:   int screen_x and int screen_y which are x and y coordinate on the screen
+ *            where the cursor will be moved
+ *  Outputs:  None
+ *  Return:   None
+ *  Function: Moves the cursor to desired screen location
+ */
 void update_cursor(int screen_x, int screen_y)
 {
-	uint16_t pos = screen_y * NUM_COLS + screen_x;
- 
-	outb(0x0F, 0x3D4);
-	outb((uint8_t)(pos & 0xFF), 0x3D5);
-	outb(0x0E, 0x3D4);
-	outb((uint8_t)((pos >> 8) & 0xFF), 0x3D5);
+    /* calculate the indexed location of cursor */
+	uint16_t cur_pos = screen_y * NUM_COLS + screen_x;
+    
+    /* send 0x0E to the VGA controller to tell it that we are sending higher byte of cursor position */
+    outb(SENDING_POSITION_HIGH, CURSOR_COMMAND);
+	outb((uint8_t)(cur_pos >> 8), CURSOR_DATA);
+    /* send 0x0F to tell that we are sending lower byte */
+	outb(SENDING_POSITION_LOW, CURSOR_COMMAND);
+	outb((uint8_t)(cur_pos), CURSOR_DATA);
 }
 
-/* void lctrl(void);
+/* void ctrl_l(void);
  * Inputs: void
  * Return Value: none
  * Function: Clears video memory and puts cursor on top */
