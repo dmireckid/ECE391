@@ -23,28 +23,28 @@ char keymap[NUM_ASCII] =  {   '\0', '\0' /*0x01: escape*/,							/* 0x00: not us
 /* and the second column contains ascii codes for symbols when shifted */
 char shifted_symbols_map[21][2] = {	/* symbols on number keys */
 									{0x02, '!'},     // 1 to !
-									{0x03, 64},     // 2 to @
-									{0x04, 35},     // 3 to #
-									{0x05, 36},     // 4 to $
-									{0x06, 37},     // 5 to %
-									{0x07, 94},     // 6 to ^
-									{0x08, 38},     // 7 to &
-									{0x09, 42},     // 8 to *
-									{0x0A, 40},     // 9 to (
-									{0x0B, 41},     // 0 to )
+									{0x03, '@'},     // 2 to @
+									{0x04, '#'},     // 3 to #
+									{0x05, '$'},     // 4 to $
+									{0x06, '%'},     // 5 to %
+									{0x07, '^'},     // 6 to ^
+									{0x08, '&'},     // 7 to &
+									{0x09, '*'},     // 8 to *
+									{0x0A, '('},     // 9 to (
+									{0x0B, ')'},     // 0 to )
 
 									/* other symbols */
-									{0x29, 126},    // ` to ~
-									{0x0C, 95},     // - to _
-									{0x0D, 43},     // = to +
-									{0x1A, 123},    // [ to {
-									{0x1B, 125},    // ] to }
-									{0x2B, 124},    // \ to |
-									{0x27, 58},     // ; to :
-									{0x28, 34},     // ' to "
-									{0x33, 60},     // , to <
-									{0x34, 62},     // . to >
-									{0x35, 63}      // / to ?
+									{0x29, '~'},    // ` to ~
+									{0x0C, '_'},     // - to _
+									{0x0D, '+'},     // = to +
+									{0x1A, '{'},    // [ to {
+									{0x1B, '}'},    // ] to }
+									{0x2B, '|'},    // \ to |
+									{0x27, ':'},     // ; to :
+									{0x28, '"'},     // ' to "
+									{0x33, '<'},     // , to <
+									{0x34, '>'},     // . to >
+									{0x35, '?'}      // / to ?
 };
 
 /* flags for Shift, Control, and Caps Lock */
