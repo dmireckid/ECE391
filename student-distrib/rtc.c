@@ -79,6 +79,6 @@ void rtc_interrupt(void){
 	inb(RTC_MDR);
 	
 	//required functionality for cp1
-	test_interrupts();
+	//test_interrupts();
 	
 }

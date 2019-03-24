@@ -55,8 +55,9 @@ void remove_from_buffer() {
  *  Side Effects: Calls a command after scanning the line buffer and clears it afterwards
  */
 void buffer_command() {
-	putc('\n');
-	printf("Line buffer size is %d", buffer_count-1);
+	//printf("Line buffer size is %d", buffer_count-1);
+	//putc('\n');
+	printf("Buffer: \"%s\" (size %d)", line_buffer, buffer_count);
 }
 
 /* 
@@ -73,8 +74,8 @@ void clear_buffer() {
 		return;
 	
 	int i;
-	for (i = 0; i < LINE_BUFFER_SIZE; i++) {
-		*(line_buffer+buffer_count) = '\0';
+	for (i = 0; i < buffer_count; i++) {
+		*(line_buffer+i) = '\0';
 	}
 	
 	buffer_count = 0;
