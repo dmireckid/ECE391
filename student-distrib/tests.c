@@ -239,7 +239,7 @@ static inline void freq_test_2(int freq, int fd)
  #define max_freq 1024
 void rtc_test()
 {
-	printf("\n void pointers \n");
+	printf("\n RTC TEST \n");
 	int fd = rtc_open(NULL);
 
 	int freq = min_freq;
@@ -279,9 +279,12 @@ void rtc_test()
 void kt_test()
 {
 
-	char string[500] = "terminal_write test";
-	terminal_write(0,string,500);
+	char string1[500] = "terminal_write test";
+	terminal_write(0,string1,500);
 	printf("\ndone\n");
+	
+	char string2[25] = "out of bound string";
+	terminal_write(0,string2,500);
 
 
 
