@@ -124,7 +124,7 @@ void keyboard_handler_function() {
 		/* if the keycode received is anything above F1 being pressed, don't do anything unless it's a release from a Shift key or Control key */
 		if ( (uint8_t)keycode >= F1_P ) {
 			if ( (uint8_t)keycode == LSHIFT_R || (uint8_t)keycode == RSHIFT_R ) {
-				shift_pressed = 0;
+				shift_pressed--;
 			}
 			if ( (uint8_t)keycode == CTRL_R ) {
 				ctrl--;
@@ -163,7 +163,7 @@ void keyboard_handler_function() {
 		
 		/* if the key that's pressed is Left Shift or Right Shift, toggle the shift_pressed flag */
 		if ((uint8_t)keycode == LSHIFT_P || (uint8_t)keycode == RSHIFT_P) {
-			shift_pressed = 1;
+			shift_pressed++;
 			return;
 		}
 		
@@ -189,7 +189,7 @@ void keyboard_handler_function() {
 		}
 
         /* prints the pressed key on screen and stores the character in the line buffer while checking if Caps Lock has been toggled and/or if Shift is being pressed */
-        if ( (caps_lock^shift_pressed) == 1 ) {
+        if (caps_lock^shift_pressed>0) {
 			if ( (((uint8_t)keycode >= Q_MAP) && ((uint8_t)keycode <= P_MAP)) || (((uint8_t)keycode >= A_MAP) && ((uint8_t)keycode <= L_MAP)) || (((uint8_t)keycode >= Z_MAP) && ((uint8_t)keycode <= M_MAP)) ) {
 				type_to_buffer(keymap[(uint8_t)keycode]-CAP_OFFSET);
 				putc(keymap[(uint8_t)keycode]-CAP_OFFSET);
