@@ -1,6 +1,7 @@
 #include "term_driver.h"
 #include "keyboard.h"
-
+#include "types.h"
+#include "lib.h"
 int buffer_count = 0;
 
 /* 
@@ -56,7 +57,7 @@ void remove_from_buffer() {
  */
 void buffer_command() {
 	putc('\n');
-	printf("Line buffer size is %d", buffer_count-1);
+	printf("Number of characters in line buffer before enter was pressed is %d\n", buffer_count-1);
 }
 
 /* 
@@ -74,8 +75,131 @@ void clear_buffer() {
 	
 	int i;
 	for (i = 0; i < LINE_BUFFER_SIZE; i++) {
-		*(line_buffer+buffer_count) = '\0';
+		*(line_buffer+i) = '\0';
 	}
 	
 	buffer_count = 0;
 }
+
+/*
+ *	terminal_read
+ *  DESCRIPTION: copies the line buffer to a given address, the caller must provide a 128 byte space in memory
+ *	INPUTS: 
+ *  int32_t fd - a file descriptor (not used)
+ *  const void* buf  - a char* string that has 128 bytes
+ *  int32_t nbytes - must be 128 bytes
+ *	OUTPUTS: writes to the address pointed to by buf
+ *	RETURN VALUE:the number of bytes written, or -1 on failure
+ *	SIDE EFFECTS: none
+ */
+
+int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes)
+{
+	if(nbytes!=LINE_BUFFER_SIZE || buf==NULL) return -1;
+
+	/* int8_t* strcpy(int8_t* dest, const int8_t* src, uint32_t n)
+	* Inputs:      int8_t* dest = destination string of copy
+	*         const int8_t* src = source string of copy
+	*                uint32_t n = number of bytes to copy
+	* Return Value: pointer to dest
+	* Function: copy n bytes of the source string into the destination string */
+	
+	strncpy((int8_t*) buf, line_buffer, buffer_count);
+
+	return buffer_count;
+
+
+}
+
+/*
+ *	keyboard_read
+ *  DESCRIPTION: copies the line buffer to a given address,the caller must provide a 128 byte space in memory
+ *	INPUTS: 
+ *  int32_t fd - a file descriptor (not used)
+ *  const void* buf  - a char* string that has 128 bytes
+ *  int32_t nbytes - must be 128 bytes
+ *	OUTPUTS: writes to the address pointed to by buf
+ *	RETURN VALUE:the number of bytes read, or -1 on failure
+ *	SIDE EFFECTS: none
+ */
+
+int32_t keyboard_read(int32_t fd, void* buf, int32_t nbytes)
+{
+	if(nbytes!=LINE_BUFFER_SIZE || buf==NULL) return -1;
+
+	/* int8_t* strcpy(int8_t* dest, const int8_t* src, uint32_t n)
+	* Inputs:      int8_t* dest = destination string of copy
+	*         const int8_t* src = source string of copy
+	*                uint32_t n = number of bytes to copy
+	* Return Value: pointer to dest
+	* Function: copy n bytes of the source string into the destination string */
+	
+	strncpy((int8_t*) buf, line_buffer, buffer_count);
+
+	return buffer_count;
+
+
+}
+
+
+
+/*
+ *	terminal_write
+ *  DESCRIPTION:write a string to the terminal
+ * 
+ *  
+ *	INPUTS:
+ *  int32_t fd - file descriptor (not used)
+ *  const void* buf - a pointer to a string to be written to the terminal
+ *  int32_t nbytes - the number of characters in the string (max 128*25)
+ *	OUTPUTS: printed string on the terminal
+ *	RETURN VALUE:the number of bytes written, or -1 on failure
+ *	SIDE EFFECTS: printed string on the terminal
+ */
+#define terminal_string_size 80*25
+int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes)
+{
+	if(buf==NULL || nbytes<1 || nbytes>terminal_string_size) return -1;
+	clear_buffer();
+	int i;
+
+	char* string = (char *) buf;
+	for(i=0;i<nbytes;i++)
+		putc(*(string+i));
+	
+
+	return nbytes;
+
+
+}
+
+
+/*
+ *	terminal_open
+ *  DESCRIPTION: not used
+ *	INPUTS:the name of a file , represented as a array of bytes, with max size of 32 (addresses in filesys.c)
+ *	OUTPUTS: none
+ *	RETURN VALUE:file descriptor 
+ *  If the named file does not exist or no descriptors are free, the call returns -1
+ *	SIDE EFFECTS: none
+ */
+int32_t terminal_open(const uint8_t* filename){
+	 
+	return -1;
+
+ }
+
+ /*
+ *	terminal_close
+ *  DESCRIPTION:closes the specified file descriptor
+ *	INPUTS:a integer that is the file descriptor
+ *	OUTPUTS: none
+ *	RETURN VALUE:Trying to close an invalid descriptor should result in a return value of -1; successful closes should return 0.
+ *	SIDE EFFECTS: none
+ */
+ int32_t terminal_close(int32_t fd){
+
+
+	return -1;
+}
+

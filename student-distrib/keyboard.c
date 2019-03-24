@@ -116,8 +116,12 @@ void keyboard_handler_function() {
 		if ( keymap[(uint8_t)keycode] == '\n' ) {
 			type_to_buffer('\n');
 			buffer_command();
-			clear_buffer();
-			putc('\n');
+			char string[LINE_BUFFER_SIZE];
+			int string_size = terminal_read(0,string,LINE_BUFFER_SIZE);
+			terminal_write(0,string,string_size);
+
+			//clear_buffer();
+			//putc('\n');
 			return;
 		}
 
@@ -199,4 +203,56 @@ void keyboard_handler_function() {
 		type_to_buffer(keymap[(uint8_t)keycode]);
 		putc(keymap[(uint8_t)keycode]);
     }
+}
+
+
+/*
+ *	keyboard_open
+ *  DESCRIPTION: not used
+ *	INPUTS:the name of a file , represented as a array of bytes, with max size of 32 (addresses in filesys.c)
+ *	OUTPUTS: none
+ *	RETURN VALUE:file descriptor 
+ *  If the named file does not exist or no descriptors are free, the call returns -1
+ *	SIDE EFFECTS: none
+ */
+int32_t keyboard_open(const uint8_t* filename){
+	 
+	return -1;
+
+ }
+
+ /*
+ *	keyboard_close
+ *  DESCRIPTION:closes the specified file descriptor
+ *	INPUTS:a integer that is the file descriptor
+ *	OUTPUTS: none
+ *	RETURN VALUE:Trying to close an invalid descriptor should result in a return value of -1; successful closes should return 0.
+ *	SIDE EFFECTS: none
+ */
+ int32_t keyboard_close(int32_t fd){
+
+
+	return -1;
+}
+
+
+/*
+ *	keyboard_write
+ *  DESCRIPTION:do nothing
+ * 
+ *  
+ *	INPUTS:
+ *  int32_t fd - file descriptor (not used)
+ *  const void* buf - not used
+ *  int32_t nbytes - the number of bytes written
+ *	OUTPUTS: none
+ *	RETURN VALUE:the number of bytes written, or -1 on failure
+ *	SIDE EFFECTS: none
+ */
+
+int32_t keyboard_write(int32_t fd, const void* buf, int32_t nbytes)
+{
+	return -1;
+
+
 }

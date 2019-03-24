@@ -1,8 +1,10 @@
 #include "tests.h"
 #include "x86_desc.h"
 #include "lib.h"
-
+#include "types.h"
 #include "paging.h"
+#include "rtc.h"
+#include "term_driver.h"
 
 #define PASS 1
 #define FAIL 0
@@ -194,6 +196,99 @@ int paging_test(){
 }
 
 /* Checkpoint 2 tests */
+
+//helper functions for rtc test
+
+
+static inline void freq_test_1(int freq, int fd)
+{
+	//int32_t* buf = &freq;
+	rtc_write(fd,(void *)freq,4);
+	int count;
+	for(count = 0;count<9;count++) 
+	{
+		rtc_read(fd,(void *)freq,4);
+		printf("%u ", freq);
+	}
+}
+
+
+static inline void freq_test_2(int freq, int fd)
+{
+	//int32_t* buf = &freq;
+	rtc_write(fd,(void *)freq,4);
+	int count;
+	for(count = 0;count<freq;count++) 
+	{
+		rtc_read(fd,(void *)freq,4);
+	}
+	printf("%u rtc interrupts at %u Hz \n",freq,freq);
+}
+
+
+/* RTC
+ * 
+ * Description: check that rtc can have different frequencies, check funtionality of rtc_read/rtc_write
+ * Inputs: None
+ * Outputs: None
+ * Side Effects: None
+ * Coverage: rtc functionalty
+ * Files: rtc.c/rtc.h
+ */
+ #define min_freq 2
+ #define max_freq 1024
+void rtc_test()
+{
+	printf("\n void pointers \n");
+	int fd = rtc_open(NULL);
+
+	int freq = min_freq;
+	printf("\nRTC Test 1\n");
+	
+	for(freq = min_freq;freq<=max_freq;freq=freq*2 )
+	{
+		freq_test_1(freq,fd);
+	}
+	printf("\nRTC Test 2\n");
+	for(freq = min_freq;freq<=max_freq;freq=freq*2 )
+	{
+		freq_test_2(freq,fd);
+	}
+	for(freq = max_freq;freq>=min_freq;freq=freq/2 )
+	{
+		freq_test_2(freq,fd);
+	}
+
+
+	
+	rtc_close(fd);
+
+}
+/* 
+
+ *Keyboard/terminal test
+ * 
+ * Description: check line buffer, terminal_write
+ * Inputs: None
+ * Outputs: None
+ * Side Effects: None
+ * Coverage: terminal/keyboard functionality
+ * Files: term_driver.c/term_driver.h
+ */
+
+void kt_test()
+{
+
+	char string[500] = "terminal_write test";
+	terminal_write(0,string,500);
+	printf("\ndone\n");
+
+
+
+
+}
+
+
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -215,4 +310,9 @@ void launch_tests(){
 	TEST_OUTPUT("idt_val_test", idt_val_test());
 	TEST_OUTPUT("paging_struct_test", paging_struct_test());
 	TEST_OUTPUT("paging_test", paging_test());
+
+	rtc_test();
+
+	kt_test();
+
 }

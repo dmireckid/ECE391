@@ -5,6 +5,8 @@
 #ifndef _KEYBOARD_H
 #define _KEYBOARD_H
 
+#include "types.h"
+
 /* Keyboard IRQ number and ports to communicate*/
 #define KEYBOARD_IRQ    1
 #define KEYBOARD_DATA   0x60
@@ -42,5 +44,11 @@ void shift_init(void);
 
 /* Handles input from keyboard and prints it on screen */
 void keyboard_handler_function(void);
+
+int32_t keyboard_open(const uint8_t* filename);
+
+int32_t keyboard_close(int32_t fd);
+
+int32_t keyboard_write(int32_t fd, const void* buf, int32_t nbytes);
 
 #endif /* KEYBOARD_H */
