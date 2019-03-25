@@ -116,12 +116,17 @@ void keyboard_handler_function() {
 		if ( keymap[(uint8_t)keycode] == '\n' ) {
 			type_to_buffer('\n');
 			buffer_command();
+
 			char string[LINE_BUFFER_SIZE];
 			int string_size = terminal_read(0,string,LINE_BUFFER_SIZE);
+			printf("Buffer content: ");
 			terminal_write(0,string,string_size);
 
 			//clear_buffer();
 			//putc('\n');
+			
+			/* Start taking user inputs */
+    		printf("> ");
 			return;
 		}
 
@@ -175,6 +180,10 @@ void keyboard_handler_function() {
 		if ( ctrl > 0 && keymap[(uint8_t)keycode] == 'l' ) {
 			clear_buffer();
 			ctrl_l();
+
+			/* Start taking user inputs */
+    		printf("> ");
+
 			return;
 		}
 		
