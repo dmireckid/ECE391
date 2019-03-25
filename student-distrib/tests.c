@@ -5,6 +5,7 @@
 #include "paging.h"
 #include "rtc.h"
 #include "term_driver.h"
+#include "filesys.h"
 
 #define PASS 1
 #define FAIL 0
@@ -291,6 +292,17 @@ void kt_test()
 
 }
 
+/* 
+
+ *Filesystem test (read by name)
+ * 
+ * Description: Reads a file by name and prints its contents/stats
+ * Inputs: int arg (txt or exe file)
+ * Outputs: int
+ * Side Effects: PASS for success, FAIL for failure
+ * Coverage: Filesystem read_by_name functionality
+ * Files: filesys.c/filesys.h
+ */
 int filesys_test(int arg){
 	clear();
 	dentry_t test;
@@ -319,9 +331,12 @@ int filesys_test(int arg){
 	retval = read_data(test.inode_num, 0, buf, size);
 	printf("File size: %d\n", (int32_t)retval);
 	if(retval >= 500){
+		printf("First 250 characters of large file...\n");
 		for(i=0; i<250; i++){
 			putc(buf[i]);		//only print first 250 and last 250 characters
 		}									//if file is too long
+		printf("\n");
+		printf("Last 250 characters of large file...\n");
 		for(i= retval-250; i<retval; i++){
 			putc(buf[i]);
 		}
@@ -336,6 +351,17 @@ int filesys_test(int arg){
 	return PASS;
 }
 
+/* 
+
+ *Filesystem test index (read by index)
+ * 
+ * Description: Reads a file by index and prints its contents/stats
+ * Inputs: int arg (index)
+ * Outputs: int
+ * Side Effects: PASS for success, FAIL for failure
+ * Coverage: Filesystem read_by_index functionality
+ * Files: filesys.c/filesys.h
+ */
 int filesys_test_index(int arg){
 	clear();
 	dentry_t test;
@@ -364,9 +390,12 @@ int filesys_test_index(int arg){
 	retval = read_data(test.inode_num, 0, buf, size);
 	printf("File size: %d\n", (int32_t)retval);
 	if(retval >= 500){
+		printf("First 250 characters of large file...\n");
 		for(i=0; i<250; i++){
 			putc(buf[i]);
 		}
+		printf("\n");
+		printf("Last 250 characters of large file...\n");
 		for(i= retval-250; i<retval; i++){
 			putc(buf[i]);		//print shortened version of file if very long
 		}
@@ -381,11 +410,22 @@ int filesys_test_index(int arg){
 	return PASS;
 }
 
+/* 
+
+ *Filesystem test directory (read by name)
+ * 
+ * Description: Reads a directory and prints all files names in it
+ * Inputs: NONE
+ * Outputs: int
+ * Side Effects: PASS for success, FAIL for failure
+ * Coverage: Filesystem read_d functionality
+ * Files: filesys.c/filesys.h
+ */
 int filesys_test_directory(){
 	clear();
-	uint8_t buf[33];
+	uint8_t buf[FILENAME_LEN];
 	int32_t i=0;
-	while(read_d(i++, 32, buf) != 0){		//print out the whole directory contents
+	while(read_d(i++, FILENAME_LEN, buf) != 0){		//print out the whole directory contents
 		printf("%s\n", buf);
 	}
 	return PASS;
@@ -413,11 +453,11 @@ void launch_tests(){
 	TEST_OUTPUT("paging_struct_test", paging_struct_test());
 	TEST_OUTPUT("paging_test", paging_test());
 
-	rtc_test();
+	//rtc_test();
 
-	kt_test();
+	//kt_test();
 	
 	//filesys_test(2);
-	//filesys_test_index(8);
+	filesys_test_index(8);
 	//filesys_test_directory();
 }
