@@ -198,9 +198,16 @@ int paging_test(){
 
 /* Checkpoint 2 tests */
 
-//helper functions for rtc test
-
-
+//helper function for rtc test
+/* freq_test_1
+ * 
+ * Description: tests rtc frequency change by printing freq value on every interrupt
+ * Inputs: int freq and int fd
+ * Outputs: None
+ * Side Effects: Prints frequency valus on screen
+ * Coverage: rtc functionalty
+ * Files: rtc.c/rtc.h
+ */
 static inline void freq_test_1(int freq, int fd)
 {
 	//int32_t* buf = &freq;
@@ -213,7 +220,16 @@ static inline void freq_test_1(int freq, int fd)
 	}
 }
 
-
+//helper function for rtc test
+/* freq_test_2
+ * 
+ * Description: tests rtc frequency by printing a message after taking N interrupts at N Hz. (elapsed time is always 1 second)
+ * Inputs: int freq and int fd
+ * Outputs: None
+ * Side Effects: Prints a message on screen
+ * Coverage: rtc functionalty
+ * Files: rtc.c/rtc.h
+ */
 static inline void freq_test_2(int freq, int fd)
 {
 	//int32_t* buf = &freq;
@@ -276,20 +292,13 @@ void rtc_test()
  * Coverage: terminal/keyboard functionality
  * Files: term_driver.c/term_driver.h
  */
-
-void kt_test()
-{
-
+void kt_test() {
 	char string1[500] = "terminal_write test";
 	terminal_write(0,string1,500);
 	printf("\ndone\n");
 	
 	char string2[25] = "out of bound string";
 	terminal_write(0,string2,500);
-
-
-
-
 }
 
 /* 
@@ -447,17 +456,21 @@ int filesys_test_directory(){
 void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
 	// launch your tests here
+	
+	/* CP 1 */
+
 	//division_test();
 	//asm volatile("int $19");
 	TEST_OUTPUT("idt_val_test", idt_val_test());
 	TEST_OUTPUT("paging_struct_test", paging_struct_test());
 	TEST_OUTPUT("paging_test", paging_test());
 
-	//rtc_test();
 
+	/* CP 2 */
+
+	rtc_test();
 	//kt_test();
-	
 	//filesys_test(2);
-	filesys_test_index(8);
+	//filesys_test_index(8);
 	//filesys_test_directory();
 }

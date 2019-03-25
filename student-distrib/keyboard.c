@@ -107,7 +107,7 @@ void keyboard_handler_function() {
     /* get status number */
     status = (uint8_t)(inb(KEYBOARD_STATUS));
 
-    /* if status is zero, there is no data to read */
+    /* if the lowest bit of status is zero, the buffer is empty and there is no data to read */
     if (status & 0x01) {
         /* get keycode */
         keycode = (uint8_t)(inb(KEYBOARD_DATA));
