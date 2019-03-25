@@ -13,6 +13,7 @@
 #define CURSOR_DATA     0x3D5
 #define SENDING_POSITION_HIGH   0x0E
 #define SENDING_POSITION_LOW    0x0F
+#define NUMBER_OF_BITS_IN_BYTE  8
 
 static int screen_x;
 static int screen_y;
@@ -32,7 +33,7 @@ void update_cursor(int screen_x, int screen_y)
     
     /* send 0x0E to the VGA controller to tell it that we are sending higher byte of cursor position */
     outb(SENDING_POSITION_HIGH, CURSOR_COMMAND);
-    outb((uint8_t)(cur_pos >> 8), CURSOR_DATA);
+    outb((uint8_t)(cur_pos >> NUMBER_OF_BITS_IN_BYTE), CURSOR_DATA);
     /* send 0x0F to tell that we are sending lower byte */
     outb(SENDING_POSITION_LOW, CURSOR_COMMAND);
     outb((uint8_t)(cur_pos), CURSOR_DATA);

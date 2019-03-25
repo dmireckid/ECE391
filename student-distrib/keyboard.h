@@ -36,6 +36,29 @@
 #define Z_MAP			0x2C
 #define M_MAP			0x32
 
+/* Keycode values for shift key symbol mapping */
+#define KB_ONE                  0x02
+#define KB_TWO	                0x03
+#define KB_THREE	            0x04
+#define KB_FOUR                 0x05
+#define KB_FIVE                 0x06
+#define KB_SIX                  0x07
+#define KB_SEVEN                0x08
+#define KB_EIGHT                0x09
+#define KB_NINE                 0x0A
+#define KB_ZERO                 0x0B
+#define KB_BACKTICK             0x29
+#define KB_DASH                 0x0C
+#define KB_EQUAL                0x0D
+#define KB_OPENING_SQ_BRACKET   0x1A
+#define KB_CLOSING_SQ_BRACKET   0x1B
+#define KB_BACKSLASH            0x2B
+#define KB_SEMICOLON            0x27
+#define KB_APOSTROPHE           0x28
+#define KB_COMMA                0x33
+#define KB_DOT                  0x34
+#define KB_SLASH                0x35
+
 /* Initializes keyboard */
 void keyboard_init(void);
 
