@@ -291,6 +291,105 @@ void kt_test()
 
 }
 
+int filesys_test(int arg){
+	clear();
+	dentry_t test;
+	int32_t retval;
+	uint32_t size;
+	if(arg == 1){
+		size = 500;		//buffer size 500 for text file
+	}
+	if(arg == 2){
+		size = 6000;	//buffer size 6000 for exe file
+	}
+	uint8_t buf[size];
+	retval = read_dentry_by_name((uint8_t*)"frame1.txt", &test);	//read certain file by name
+	if(retval == -1){
+		return FAIL;
+	}
+	int i;
+	printf("File name: ");
+	for(i=0; i<FILENAME_LEN; i++){
+		putc(test.filename[i]);
+	}
+	printf("\n");
+	printf("File type: %d\n", test.filetype);
+	printf("Inode #: %d\n", test.inode_num);		//print file stats
+
+	retval = read_data(test.inode_num, 0, buf, size);
+	printf("File size: %d\n", (int32_t)retval);
+	if(retval >= 500){
+		for(i=0; i<250; i++){
+			putc(buf[i]);		//only print first 250 and last 250 characters
+		}									//if file is too long
+		for(i= retval-250; i<retval; i++){
+			putc(buf[i]);
+		}
+		return PASS;
+	}
+	else{
+		for(i=0; i<retval; i++){
+			putc(buf[i]);		//or print whole file if it is not too long
+		}
+	}
+	//printf("returning");
+	return PASS;
+}
+
+int filesys_test_index(int arg){
+	clear();
+	dentry_t test;
+	int32_t retval;
+	uint32_t size;
+	if(arg == 10 || arg == 14 || arg == 15){
+		size = 500;		//buffer size is 500 if text file
+	}
+	else{
+		size = 6000;	//6000 if executable file
+	}
+	uint8_t buf[size];
+	retval = read_dentry_by_index(arg, &test);	//read the file at certain bootblock index
+	if(retval == -1){
+		return FAIL;
+	}
+	int i;
+	printf("File name: ");
+	for(i=0; i<FILENAME_LEN; i++){
+		putc(test.filename[i]);
+	}
+	printf("\n");
+	printf("File type: %d\n", test.filetype);
+	printf("Inode #: %d\n", test.inode_num);		//print file stats
+
+	retval = read_data(test.inode_num, 0, buf, size);
+	printf("File size: %d\n", (int32_t)retval);
+	if(retval >= 500){
+		for(i=0; i<250; i++){
+			putc(buf[i]);
+		}
+		for(i= retval-250; i<retval; i++){
+			putc(buf[i]);		//print shortened version of file if very long
+		}
+		return PASS;
+	}
+	else{
+		for(i=0; i<retval; i++){
+			putc(buf[i]);		//if not too long, print whole file
+		}
+	}
+	//printf("returning");
+	return PASS;
+}
+
+int filesys_test_directory(){
+	clear();
+	uint8_t buf[33];
+	int32_t i=0;
+	while(read_d(i++, 32, buf) != 0){		//print out the whole directory contents
+		printf("%s\n", buf);
+	}
+	return PASS;
+}
 
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
@@ -317,5 +416,8 @@ void launch_tests(){
 	rtc_test();
 
 	kt_test();
-
+	
+	//filesys_test(2);
+	//filesys_test_index(8);
+	//filesys_test_directory();
 }

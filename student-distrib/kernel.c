@@ -11,6 +11,7 @@
 #include "keyboard.h"
 #include "paging.h"
 #include "rtc.h"
+#include "filesys.h"
 
 #define RUN_TESTS
 
@@ -50,11 +51,13 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Is the command line passed? */
     if (CHECK_FLAG(mbi->flags, 2))
         printf("cmdline = %s\n", (char *)mbi->cmdline);
-
+	
+	uint32_t fs_addr;
     if (CHECK_FLAG(mbi->flags, 3)) {
         int mod_count = 0;
         int i;
         module_t* mod = (module_t*)mbi->mods_addr;
+		fs_addr = mod->mod_start;
         while (mod_count < mbi->mods_count) {
             printf("Module %d loaded at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_start);
             printf("Module %d ends at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_end);
@@ -151,6 +154,9 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
     initialize_page();
+	
+	/*Initialize the filesystem*/
+	init_filesystem(fs_addr);
 
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
