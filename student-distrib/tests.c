@@ -306,25 +306,19 @@ void kt_test() {
  *Filesystem test (read by name)
  * 
  * Description: Reads a file by name and prints its contents/stats
- * Inputs: int arg (txt or exe file)
+ * Inputs: NONE
  * Outputs: int
  * Side Effects: PASS for success, FAIL for failure
  * Coverage: Filesystem read_by_name functionality
  * Files: filesys.c/filesys.h
  */
-int filesys_test(int arg){
+int filesys_test(){
 	clear();
 	dentry_t test;
 	int32_t retval;
-	uint32_t size;
-	if(arg == 1){
-		size = 500;		//buffer size 500 for text file
-	}
-	if(arg == 2){
-		size = 6000;	//buffer size 6000 for exe file
-	}
+	uint32_t size=6000; //upper limit for a large file
 	uint8_t buf[size];
-	retval = read_dentry_by_name((uint8_t*)"frame1.txt", &test);	//read certain file by name
+	retval = read_dentry_by_name((uint8_t*)"verylargetextwithverylongname.tx", &test);	//read certain file by name
 	if(retval == -1){
 		return FAIL;
 	}
@@ -375,13 +369,7 @@ int filesys_test_index(int arg){
 	clear();
 	dentry_t test;
 	int32_t retval;
-	uint32_t size;
-	if(arg == 10 || arg == 14 || arg == 15){
-		size = 500;		//buffer size is 500 if text file
-	}
-	else{
-		size = 6000;	//6000 if executable file
-	}
+	uint32_t size=6000;	//upper limit for exe file size
 	uint8_t buf[size];
 	retval = read_dentry_by_index(arg, &test);	//read the file at certain bootblock index
 	if(retval == -1){
@@ -470,7 +458,7 @@ void launch_tests(){
 
 	rtc_test();
 	//kt_test();
-	//filesys_test(2);
-	//filesys_test_index(8);
+	//filesys_test();
+	//filesys_test_index(10);
 	//filesys_test_directory();
 }
