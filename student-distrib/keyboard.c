@@ -8,9 +8,9 @@
 #include "term_driver.h"
 
 /* maps keycode to ASCII character code */
-char keymap[NUM_ASCII] =  {   '\0', '\e' /*0x01: escape*/,							/* 0x00: not used, 0x01: esc key */
+char keymap[NUM_ASCII] =  {   '\0', '\0' /*0x01: escape*/,							/* 0x00: not used, 0x01: esc key */
                         '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',			/* 0x02~0x0B: numbers 1~9 and 0 */ 
-						'-', '=', '\b' /*0x0E: backspace*/, '\t' /*0x0F: tab*/,		/* 0x0C~0x0F */
+						'-', '=', '\b' /*0x0E: backspace*/, '\0' /*0x0F: tab*/,		/* 0x0C~0x0F */
 						'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',			/* 0x10~0x19: letters q~p */
 						'[', ']', '\n' /*0x1C: enter*/, '\0' /*0x1D: left ctrl*/,	/* 0x1A~0x1D */
 						'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l',				/* 0x1E~0x26: letters a~l */
