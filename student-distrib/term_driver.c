@@ -2,6 +2,7 @@
 #include "keyboard.h"
 
 int buffer_count = 0;
+uint8_t buffer_output_enabled = 0;
 
 /* 
  * type_to_buffer(char input)
@@ -57,7 +58,47 @@ void remove_from_buffer() {
 void buffer_command() {
 	//printf("Line buffer size is %d", buffer_count-1);
 	//putc('\n');
-	printf("Buffer: \"%s\" (size %d)", line_buffer, buffer_count);
+	if (buffer_output_enabled)
+		printf("Buffer: \"%s\" (size %d)\n", line_buffer, buffer_count);
+
+	uint8_t i, j, is_arg=0;
+	char com_and_arg[2][buffer_count];
+	for (i=0; i<2; i++) {
+		for (j=0; j<buffer_count; j++) {
+			com_and_arg[i][j]='\0';
+		}
+	}
+	j=0;
+	for (i=0; i<buffer_count-1; i++) {
+		if (is_arg==0 && ( *(line_buffer+i)==' ' || *(line_buffer+i)=='\0') ) {
+			com_and_arg[is_arg][j] = '\0';
+			is_arg = 1;
+			j = 0;
+		}
+		else {
+			com_and_arg[is_arg][j] = *(line_buffer+i);
+			j++;
+		}
+	}
+	com_and_arg[1][j] = '\0';
+
+	printf("Command: \"%s\"\n", com_and_arg[0]);
+	printf("Argument: \"%s\"\n", com_and_arg[1]);
+
+	if (!strncmp(com_and_arg[0], "buffer", 6)) {
+		if (buffer_output_enabled==0) {
+			buffer_output_enabled = 1;
+			printf("Buffer output enabled\n");
+		} else {
+			buffer_output_enabled = 0;
+			printf("Buffer output disabled\n");
+		}
+	}
+
+	if (!strncmp(com_and_arg[0], "echo", 4)) {
+		printf("%s\n", com_and_arg[1]);
+	}
+
 }
 
 /* 
