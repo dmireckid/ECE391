@@ -420,10 +420,20 @@ int filesys_test_index(int arg){
  */
 int filesys_test_directory(){
 	clear();
-	uint8_t buf[FILENAME_LEN];
 	int32_t i=0;
+	int32_t j;
+	uint8_t buf[FILENAME_LEN];
+	for(j=0; j<FILENAME_LEN; j++){
+			buf[j] = '\0';
+		}
+
 	while(read_d(i++, FILENAME_LEN, buf) != 0){		//print out the whole directory contents
-		printf("%s\n", buf);
+		for(j=0; j<FILENAME_LEN; j++){
+			putc(buf[j]);
+			buf[j] = '\0';
+		}
+		putc('\n');
+		
 	}
 	return PASS;
 }
@@ -456,9 +466,9 @@ void launch_tests(){
 
 	/* CP 2 */
 
-	rtc_test();
+	//rtc_test();
 	//kt_test();
 	//filesys_test();
 	//filesys_test_index(10);
-	//filesys_test_directory();
+	filesys_test_directory();
 }
