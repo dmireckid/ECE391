@@ -83,11 +83,11 @@ void clear_buffer() {
 
 /*
  *	terminal_read
- *  DESCRIPTION: copies the line buffer to a given address, the caller must provide a 128 byte space in memory
+ *  DESCRIPTION: copies the line buffer to a given address after the user hits enter
  *	INPUTS: 
  *  int32_t fd - a file descriptor (not used)
  *  const void* buf  - a char* string that has 128 bytes
- *  int32_t nbytes - must be 128 bytes
+ *  int32_t nbytes - must be larger than 128 bytes (specifies size of the buffer)
  *	OUTPUTS: writes to the address pointed to by buf
  *	RETURN VALUE:the number of bytes written, or -1 on failure
  *	SIDE EFFECTS: none
@@ -95,7 +95,7 @@ void clear_buffer() {
 
 int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes)
 {
-	if(nbytes!=LINE_BUFFER_SIZE || buf==NULL) return -1;
+	if(nbytes < LINE_BUFFER_SIZE || buf==NULL) return -1;
 
 	/* int8_t* strcpy(int8_t* dest, const int8_t* src, uint32_t n)
 	* Inputs:      int8_t* dest = destination string of copy
@@ -104,8 +104,9 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes)
 	* Return Value: pointer to dest
 	* Function: copy n bytes of the source string into the destination string */
 	
+	while(line_buffer[buffer_count-1]!='\n');
 	strncpy((int8_t*) buf, line_buffer, buffer_count);
-
+	clear_buffer();
 	return buffer_count;
 
 
@@ -113,11 +114,11 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes)
 
 /*
  *	keyboard_read
- *  DESCRIPTION: copies the line buffer to a given address,the caller must provide a 128 byte space in memory
+ *  DESCRIPTION: copies the line buffer to a given address after the user hits enter
  *	INPUTS: 
  *  int32_t fd - a file descriptor (not used)
  *  const void* buf  - a char* string that has 128 bytes
- *  int32_t nbytes - must be 128 bytes
+ *  int32_t nbytes -  must be larger than 128 bytes (specifies size of the buffer)
  *	OUTPUTS: writes to the address pointed to by buf
  *	RETURN VALUE:the number of bytes read, or -1 on failure
  *	SIDE EFFECTS: none
@@ -125,7 +126,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes)
 
 int32_t keyboard_read(int32_t fd, void* buf, int32_t nbytes)
 {
-	if(nbytes!=LINE_BUFFER_SIZE || buf==NULL) return -1;
+	if(nbytes < LINE_BUFFER_SIZE || buf==NULL) return -1;
 
 	/* int8_t* strcpy(int8_t* dest, const int8_t* src, uint32_t n)
 	* Inputs:      int8_t* dest = destination string of copy
@@ -134,13 +135,14 @@ int32_t keyboard_read(int32_t fd, void* buf, int32_t nbytes)
 	* Return Value: pointer to dest
 	* Function: copy n bytes of the source string into the destination string */
 	
+	while(line_buffer[buffer_count-1]!='\n');
 	strncpy((int8_t*) buf, line_buffer, buffer_count);
+	clear_buffer();
 
 	return buffer_count;
 
 
 }
-
 
 
 /*
