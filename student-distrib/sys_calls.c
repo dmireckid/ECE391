@@ -23,7 +23,7 @@ int32_t open (const uint8 t* filename){}
 int32_t close (int32_t fd){}
 int32_t getargs (uint8 t* buf, int32_t nbytes){}
 int32_t vidmap (uint8 t** screen start){}
-int32_t set_handler (int32_t signum, void* handler address){}
+int32_t set_handler (int32_t signum, void* handler_address){}
 int32_t sigreturn (void){}
 
 
