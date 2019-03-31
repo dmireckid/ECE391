@@ -50,10 +50,10 @@ void initialize_page() {
 	*	set the entry's present and read/write bits to 1 and page size to 1 since program memory
 	*	is of size 4 MB
 	*/
-	directory_entry_array[PROGRAM_INDEX].present = 1;
+	directory_entry_array[PROGRAM_INDEX].present = 0;
 	directory_entry_array[PROGRAM_INDEX].read_write = 1;
 	directory_entry_array[PROGRAM_INDEX].page_size = 1;
-	directory_entry_array[PROGRAM_INDEX].p_table_addr = VIRT_PROGRAM_ADDR>>SHIFT_12;
+	directory_entry_array[PROGRAM_INDEX].p_table_addr = SHELL_ADDR_1>>SHIFT_12;
 
 	/* enable paging through assembly linkage */
 	enable_paging(directory_entry_array);
@@ -68,5 +68,12 @@ void initialize_page() {
  *   SIDE EFFECTS: remaps and reinitializes paging
  */
 void remap_page(uint8_t pid) {
+
+	directory_entry_array[PROGRAM_INDEX].present = 1;
+	directory_entry_array[PROGRAM_INDEX].read_write = 1;
+	directory_entry_array[PROGRAM_INDEX].page_size = 1;
+	directory_entry_array[PROGRAM_INDEX].p_table_addr = (SHELL_ADDR_1+pid*PROGRAM_SIZE)>>SHIFT_12;
 	enable_paging(directory_entry_array);
 }
+
+

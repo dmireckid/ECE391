@@ -5,6 +5,9 @@
 #define _SYS_CALLS_H
 #include "types.h"
 
+#define IN_USE_FLAG 33
+#define NOT_IN_USE_FLAG -44
+
 typedef struct __attribute__ ((packed))  file_entry{
 
     uint32_t fops	: 32; //file operations table pointer	
@@ -15,7 +18,24 @@ typedef struct __attribute__ ((packed))  file_entry{
     
 }file_entry_t;
 
+#define MAX_FILES 8
+typedef struct __attribute__ ((packed)) pcb{
 
+    file_entry_t fd_array[MAX_FILES] ;	
+    uint32_t parent_pid;
+    uint32_t parent_kernel_esp;
+    uint32_t parent_kernel_ebp;
+		
+}pcb_t;
+
+typedef uint32_t (*zero_arg)(void);
+typedef uint32_t (*one_arg)(void* arg1);
+typedef uint32_t (*two_arg)(void* arg1,void* arg2);
+typedef uint32_t (*three_arg)(void* arg1,void* arg2,void* arg3);
+
+
+
+void init_STD(uint32_t pid);
 
 
 int32_t halt(uint8_t status);

@@ -37,11 +37,10 @@ sys_call_invalid:
 
 
 sys_call_open:
-    pushl %edx
-    pushl %ecx
+    
     pushl %ebx
     call open
-    addl $12,%esp
+    popl %ebx
     IRET
 
 
