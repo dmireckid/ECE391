@@ -46,6 +46,27 @@ void initialize_page() {
 	directory_entry_array[1].page_size = 1;
 	directory_entry_array[1].p_table_addr = KERNEL_ADDR>>SHIFT_12;				// address has to be mapped from 4 MB, so shift physical address to right by 12 (other 10 bits accomodated by reserved and PAT bits)
 
+	/*	program space is at 128 MB (0x8000000), in other words in index 32 of the directory_entry_array, so
+	*	set the entry's present and read/write bits to 1 and page size to 1 since program memory
+	*	is of size 4 MB
+	*/
+	directory_entry_array[PROGRAM_INDEX].present = 1;
+	directory_entry_array[PROGRAM_INDEX].read_write = 1;
+	directory_entry_array[PROGRAM_INDEX].page_size = 1;
+	directory_entry_array[PROGRAM_INDEX].p_table_addr = VIRT_PROGRAM_ADDR>>SHIFT_12;
+
 	/* enable paging through assembly linkage */
+	enable_paging(directory_entry_array);
+}
+
+/*
+ * remap_page
+ *   DESCRIPTION: Remaps and reinitializes paging (primarily for remapping program/shell address)
+ *   INPUTS: pid - program id
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: remaps and reinitializes paging
+ */
+void remap_page(uint8_t pid) {
 	enable_paging(directory_entry_array);
 }

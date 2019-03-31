@@ -13,6 +13,13 @@
 #define KERNEL_ADDR		0x400000
 #define VIDEO_ADDR		0xB8000
 
+#define PROGRAM_INDEX		32
+#define VIRT_PROGRAM_ADDR	0x8000000
+#define SHELL_ADDR_1		0x800000
+#define	SHELL_ADDR_2		0xC00000
+#define PROG_ADDR_1			0x1000000
+#define PROG_ADDR_2			0x1400000
+
 #define NUM_ENTRIES		1024
 
 
@@ -65,5 +72,8 @@ page_table_entry_t table_entry_array[NUM_ENTRIES] __attribute__((aligned (KB_4))
 
 /* function to initialize paging */
 extern void initialize_page();
+
+/* function to remap paging */
+void remap_page(uint8_t pid);
 
 #endif
