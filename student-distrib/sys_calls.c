@@ -10,10 +10,10 @@
 #include "lib.h"
 #include "paging.h"
 
-static zero_arg rtc_jumptable[4] = {(zero_arg)rtc_open,(zero_arg)rtc_read,(zero_arg)rtc_write,(zero_arg)rtc_close};
-static zero_arg terminal_jumptable[4] = {(zero_arg)terminal_open,(zero_arg)terminal_read,(zero_arg)terminal_write,(zero_arg)terminal_close};
-static zero_arg directory_jumptable[4] = {(zero_arg)open_d,(zero_arg)read_d,(zero_arg)write_d,(zero_arg)close_d};
-static zero_arg file_jumptable[4] = {(zero_arg)open_f,(zero_arg)read_f,(zero_arg)write_f,(zero_arg)close_f};
+static uint32_t rtc_jumptable[4] = { (uint32_t)&rtc_open,(uint32_t)&rtc_read,(uint32_t)&rtc_write,(uint32_t)&rtc_close};
+static uint32_t terminal_jumptable[4] = {(uint32_t)&terminal_open,(uint32_t)&terminal_read,(uint32_t)&terminal_write,(uint32_t)&terminal_close};
+static uint32_t directory_jumptable[4] = {(uint32_t)&open_d,(uint32_t)&read_d,(uint32_t)&write_d,(uint32_t)&close_d};
+static uint32_t file_jumptable[4] = {(uint32_t)&open_f,(uint32_t)&read_f,(uint32_t)&write_f,(uint32_t)&close_f};
 
 #define ELF_SIZE 4
 static int8_t elf_string[ELF_SIZE] = {0x7f,0x45,0x4c,0x4f};
@@ -24,6 +24,8 @@ static pcb_t pcb_array[MAX_PROCESSES];
 #define pid_shell_0  0
 #define pid_program_0  1
 #define PROGRAM_VIRTUAL_ADDRESS 0x800000
+
+
 
 int32_t halt (uint8_t status){
     return 0;
@@ -95,11 +97,16 @@ void init_STD(uint32_t pid)
     pcb_array[pid].fd_array[1].fp =0;
     pcb_array[pid].fd_array[1].flags =IN_USE_FLAG;
 
+    pcb_array[pid].files_in_use = 2;
 }
 
 
 int32_t read (int32_t fd, void* buf, int32_t nbytes)
 {
+
+
+
+
     return 0;
 }
 int32_t write (int32_t fd, const void* buf, int32_t nbytes)
@@ -108,7 +115,52 @@ int32_t write (int32_t fd, const void* buf, int32_t nbytes)
 }
 int32_t open (const uint8_t* filename)
 {
-    return 0;
+    dentry_t test;
+     //check if file exists
+    if(read_dentry_by_name(filename,&test)==-1) return -1;
+    switch(test.filetype)
+    {
+        case 0://rtc
+        {
+            pcb_array[current_pid].files_in_use++;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fops = (uint32_t)rtc_jumptable;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].inode = 0;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fp = 0;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].flags = IN_USE_FLAG;
+            break;
+        }
+        case 1://directory
+        {
+
+            pcb_array[current_pid].files_in_use++;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fops = (uint32_t)directory_jumptable;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].inode = 0;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fp = 0;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].flags = IN_USE_FLAG;
+            break;
+        }
+        case 2://file
+        {
+
+            pcb_array[current_pid].files_in_use++;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fops = (uint32_t)file_jumptable;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].inode = test.inode_num;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fp = 0;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].flags = IN_USE_FLAG;
+            break;
+        }
+        default:
+            return -1;
+
+
+    }
+ 
+    uint32_t* ptr = (uint32_t*)pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fops; 
+    int32_t (*fun_ptr)(const uint8_t*) = (void*)ptr[0];
+    (*fun_ptr)(filename);
+
+    
+    return pcb_array[current_pid].files_in_use-1;
 }
 int32_t close (int32_t fd)
 {

@@ -25,13 +25,11 @@ typedef struct __attribute__ ((packed)) pcb{
     uint32_t parent_pid;
     uint32_t parent_kernel_esp;
     uint32_t parent_kernel_ebp;
+    uint32_t files_in_use;
 		
 }pcb_t;
 
-typedef uint32_t (*zero_arg)(void);
-typedef uint32_t (*one_arg)(void* arg1);
-typedef uint32_t (*two_arg)(void* arg1,void* arg2);
-typedef uint32_t (*three_arg)(void* arg1,void* arg2,void* arg3);
+
 
 
 
