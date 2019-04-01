@@ -31,18 +31,17 @@ int32_t halt (uint8_t status){
     return 0;
 
 }
+
 /*
- *	execute
- 
+ *	execute 
  *
- *	INPUTS:
- *  const uint8_t* command - a string specifying a program
+ *	INPUTS: const uint8_t* command - a string specifying a program
  *	OUTPUTS: none
  *	RETURN VALUE: the execute call returns -1 if the command cannot be executed,
  *  for example, if the program does not exist or the filename specified is not an executable, 256 if the program dies by an
  *  exception, or a value in the range 0 to 255 if the program executes a halt system call, in which case the value returned
- *  is that given by the program’s call to halt.
- *	SIDE EFFECTS: RTC may run faster 
+ *  is that given by the program's call to halt.
+ *	SIDE EFFECTS: program is added to PCB array
  */
 int32_t execute (const uint8_t* command)
 {
@@ -58,10 +57,7 @@ int32_t execute (const uint8_t* command)
     file_size = read_data(test.inode_num,0,(uint8_t*) buf,ELF_SIZE);
     if(strncmp(buf,elf_string,ELF_SIZE)!=0) return -1;
 
-
     //assign pid and memory for the process
-    
-    
     current_pid++;
     remap_page(current_pid);
 
@@ -77,7 +73,9 @@ int32_t execute (const uint8_t* command)
     //pcb_array[current_pid].parent_kernel_esp = 
     //pcb_array[current_pid].parent_kernel_ebp =
     
-    tss.esp0 =MB_8 - current_pid*KB_8;
+	//set tss values
+    tss.esp0 = MB_8 - current_pid*KB_8;
+	tss.ss0 = KERNEL_DS;
 
     //get entry point
 
@@ -85,6 +83,14 @@ int32_t execute (const uint8_t* command)
     return 0;
 }
 
+/*
+ *	init_STD
+ *
+ *	INPUTS: uint32_t pid - the processor ID of the PCB
+ *	OUTPUTS: none
+ *	RETURN VALUE: none
+ *	SIDE EFFECTS: stdin and stdout are respectively initialized in index 0 and 1 of file descriptor array
+ */
 void init_STD(uint32_t pid)
 {
     pcb_array[pid].fd_array[0].fops = (uint32_t)terminal_jumptable;
@@ -100,23 +106,138 @@ void init_STD(uint32_t pid)
     pcb_array[pid].files_in_use = 2;
 }
 
-
+/*
+ *	read
+ *
+ *	INPUTS: int32_t fd - file descriptor
+ * 			void* buf - buffer
+ *			int32_t nbytes - file syze (in bytes)
+ *	OUTPUTS: none
+ *	RETURN VALUE: file descriptor
+ *	SIDE EFFECTS: runs the read command based on the file type
+ */
 int32_t read (int32_t fd, void* buf, int32_t nbytes)
 {
+    dentry_t test;
+    //check if file exists
+    //if(read_dentry_by_name(filename,&test)==-1) return -1;
+    switch(test.filetype)
+    {
+        case 0://rtc
+        {
+            pcb_array[current_pid].files_in_use++;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fops = (uint32_t)rtc_jumptable;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].inode = 0;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fp = 0;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].flags = IN_USE_FLAG;
+            break;
+        }
+        case 1://directory
+        {
+
+            pcb_array[current_pid].files_in_use++;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fops = (uint32_t)directory_jumptable;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].inode = 0;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fp = 0;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].flags = IN_USE_FLAG;
+            break;
+        }
+        case 2://file
+        {
+
+            pcb_array[current_pid].files_in_use++;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fops = (uint32_t)file_jumptable;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].inode = test.inode_num;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fp = 0;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].flags = IN_USE_FLAG;
+            break;
+        }
+        default:
+            return -1;
 
 
+    }
+ 
+    uint32_t* ptr = (uint32_t*)pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fops; 
+    int32_t (*fun_ptr)(int32_t, const void*, int32_t) = (void*)ptr[1];
+    (*fun_ptr)(fd,buf,nbytes);
 
-
-    return 0;
+    
+    return pcb_array[current_pid].files_in_use-1;
 }
+
+/*
+ *	write
+ *
+ *	INPUTS: int32_t fd - file descriptor
+ * 			void* buf - buffer
+ *			int32_t nbytes - file syze (in bytes)
+ *	OUTPUTS: none
+ *	RETURN VALUE: file descriptor
+ *	SIDE EFFECTS: runs the write command based on the file type
+ */
 int32_t write (int32_t fd, const void* buf, int32_t nbytes)
 {
-    return 0;
+    dentry_t test;
+    //check if file exists
+    //if(read_dentry_by_name(filename,&test)==-1) return -1;
+    switch(test.filetype)
+    {
+        case 0://rtc
+        {
+            pcb_array[current_pid].files_in_use++;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fops = (uint32_t)rtc_jumptable;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].inode = 0;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fp = 0;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].flags = IN_USE_FLAG;
+            break;
+        }
+        case 1://directory
+        {
+
+            pcb_array[current_pid].files_in_use++;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fops = (uint32_t)directory_jumptable;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].inode = 0;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fp = 0;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].flags = IN_USE_FLAG;
+            break;
+        }
+        case 2://file
+        {
+
+            pcb_array[current_pid].files_in_use++;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fops = (uint32_t)file_jumptable;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].inode = test.inode_num;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fp = 0;
+            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].flags = IN_USE_FLAG;
+            break;
+        }
+        default:
+            return -1;
+
+
+    }
+ 
+    uint32_t* ptr = (uint32_t*)pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fops; 
+    int32_t (*fun_ptr)(int32_t, const void*, int32_t) = (void*)ptr[2];
+    (*fun_ptr)(fd,buf,nbytes);
+
+    
+    return pcb_array[current_pid].files_in_use-1;
 }
+
+/*
+ *	open
+ *
+ *	INPUTS: const uint8_t* filename - pointer to file name
+ *	OUTPUTS: none
+ *	RETURN VALUE: file descriptor value
+ *	SIDE EFFECTS: runs the open command based on the file type
+ */
 int32_t open (const uint8_t* filename)
 {
     dentry_t test;
-     //check if file exists
+    //check if file exists
     if(read_dentry_by_name(filename,&test)==-1) return -1;
     switch(test.filetype)
     {
@@ -162,22 +283,27 @@ int32_t open (const uint8_t* filename)
     
     return pcb_array[current_pid].files_in_use-1;
 }
+
 int32_t close (int32_t fd)
 {
     return 0;
 }
+
 int32_t getargs (uint8_t* buf, int32_t nbytes)
 {
     return 0;
 }
+
 int32_t vidmap (uint8_t** screen_start)
 {
     return 0;
 }
+
 int32_t set_handler (int32_t signum, void* handler_address)
 {
     return 0;
 }
+
 int32_t sigreturn (void)
 {
     return 0;
