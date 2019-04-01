@@ -13,11 +13,12 @@
 #define KERNEL_ADDR		0x400000
 #define VIDEO_ADDR		0xB8000
 
-#define PROGRAM_INDEX		32
-#define SHELL_ADDR_1		0x800000//8MB
+#define PROGRAM_INDEX	32
+#define SHELL_ADDR_1	0x800000//8MB
 #define PROGRAM_SIZE    0x400000//4MB 
-#define KB_8 0x2000 //8KB
-#define MB_8 0x800000//8MB
+#define KB_8 			0x2000 //8KB
+#define MB_8 			0x800000//8MB
+#define MB_128			0x8000000//128MB
 #define NUM_ENTRIES		1024
 
 

@@ -18,13 +18,11 @@
  *  Side Effects: 
  */
 sys_call_handler:
-
     cmpl $SYS_CALL_NUM_MIN,%eax
     jb sys_call_invalid
 
     cmpl $SYS_CALL_NUM_MAX,%eax
     ja sys_call_invalid
-
 
     jmp *jump_table(,%eax,4);
 
@@ -32,41 +30,39 @@ sys_call_invalid:
     movl $-1,%eax
     IRET
 
-
-
-
-
 sys_call_open:
-    
+	# push arguments and call open
     pushl %ebx
     call open
     popl %ebx
     IRET
 
-
 sys_call_close:
 
-
-
 sys_call_read:
-
+	# push arguments and call read
+    pushl %edx
+    pushl %ecx
+	pushl %ebx
+    call halt
+    popl %ebx
+    popl %ecx
+    popl %edx
 
 sys_call_write:
 
-
-
 sys_call_halt:
+	# push arguments and call halt
     pushl %ebx
     call halt
     popl %ebx
 
-
-
 sys_call_execute:
+	# push arguments and call execute
     pushl %ebx
     call execute
     popl %ebx
-
+	# set up entire IRET stack
 
 
 

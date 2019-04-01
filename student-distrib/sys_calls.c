@@ -68,17 +68,18 @@ int32_t execute (const uint8_t* command)
     init_STD(current_pid);
     pcb_array[current_pid].parent_pid = current_pid-1;
     
+	//save parent esp and ebp values
     asm volatile("movl %%esp,%0" : "=rm"(pcb_array[current_pid].parent_kernel_esp));
     asm volatile("movl %%ebp,%0" : "=rm"(pcb_array[current_pid].parent_kernel_ebp));
-    //pcb_array[current_pid].parent_kernel_esp = 
-    //pcb_array[current_pid].parent_kernel_ebp =
     
 	//set tss values
     tss.esp0 = MB_8 - current_pid*KB_8;
 	tss.ss0 = KERNEL_DS;
 
     //get entry point
-
+	uint32_t entry;
+	read_data(test.inode_num,24,(uint8_t*)&entry,4);
+	entry += MB_128;
 
     return 0;
 }
