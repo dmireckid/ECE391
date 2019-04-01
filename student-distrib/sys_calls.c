@@ -28,6 +28,12 @@ static pcb_t pcb_array[MAX_PROCESSES];
 
 
 int32_t halt (uint8_t status){
+    /*    asm volatile("movl %%eax,%%ebp" 
+    : 
+    :"a"(pcb_array[current_pid].parent_kernel_ebp)
+    : "memory");*/
+  
+  
     return 0;
 
 }
@@ -69,9 +75,18 @@ int32_t execute (const uint8_t* command)
     pcb_array[current_pid].parent_pid = current_pid-1;
     
 	//save parent esp and ebp values
-    asm volatile("movl %%esp,%0" : "=rm"(pcb_array[current_pid].parent_kernel_esp));
-    asm volatile("movl %%ebp,%0" : "=rm"(pcb_array[current_pid].parent_kernel_ebp));
+    asm volatile("movl %%esp,%%eax;"
+        : "=a"(pcb_array[current_pid].parent_kernel_esp)
+        :
+        : "memory");
+    asm volatile("movl %%ebp,%%eax;" 
+    : "=a"(pcb_array[current_pid].parent_kernel_ebp)
+    :
+    : "memory");
+
+
     
+
 	//set tss values
     tss.esp0 = MB_8 - current_pid*KB_8;
 	tss.ss0 = KERNEL_DS;
@@ -81,6 +96,19 @@ int32_t execute (const uint8_t* command)
 	read_data(test.inode_num,24,(uint8_t*)&entry,4);
 	entry += MB_128;
 
+//NEED TO FIX THIS
+    asm volatile(
+        "pushl $USER_DS"
+        "pushl $MB_128+$PROGRAM_SIZE"
+        "pushfl"
+        "pushl $USER_CS"
+        "pushl %%eax"
+        "IRET" 
+        : 
+        : "a"(entry) 
+        : "memory"
+
+    );
     return 0;
 }
 

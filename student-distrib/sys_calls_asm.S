@@ -9,6 +9,10 @@
 
 .globl sys_call_handler,sys_call_halt, sys_call_execute, sys_call_read, sys_call_write,  sys_call_open,  sys_call_close, sys_call_getargs, sys_call_vidmap, sys_call_sethandler, sys_call_sigreturn
 
+
+
+entry_point:
+    .long 0
 /* 
  * sys_call_handler
  *   Description: dispatcher function
