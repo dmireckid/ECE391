@@ -108,7 +108,7 @@ void init_STD(uint32_t pid)
 		pcb_array[pid].fd_array[1].flags = NOT_IN_USE_FLAG;
 	}
 
-    pcb_array[pid].files_in_use = 2;
+
 }
 
 /*
@@ -159,6 +159,7 @@ int32_t write (int32_t fd, const void* buf, int32_t nbytes)
  *	INPUTS: const uint8_t* filename - pointer to file name
  *	OUTPUTS: none
  *	RETURN VALUE: file descriptor value
+ * If the named file does not exist or no descriptors are free, the call returns -1.
  *	SIDE EFFECTS: runs the open command based on the file type
  */
 int32_t open (const uint8_t* filename)
@@ -166,35 +167,44 @@ int32_t open (const uint8_t* filename)
     dentry_t test;
     //check if file exists
     if(read_dentry_by_name(filename,&test)==-1) return -1;
+    //get a unused file discriptor
+    uint32_t unusedfd = 2;
+    for(unusedfd = 2;unusedfd<=8;unusedfd++)
+    {
+       if(unusedfd==8) return -1;
+       if(pcb_array[current_pid].fd_array[unusedfd].flags == NOT_IN_USE_FLAG)
+            break;
+    }
+
     switch(test.filetype)
     {
         case 0://rtc
         {
-            pcb_array[current_pid].files_in_use++;
-            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fops = (uint32_t)rtc_jumptable;
-            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].inode = 0;
-            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fp = 0;
-            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].flags = IN_USE_FLAG;
+
+            pcb_array[current_pid].fd_array[unusedfd].fops = (uint32_t)rtc_jumptable;
+            pcb_array[current_pid].fd_array[unusedfd].inode = 0;
+            pcb_array[current_pid].fd_array[unusedfd].fp = 0;
+            pcb_array[current_pid].fd_array[unusedfd].flags = IN_USE_FLAG;
             break;
         }
         case 1://directory
         {
 
-            pcb_array[current_pid].files_in_use++;
-            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fops = (uint32_t)directory_jumptable;
-            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].inode = 0;
-            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fp = 0;
-            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].flags = IN_USE_FLAG;
+
+            pcb_array[current_pid].fd_array[unusedfd].fops = (uint32_t)directory_jumptable;
+            pcb_array[current_pid].fd_array[unusedfd].inode = 0;
+            pcb_array[current_pid].fd_array[unusedfd].fp = 0;
+            pcb_array[current_pid].fd_array[unusedfd].flags = IN_USE_FLAG;
             break;
         }
         case 2://file
         {
 
-            pcb_array[current_pid].files_in_use++;
-            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fops = (uint32_t)file_jumptable;
-            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].inode = test.inode_num;
-            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fp = 0;
-            pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].flags = IN_USE_FLAG;
+
+            pcb_array[current_pid].fd_array[unusedfd].fops = (uint32_t)file_jumptable;
+            pcb_array[current_pid].fd_array[unusedfd].inode = test.inode_num;
+            pcb_array[current_pid].fd_array[unusedfd].fp = 0;
+            pcb_array[current_pid].fd_array[unusedfd].flags = IN_USE_FLAG;
             break;
         }
         default:
@@ -203,12 +213,12 @@ int32_t open (const uint8_t* filename)
 
     }
  
-    uint32_t* ptr = (uint32_t*)pcb_array[current_pid].fd_array[pcb_array[current_pid].files_in_use-1].fops; 
+    uint32_t* ptr = (uint32_t*)pcb_array[current_pid].fd_array[unusedfd].fops; 
     int32_t (*fun_ptr)(const uint8_t*) = (void*)ptr[0];
     (*fun_ptr)(filename);
 
     
-    return pcb_array[current_pid].files_in_use-1;
+    return unusedfd;
 }
 
 int32_t close (int32_t fd)
