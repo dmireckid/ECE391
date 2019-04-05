@@ -257,6 +257,10 @@ int32_t open (const uint8_t* filename)
 
 int32_t close (int32_t fd)
 {
+	if(fd > 7 || fd < 2){
+		return -1;
+	}
+	pcb_array[current_pid].fd_array[fd].flags = NOT_IN_USE_FLAG;
     return 0;
 }
 
