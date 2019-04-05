@@ -72,6 +72,7 @@ void remap_page(uint8_t pid) {
 	directory_entry_array[PROGRAM_INDEX].present = 1;
 	directory_entry_array[PROGRAM_INDEX].read_write = 1;
 	directory_entry_array[PROGRAM_INDEX].page_size = 1;
+	directory_entry_array[PROGRAM_INDEX].user_super = 1;
 	directory_entry_array[PROGRAM_INDEX].p_table_addr = (SHELL_ADDR_1+pid*PROGRAM_SIZE)>>SHIFT_12;
 	enable_paging(directory_entry_array);
 }

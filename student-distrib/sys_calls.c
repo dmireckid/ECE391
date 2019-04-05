@@ -16,7 +16,7 @@ static uint32_t terminal_jumptable[4] = {(uint32_t)&terminal_open,(uint32_t)&ter
 static uint32_t directory_jumptable[4] = {(uint32_t)&open_d,(uint32_t)&read_d,(uint32_t)&write_d,(uint32_t)&close_d};
 static uint32_t file_jumptable[4] = {(uint32_t)&open_f,(uint32_t)&read_f,(uint32_t)&write_f,(uint32_t)&close_f};
 
-static int8_t elf_string[ELF_SIZE] = {0x7f,0x45,0x4c,0x4f};
+static int8_t elf_string[ELF_SIZE] = {0x7f,0x45,0x4c,0x46};
 
 static uint32_t current_pid=-1;
 static pcb_t pcb_array[MAX_PROCESSES];
@@ -53,7 +53,7 @@ int32_t execute (const uint8_t* command)
     
     //check if file exists
     if(read_dentry_by_name(command,&test)==-1) return -1;
-   //check if the filetype is a file
+	//check if the filetype is a file
     if(test.filetype !=2) return -1;
     //check if the first 4 bytes are ELF magic number
     file_size = read_data(test.inode_num,0,(uint8_t*) buf,ELF_SIZE);
@@ -62,6 +62,8 @@ int32_t execute (const uint8_t* command)
     //assign pid and memory for the process
     current_pid++;
     remap_page(current_pid);
+	uint8_t* te = (uint8_t*)0x08048000;
+	uint32_t blah = *te;
 
     //copy program into memory
     read_data(test.inode_num,0,(uint8_t*)PROGRAM_VIRTUAL_ADDRESS,PROGRAM_SIZE);
@@ -90,17 +92,22 @@ int32_t execute (const uint8_t* command)
     //get entry point
 	uint32_t entry;
 	read_data(test.inode_num,24,(uint8_t*)&entry,4);
-	entry += MB_128;
+	//entry += MB_128;
 	
+	uint32_t user_ds = USER_DS; //store USER_DS in a variable
+	uint32_t user_cs = USER_CS; //store USER_CS in a variable
+	uint32_t iret_esp = PROGRAM_VIRTUAL_END; //store the IRET esp in a variable
 	
+	cli();
+	context_switch(user_ds, iret_esp, user_cs, entry);
 
 //NEED TO FIX THIS
 /*    asm volatile(
-        "pushl $USER_DS"
-        "pushl $MB_128+$PROGRAM_SIZE"
-        "pushfl"
-        "pushl $USER_CS"
-        "pushl %%eax"
+        "pushl $USER_DS"				//push USER_DS
+        "pushl $PROGRAM_VIRTUAL_END"	//push value of 132MB-1
+        "pushfl"						//push all flags
+        "pushl $USER_CS"				//push USER_CS
+        "pushl %%eax"					//push entry point
         "IRET" 
         : 
         : "a"(entry) 

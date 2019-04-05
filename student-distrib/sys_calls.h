@@ -13,7 +13,8 @@
 #define ELF_SIZE 				4
 #define PID_SHELL_0  			0
 #define PID_PROGRAM_0  			1
-#define PROGRAM_VIRTUAL_ADDRESS 0x800000
+#define PROGRAM_VIRTUAL_ADDRESS 0x08048000
+#define PROGRAM_VIRTUAL_END		0x83FFFFC
 
 typedef struct __attribute__((packed))  file_entry{
 

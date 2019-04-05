@@ -4,6 +4,7 @@
 
 #include "keyboard_asm.h"
 #include "rtc_asm.h"
+#include "sys_calls_asm.h"
 
 #define RTC_VAL 0x28
 #define KEYBOARD_VAL 0x21
@@ -60,7 +61,7 @@ void idt_init(){
 	//SET_IDT_ENTRY(idt[0x20], PIT_handler);		//PIC timer handler
 	SET_IDT_ENTRY(idt[KEYBOARD_VAL], keyboard_handler);	//keyboard handler
 	SET_IDT_ENTRY(idt[RTC_VAL], rtc_handler); 		//RTC handler
-	//SET_IDT_ENTRY(idt[0x80], syscall_handler);		//syscall handler
+	SET_IDT_ENTRY(idt[0x80], sys_call_handler);		//syscall handler
 }
 
 

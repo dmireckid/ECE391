@@ -115,15 +115,15 @@ void keyboard_handler_function() {
 		/* if the keycode received is Enter, add the character to the line buffer and call the command */
 		if ( keymap[(uint8_t)keycode] == '\n' ) {
 			type_to_buffer('\n');
-			buffer_command();
+			//buffer_command();
 
 			char string[LINE_BUFFER_SIZE];
 			int string_size = terminal_read(0,string,LINE_BUFFER_SIZE);
-			printf("Buffer content: ");
+			//printf("Buffer content: ");
 			terminal_write(0,string,string_size);
 
 			//clear_buffer();
-			//putc('\n');
+			putc('\n');
 			
 			/* Start taking user inputs */
     		printf("> ");

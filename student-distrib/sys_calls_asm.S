@@ -45,12 +45,30 @@ sys_call_invalid:
 /* 
  * context_switch
  *   Description: does a context switch after execute
- *        Inputs: 
+ *        Inputs: user_ds - value of USER_DS
+ *				  iret_esp - 132MB-1
+ *				  user_cs - value of USER_CS
+ *				  entry - entry point
  *        Output: None
  *        Return: None
  *  Side Effects: context is switched
  */
 context_switch:
+	# push USER_DS
+	pushl 4(%esp)
+	# push IRET ESP
+	pushl 12(%esp)
+	# push flags
+	pushfl # make IF to be 1
+	popl %eax
+	orl $0x200, %eax
+	pushl %eax
+	# push USER_CS
+	pushl 24(%esp)
+	# push entry point
+	pushl 32(%esp)
+	IRET
+	
 
 /* 
  * sys_call_halt

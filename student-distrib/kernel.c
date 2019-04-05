@@ -12,6 +12,7 @@
 #include "paging.h"
 #include "rtc.h"
 #include "filesys.h"
+#include "sys_calls.h"
 
 #define RUN_TESTS
 
@@ -164,10 +165,15 @@ void entry(unsigned long magic, unsigned long addr) {
      * without showing you any output */
     printf("Enabling Interrupts\n");
     sti();
+	
+	while(1) {
+		clear();
+		execute((unsigned char*)"shell");
+	}
 
 #ifdef RUN_TESTS
     /* Run tests */
-    launch_tests();
+    //launch_tests();
 #endif
     /* Execute the first program ("shell") ... */
 
