@@ -4,7 +4,14 @@
 
 .globl enable_paging
 
-# enable paging by properly setting the control register values
+/*
+ * enable_paging
+ *   DESCRIPTION: Enable paging in the OS by setting up the control register values
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: enables paging
+ */
 enable_paging:
 	# store the pointer of the page directory in CR3
 	pushl %ebp

@@ -10,4 +10,6 @@
 
 extern void sys_call_handler();
 
+extern void context_switch();
+
 #endif

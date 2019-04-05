@@ -5,21 +5,26 @@
 #define _SYS_CALLS_H
 #include "types.h"
 
-#define IN_USE_FLAG 33
-#define NOT_IN_USE_FLAG -44
+#define IN_USE_FLAG 			33
+#define NOT_IN_USE_FLAG 		-44
 
-typedef struct __attribute__ ((packed))  file_entry{
+#define MAX_PROCESSES 			6
+#define MAX_FILES 				8
+#define ELF_SIZE 				4
+#define PID_SHELL_0  			0
+#define PID_PROGRAM_0  			1
+#define PROGRAM_VIRTUAL_ADDRESS 0x800000
+
+typedef struct __attribute__((packed))  file_entry{
 
     uint32_t fops	: 32; //file operations table pointer	
     uint32_t inode	: 32; //inode
     uint32_t fp		: 32;//file position
     uint32_t flags	: 32; //flags
-		 
-    
+
 }file_entry_t;
 
-#define MAX_FILES 8
-typedef struct __attribute__ ((packed)) pcb{
+typedef struct __attribute__((packed)) pcb{
 
     file_entry_t fd_array[MAX_FILES] ;	
     uint32_t parent_pid;

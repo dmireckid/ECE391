@@ -2,6 +2,7 @@
  */
 
 #include "sys_calls.h"
+#include "sys_calls_asm.h"
 #include "rtc.h"
 #include "term_driver.h"
 #include "keyboard.h"
@@ -15,15 +16,10 @@ static uint32_t terminal_jumptable[4] = {(uint32_t)&terminal_open,(uint32_t)&ter
 static uint32_t directory_jumptable[4] = {(uint32_t)&open_d,(uint32_t)&read_d,(uint32_t)&write_d,(uint32_t)&close_d};
 static uint32_t file_jumptable[4] = {(uint32_t)&open_f,(uint32_t)&read_f,(uint32_t)&write_f,(uint32_t)&close_f};
 
-#define ELF_SIZE 4
 static int8_t elf_string[ELF_SIZE] = {0x7f,0x45,0x4c,0x4f};
 
-#define MAX_PROCESSES 6
 static uint32_t current_pid=-1;
 static pcb_t pcb_array[MAX_PROCESSES];
-#define pid_shell_0  0
-#define pid_program_0  1
-#define PROGRAM_VIRTUAL_ADDRESS 0x800000
 
 
 
@@ -95,9 +91,11 @@ int32_t execute (const uint8_t* command)
 	uint32_t entry;
 	read_data(test.inode_num,24,(uint8_t*)&entry,4);
 	entry += MB_128;
+	
+	
 
 //NEED TO FIX THIS
-    asm volatile(
+/*    asm volatile(
         "pushl $USER_DS"
         "pushl $MB_128+$PROGRAM_SIZE"
         "pushfl"
@@ -108,7 +106,7 @@ int32_t execute (const uint8_t* command)
         : "a"(entry) 
         : "memory"
 
-    );
+    );*/
     return 0;
 }
 

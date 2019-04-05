@@ -133,6 +133,8 @@ int paging_struct_test(){
 	/*	run through the entire page directory and page table to see that every other entry is set to 0 */
 	int i;
 	for (i = 0; i < NUM_ENTRIES; i++) {
+		if (i == PROGRAM_INDEX)
+			continue;
 		if (i > 1 && directory_entry_array[i].val != 0)
 			return FAIL;
 		if (i != VIDEO_ADDR/KB_4 && table_entry_array[i].val != 0)
