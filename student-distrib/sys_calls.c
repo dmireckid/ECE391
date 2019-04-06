@@ -11,18 +11,26 @@
 #include "lib.h"
 #include "paging.h"
 
-static uint32_t rtc_jumptable[4] = { (uint32_t)&rtc_open,(uint32_t)&rtc_read,(uint32_t)&rtc_write,(uint32_t)&rtc_close};
-static uint32_t terminal_jumptable[4] = {(uint32_t)&terminal_open,(uint32_t)&terminal_read,(uint32_t)&terminal_write,(uint32_t)&terminal_close};
-static uint32_t directory_jumptable[4] = {(uint32_t)&open_d,(uint32_t)&read_d,(uint32_t)&write_d,(uint32_t)&close_d};
-static uint32_t file_jumptable[4] = {(uint32_t)&open_f,(uint32_t)&read_f,(uint32_t)&write_f,(uint32_t)&close_f};
+static uint32_t rtc_jumptable[ELF_SIZE] = { (uint32_t)&rtc_open,(uint32_t)&rtc_read,(uint32_t)&rtc_write,(uint32_t)&rtc_close};
+static uint32_t terminal_jumptable[ELF_SIZE] = {(uint32_t)&terminal_open,(uint32_t)&terminal_read,(uint32_t)&terminal_write,(uint32_t)&terminal_close};
+static uint32_t directory_jumptable[ELF_SIZE] = {(uint32_t)&open_d,(uint32_t)&read_d,(uint32_t)&write_d,(uint32_t)&close_d};
+static uint32_t file_jumptable[ELF_SIZE] = {(uint32_t)&open_f,(uint32_t)&read_f,(uint32_t)&write_f,(uint32_t)&close_f};
 
-static int8_t elf_string[ELF_SIZE] = {0x7f,0x45,0x4c,0x46};
+static int8_t elf_string[ELF_SIZE] = {ELF_0,ELF_1,ELF_2,ELF_3};
 
 static uint32_t current_pid=0;
+//	index 0 will hold the data for kernel.c process, 1-6 will hold the base shell and command programs
 static pcb_t pcb_array[MAX_PROCESSES+1];
 
 
-
+/*
+ *	halt 
+ *
+ *	INPUTS: uint8_t status - the number corresponding to pid
+ *	OUTPUTS: none
+ *	RETURN VALUE: the execute call returns after halting the program
+ *	SIDE EFFECTS: program is removed from PCB array
+ */
 int32_t halt (uint8_t status){
     /*    asm volatile("movl %%eax,%%ebp" 
     : 
@@ -31,7 +39,7 @@ int32_t halt (uint8_t status){
 	
 	// clear out the fd_array associated with the program being halted
 	int i;
-	for (i = 2; i < MAX_FILES; i++) {
+	for (i = FILE_TYPE_2; i < MAX_FILES; i++) {
 		close(i);
 	}
 
@@ -69,6 +77,9 @@ int32_t halt (uint8_t status){
  */
 int32_t execute (const uint8_t* command)
 {
+	//check if the max number of processes are running
+	if (current_pid == MAX_PROCESSES) return -1;
+	
     dentry_t test;
     int8_t buf[ELF_SIZE];
     int32_t file_size;
@@ -76,7 +87,7 @@ int32_t execute (const uint8_t* command)
     //check if file exists
     if(read_dentry_by_name(command,&test)==-1) return -1;
 	//check if the filetype is a file
-    if(test.filetype !=2) return -1;
+    if(test.filetype != FILE_TYPE_2) return -1;
     //check if the first 4 bytes are ELF magic number
     file_size = read_data(test.inode_num,0,(uint8_t*) buf,ELF_SIZE);
     if(strncmp(buf,elf_string,ELF_SIZE)!=0) return -1;
@@ -113,7 +124,7 @@ int32_t execute (const uint8_t* command)
 
     //get entry point
 	uint32_t entry;
-	read_data(test.inode_num,24,(uint8_t*)&entry,4);
+	read_data(test.inode_num,INDEX_24,(uint8_t*)&entry,ELF_SIZE);
 	//entry += MB_128;
 	
 	uint32_t user_ds = USER_DS; //store USER_DS in a variable
@@ -123,7 +134,6 @@ int32_t execute (const uint8_t* command)
 	cli();
 	context_switch(user_ds, iret_esp, user_cs, entry);
 
-//NEED TO FIX THIS
 /*    asm volatile(
         "pushl $USER_DS"				//push USER_DS
         "pushl $PROGRAM_VIRTUAL_END"	//push value of 132MB-1
@@ -160,7 +170,7 @@ void init_STD(uint32_t pid)
     pcb_array[pid].fd_array[1].flags =IN_USE_FLAG;
 
 	int i;
-	for (i = 2; i < 8; i++) {
+	for (i = FILE_TYPE_2; i < MAX_FILES; i++) {
 		pcb_array[pid].fd_array[i].flags = NOT_IN_USE_FLAG;
 	}
 
@@ -180,7 +190,7 @@ void init_STD(uint32_t pid)
 int32_t read (int32_t fd, void* buf, int32_t nbytes)
 {
     //check if file descriptor is in bounds and if the flag is IN_USE
-    if(fd > 7 || fd < 0) return -1;
+    if(fd > MAX_FILES-1 || fd < 0) return -1;
 	if(pcb_array[current_pid].fd_array[fd].flags == NOT_IN_USE_FLAG) return -1;
  
     uint32_t* ptr = (uint32_t*)pcb_array[current_pid].fd_array[fd].fops; 
@@ -201,11 +211,11 @@ int32_t read (int32_t fd, void* buf, int32_t nbytes)
 int32_t write (int32_t fd, const void* buf, int32_t nbytes)
 {
     //check if file descriptor is in bounds and if the flag is IN_USE
-    if(fd > 7 || fd < 0) return -1;
+    if(fd > MAX_FILES-1 || fd < 0) return -1;
 	if(pcb_array[current_pid].fd_array[fd].flags == NOT_IN_USE_FLAG) return -1;
  
     uint32_t* ptr = (uint32_t*)pcb_array[current_pid].fd_array[fd].fops; 
-    int32_t (*fun_ptr)(int32_t, const void*, int32_t) = (void*)ptr[2];
+    int32_t (*fun_ptr)(int32_t, const void*, int32_t) = (void*)ptr[FILE_TYPE_2];
     return (*fun_ptr)(fd,buf,nbytes);
 }
 
@@ -224,10 +234,10 @@ int32_t open (const uint8_t* filename)
     //check if file exists
     if(read_dentry_by_name(filename,&test)==-1) return -1;
     //get a unused file discriptor
-    uint32_t unusedfd = 2;
-    for(unusedfd = 2;unusedfd<=8;unusedfd++)
+    uint32_t unusedfd = FILE_TYPE_2;
+    for(unusedfd = FILE_TYPE_2;unusedfd<=MAX_FILES;unusedfd++)
     {
-       if(unusedfd==8) return -1;
+       if(unusedfd==MAX_FILES) return -1;
        if(pcb_array[current_pid].fd_array[unusedfd].flags == NOT_IN_USE_FLAG)
             break;
     }
@@ -253,7 +263,7 @@ int32_t open (const uint8_t* filename)
             pcb_array[current_pid].fd_array[unusedfd].flags = IN_USE_FLAG;
             break;
         }
-        case 2://file
+        case FILE_TYPE_2://file
         {
 
 
@@ -279,7 +289,7 @@ int32_t open (const uint8_t* filename)
 
 int32_t close (int32_t fd)
 {
-	if(fd > 7 || fd < 2){
+	if(fd > MAX_FILES-1 || fd < FILE_TYPE_2){
 		return -1;
 	}
 	pcb_array[current_pid].fd_array[fd].flags = NOT_IN_USE_FLAG;

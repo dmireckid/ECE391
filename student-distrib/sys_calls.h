@@ -10,17 +10,24 @@
 
 #define MAX_PROCESSES 			6
 #define MAX_FILES 				8
+#define FILE_TYPE_2				2
 #define ELF_SIZE 				4
+#define ELF_0					0x7f
+#define ELF_1					0x45
+#define ELF_2					0x4c
+#define ELF_3					0x46
+#define INDEX_24				24
 #define PID_SHELL_0  			0
 #define PID_PROGRAM_0  			1
 #define PROGRAM_VIRTUAL_ADDRESS 0x08048000
 #define PROGRAM_VIRTUAL_END		0x83FFFFC
 
+
 typedef struct __attribute__((packed))  file_entry{
 
     uint32_t fops	: 32; //file operations table pointer	
     uint32_t inode	: 32; //inode
-    uint32_t fp		: 32;//file position
+    uint32_t fp		: 32; //file position
     uint32_t flags	: 32; //flags
 
 }file_entry_t;
@@ -35,11 +42,7 @@ typedef struct __attribute__((packed)) pcb{
 }pcb_t;
 
 
-
-
-
 void init_STD(uint32_t pid);
-
 
 int32_t halt(uint8_t status);
 int32_t execute(const uint8_t* command);
