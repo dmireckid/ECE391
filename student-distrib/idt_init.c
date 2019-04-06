@@ -60,10 +60,10 @@ void idt_init(){
 			SET_IDT_ENTRY(idt[i], functions[i]);		//set exception entries to their corresponding printing functions
 		}
 	}
-	//SET_IDT_ENTRY(idt[0x20], PIT_handler);		//PIC timer handler
+	//SET_IDT_ENTRY(idt[0x20], PIT_handler);			//PIC timer handler
 	SET_IDT_ENTRY(idt[KEYBOARD_VAL], keyboard_handler);	//keyboard handler
-	SET_IDT_ENTRY(idt[RTC_VAL], rtc_handler); 		//RTC handler
-	SET_IDT_ENTRY(idt[0x80], sys_call_handler);		//syscall handler
+	SET_IDT_ENTRY(idt[RTC_VAL], rtc_handler); 			//RTC handler
+	SET_IDT_ENTRY(idt[0x80], sys_call_handler);			//syscall handler
 }
 
 
@@ -81,105 +81,105 @@ void divide_error(){
 	cli();
 	clear();					//clear the screen
 	printf("Divide error\n");	//print error message
-	halt(1);					//call halt
+	halt(EX_STATUS);			//call halt
 }
 
 void debug(){
 	cli();
 	clear();					//clear the screen
 	printf("Debug error\n");	//print error message
-	halt(1);					//call halt
+	halt(EX_STATUS);			//call halt
 }
 
 void nmi(){
 	cli();
 	clear();					//clear the screen
 	printf("NMI interrupt\n");	//print error message
-	halt(1);					//call halt
+	halt(EX_STATUS);			//call halt
 }
 
 void breakpoint(){
 	cli();
 	clear();				//clear the screen
 	printf("Breakpoint\n");	//print error message
-	halt(1);				//call halt
+	halt(EX_STATUS);		//call halt
 }
 
 void overflow(){
 	cli();
 	clear();				//clear the screen
 	printf("Overflow\n");	//print error message
-	halt(1);				//call halt
+	halt(EX_STATUS);		//call halt
 }
 
 void bound_range(){
 	cli();
 	clear();							//clear the screen
 	printf("BOUND range exceeded\n");	//print error message
-	halt(1);							//call halt
+	halt(EX_STATUS);					//call halt
 }
 
 void invalid_op(){
 	cli();
 	clear();					//clear the screen
 	printf("Invalid opcode\n");	//print error message
-	halt(1);					//call halt
+	halt(EX_STATUS);			//call halt
 }
 
 void device_na(){
 	cli();
 	clear();							//clear the screen
 	printf("Device not available\n");	//print error message
-	halt(1);							//call halt
+	halt(EX_STATUS);					//call halt
 }
 
 void double_fault(){
 	cli();
 	clear();					//clear the screen
 	printf("Double fault\n");	//print error message
-	halt(1);					//call halt
+	halt(EX_STATUS);			//call halt
 }
 
 void seg_overrun(){
 	cli();
 	clear();									//clear the screen
 	printf("Coprocessor segment overrun\n");	//print error message
-	halt(1);									//call halt
+	halt(EX_STATUS);							//call halt
 }
 
 void invalid_tss(){
 	cli();
 	clear();					//clear the screen
 	printf("Invalid TSS\n");	//print error message
-	halt(1);					//call halt
+	halt(EX_STATUS);			//call halt
 }
 
 void seg_np(){
 	cli();
 	clear();							//clear the screen
 	printf("Segment not present\n");	//print error message
-	halt(1);							//call halt
+	halt(EX_STATUS);					//call halt
 }
 
 void seg_fault(){
 	cli();
 	clear();							//clear the screen
 	printf("Stack-segment fault\n");	//print error message
-	halt(1);							//call halt
+	halt(EX_STATUS);					//call halt
 }
 
 void gen_prot(){
 	cli();
 	clear();						//clear the screen
 	printf("General protection\n");	//print error message
-	halt(1);						//call halt
+	halt(EX_STATUS);				//call halt
 }
 
 void page_fault(){
 	cli();
 	clear();				//clear the screen
 	printf("Page fault\n");	//print error message
-	halt(1);				//call halt
+	halt(EX_STATUS);		//call halt
 }
 
 void blank(){
@@ -189,28 +189,28 @@ void fpe(){
 	cli();
 	clear();									//clear the screen
 	printf("x87 FPU floating-point error\n");	//print error message
-	halt(1);									//call halt
+	halt(EX_STATUS);							//call halt
 }
 
 void align(){
 	cli();
 	clear();						//clear the screen
 	printf("Alignment check\n");	//print error message
-	halt(1);						//call halt
+	halt(EX_STATUS);				//call halt
 }
 
 void machine(){
 	cli();
 	clear();					//clear the screen
 	printf("Machine check\n");	//print error message
-	halt(1);					//call halt
+	halt(EX_STATUS);			//call halt
 }
 
 void simd(){
 	cli();
 	clear();									//clear the screen
 	printf("SIMD floating-point exception\n");	//print error message
-	halt(1);									//call halt
+	halt(EX_STATUS);							//call halt
 }
 
 void general(){

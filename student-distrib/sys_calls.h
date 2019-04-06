@@ -24,7 +24,9 @@
 #define PROGRAM_VIRTUAL_ADDRESS 0x08048000
 #define PROGRAM_VIRTUAL_END		0x83FFFFC
 
+#define	EX_STATUS				8
 #define EXCEPTION				256
+#define ABNORMAL				125
 
 
 typedef struct __attribute__((packed))  file_entry{
