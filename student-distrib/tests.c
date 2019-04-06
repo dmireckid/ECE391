@@ -429,7 +429,7 @@ int filesys_test_directory(){
 			buf[j] = '\0';
 		}
 
-	while(read_d(i++, FILENAME_LEN, buf) != 0){		//print out the whole directory contents
+	while(read_d(i++, buf, FILENAME_LEN) != 0){		//print out the whole directory contents
 		for(j=0; j<FILENAME_LEN; j++){
 			putc(buf[j]);
 			buf[j] = '\0';

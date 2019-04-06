@@ -207,12 +207,12 @@ int32_t read_f(int32_t fd, uint32_t offset, void* buf,uint32_t length){
  *   RETURN VALUE: length of buffer, -1 for failure
  *   SIDE EFFECTS: fills buffer with contents of directory
  */
-int32_t read_d(int32_t fd, int32_t count, uint8_t* buf){
+int32_t read_d(int32_t fd, uint8_t* buf, int32_t count){
 	if(num_reads > num_direntries-1){
 		num_reads = 0;
 		return 0;
 	}
-	strcpy((int8_t*)buf, (const int8_t*)super_block->direntries[num_reads].filename);
+	strncpy((int8_t*)buf, (const int8_t*)super_block->direntries[num_reads].filename, FILENAME_LEN);
 	num_reads++;
 	return strlen((int8_t*)buf);
 }

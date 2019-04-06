@@ -198,7 +198,7 @@ int32_t read (int32_t fd, void* buf, int32_t nbytes)
  
 	//jump to the corresponding read function
     uint32_t* ptr = (uint32_t*)pcb_array[current_pid].fd_array[fd].fops; 
-    int32_t (*fun_ptr)(int32_t, const void*, int32_t) = (void*)ptr[1];
+    int32_t (*fun_ptr)(int32_t, void*, int32_t) = (void*)ptr[1];
     return (*fun_ptr)(fd,buf,nbytes);
 }
 
