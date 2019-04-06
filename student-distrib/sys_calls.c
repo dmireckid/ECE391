@@ -83,7 +83,7 @@ int32_t halt (uint8_t status){
 int32_t execute (const uint8_t* command)
 {
 	//check if the max number of processes are running
-	if (current_pid == MAX_PROCESSES) return 3;
+	if (current_pid == MAX_PROCESSES) return AB_STATUS;
 
     dentry_t test;
     int8_t buf[ELF_SIZE];
@@ -92,10 +92,10 @@ int32_t execute (const uint8_t* command)
     //check if file exists
     if(read_dentry_by_name(command,&test)==-1) return -1;
 	//check if the filetype is a file
-    if(test.filetype != FILE_TYPE_2) return 3;
+    if(test.filetype != FILE_TYPE_2) return AB_STATUS;
     //check if the first 4 bytes are ELF magic number
     file_size = read_data(test.inode_num,0,(uint8_t*) buf,ELF_SIZE);
-    if(strncmp(buf,elf_string,ELF_SIZE)!=0) return 3;
+    if(strncmp(buf,elf_string,ELF_SIZE)!=0) return AB_STATUS;
 
     //assign pid and memory for the process
     current_pid++;

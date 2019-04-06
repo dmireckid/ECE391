@@ -27,6 +27,7 @@
 #define	EX_STATUS				8
 #define EXCEPTION				256
 #define ABNORMAL				125
+#define AB_STATUS				3
 
 
 typedef struct __attribute__((packed))  file_entry{
