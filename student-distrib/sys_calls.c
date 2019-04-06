@@ -52,6 +52,13 @@ int32_t halt (uint8_t status){
 	// restore paging
 	remap_page(current_pid);
 
+	// set the return value for execute
+	uint32_t ret_val;
+	if (status == 0)
+		ret_val = 0;
+	else
+		ret_val = 256;
+
 	//move parent esp and ebp values back into esp/ebp registers
     asm volatile(
 		"movl %0, %%eax;"
@@ -59,7 +66,7 @@ int32_t halt (uint8_t status){
 		"movl %2, %%ebp;"
 		"jmp after_iret"
         : 
-        : "r"(0),"r"(pcb_array[current_pid+1].parent_kernel_esp), "r"(pcb_array[current_pid+1].parent_kernel_ebp)
+        : "r"(ret_val),"r"(pcb_array[current_pid+1].parent_kernel_esp), "r"(pcb_array[current_pid+1].parent_kernel_ebp)
         : "memory");
 	return 0;
 }

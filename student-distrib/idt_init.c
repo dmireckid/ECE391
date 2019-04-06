@@ -5,6 +5,8 @@
 #include "keyboard_asm.h"
 #include "rtc_asm.h"
 #include "sys_calls_asm.h"
+#include "sys_calls.h"
+#include "types.h"
 
 #define RTC_VAL 0x28
 #define KEYBOARD_VAL 0x21
@@ -68,7 +70,7 @@ void idt_init(){
 /*
  * exceptions
  *   DESCRIPTION: Exception handlers to print error message and
- *					enter infinite loop to prevent any more actions.
+ *					call halt to end program.
  *   INPUTS: NONE
  *   OUTPUTS: NONE
  *   RETURN VALUE: NONE
@@ -77,107 +79,107 @@ void idt_init(){
  */
 void divide_error(){
 	cli();
-	clear();				//clear the screen
-	printf("Divide error");	//print error message
-	while(1);				//infinite loop
+	clear();					//clear the screen
+	printf("Divide error\n");	//print error message
+	halt(1);					//call halt
 }
 
 void debug(){
 	cli();
 	clear();					//clear the screen
-	printf("Debug error");      //print error message
-	while(1);                   //infinite loop
+	printf("Debug error\n");	//print error message
+	halt(1);					//call halt
 }
 
 void nmi(){
 	cli();
-	clear();						//clear the screen
-	printf("NMI interrupt");        //print error message
-	while(1);                       //infinite loop
+	clear();					//clear the screen
+	printf("NMI interrupt\n");	//print error message
+	halt(1);					//call halt
 }
 
 void breakpoint(){
 	cli();
-	clear();						//clear the screen
-	printf("Breakpoint");           //print error message
-	while(1);                       //infinite loop
+	clear();				//clear the screen
+	printf("Breakpoint\n");	//print error message
+	halt(1);				//call halt
 }
 
 void overflow(){
 	cli();
 	clear();				//clear the screen
-	printf("Overflow");     //print error message
-	while(1);               //infinite loop
+	printf("Overflow\n");	//print error message
+	halt(1);				//call halt
 }
 
 void bound_range(){
 	cli();
 	clear();							//clear the screen
-	printf("BOUND range exceeded");     //print error message
-	while(1);                           //infinite loop
+	printf("BOUND range exceeded\n");	//print error message
+	halt(1);							//call halt
 }
 
 void invalid_op(){
 	cli();
 	clear();					//clear the screen
-	printf("Invalid opcode");   //print error message
-	while(1);                   //infinite loop
+	printf("Invalid opcode\n");	//print error message
+	halt(1);					//call halt
 }
 
 void device_na(){
 	cli();
 	clear();							//clear the screen
-	printf("Device not available");     //print error message
-	while(1);                           //infinite loop
+	printf("Device not available\n");	//print error message
+	halt(1);							//call halt
 }
 
 void double_fault(){
 	cli();
 	clear();					//clear the screen
-	printf("Double fault");     //print error message
-	while(1);                   //infinite loop
+	printf("Double fault\n");	//print error message
+	halt(1);					//call halt
 }
 
 void seg_overrun(){
 	cli();
 	clear();									//clear the screen
-	printf("Coprocessor segment overrun");      //print error message
-	while(1);                                   //infinite loop
+	printf("Coprocessor segment overrun\n");	//print error message
+	halt(1);									//call halt
 }
 
 void invalid_tss(){
 	cli();
 	clear();					//clear the screen
-	printf("Invalid TSS");      //print error message
-	while(1);                   //infinite loop
+	printf("Invalid TSS\n");	//print error message
+	halt(1);					//call halt
 }
 
 void seg_np(){
 	cli();
 	clear();							//clear the screen
-	printf("Segment not present");      //print error message
-	while(1);                           //infinite loop
+	printf("Segment not present\n");	//print error message
+	halt(1);							//call halt
 }
 
 void seg_fault(){
 	cli();
-	clear();						//clear the screen
-	printf("Stack-segment fault");  //print error message
-	while(1);                       //infinite loop
+	clear();							//clear the screen
+	printf("Stack-segment fault\n");	//print error message
+	halt(1);							//call halt
 }
 
 void gen_prot(){
 	cli();
-	clear();							//clear the screen
-	printf("General protection");       //print error message
-	while(1);                           //infinite loop
+	clear();						//clear the screen
+	printf("General protection\n");	//print error message
+	halt(1);						//call halt
 }
 
 void page_fault(){
 	cli();
-	clear();					//clear the screen
-	printf("Page fault");       //print error message
-	while(1);                   //infinite loop
+	clear();				//clear the screen
+	printf("Page fault\n");	//print error message
+	halt(1);				//call halt
 }
 
 void blank(){
@@ -186,29 +188,29 @@ void blank(){
 void fpe(){
 	cli();
 	clear();									//clear the screen
-	printf("x87 FPU floating-point error");     //print error message
-	while(1);                                   //infinite loop
+	printf("x87 FPU floating-point error\n");	//print error message
+	halt(1);									//call halt
 }
 
 void align(){
 	cli();
-	clear();					//clear the screen
-	printf("Alignment check");  //print error message
-	while(1);                   //infinite loop
+	clear();						//clear the screen
+	printf("Alignment check\n");	//print error message
+	halt(1);						//call halt
 }
 
 void machine(){
 	cli();
 	clear();					//clear the screen
-	printf("Machine check");    //print error message
-	while(1);                   //infinite loop
+	printf("Machine check\n");	//print error message
+	halt(1);					//call halt
 }
 
 void simd(){
 	cli();
 	clear();									//clear the screen
-	printf("SIMD floating-point exception");    //print error message
-	while(1);                                   //infinite loop
+	printf("SIMD floating-point exception\n");	//print error message
+	halt(1);									//call halt
 }
 
 void general(){
