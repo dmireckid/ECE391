@@ -6,7 +6,7 @@
 #include "types.h"
 
 #define IN_USE_FLAG 			33
-#define NOT_IN_USE_FLAG 		-44
+#define NOT_IN_USE_FLAG 		44
 
 #define MAX_PROCESSES 			6
 #define MAX_FILES 				8

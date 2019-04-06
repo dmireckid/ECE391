@@ -62,8 +62,8 @@ int32_t execute (const uint8_t* command)
     //assign pid and memory for the process
     current_pid++;
     remap_page(current_pid);
-	uint8_t* te = (uint8_t*)0x08048000;
-	uint32_t blah = *te;
+	//uint8_t* te = (uint8_t*)0x08048000;
+	//uint32_t blah = *te;
 
     //copy program into memory
     read_data(test.inode_num,0,(uint8_t*)PROGRAM_VIRTUAL_ADDRESS,PROGRAM_SIZE);
@@ -139,7 +139,7 @@ void init_STD(uint32_t pid)
 
 	int i;
 	for (i = 2; i < 8; i++) {
-		pcb_array[pid].fd_array[1].flags = NOT_IN_USE_FLAG;
+		pcb_array[pid].fd_array[i].flags = NOT_IN_USE_FLAG;
 	}
 
 

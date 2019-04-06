@@ -111,7 +111,9 @@ sys_call_read:
     pushl %edx
     pushl %ecx
 	pushl %ebx
+	sti
     call read
+	cli
     popl %ebx
     popl %ecx
     popl %edx
@@ -130,7 +132,9 @@ sys_call_write:
     pushl %edx
     pushl %ecx
 	pushl %ebx
+	sti
     call write
+	cli
     popl %ebx
     popl %ecx
     popl %edx

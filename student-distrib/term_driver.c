@@ -105,9 +105,10 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes)
 	* Function: copy n bytes of the source string into the destination string */
 	
 	while(line_buffer[buffer_count-1]!='\n');
-	strncpy((int8_t*) buf, line_buffer, buffer_count);
+		uint32_t count = buffer_count;
+		strncpy((int8_t*) buf, line_buffer, buffer_count);
 	clear_buffer();
-	return buffer_count;
+	return count;
 
 
 }
@@ -135,9 +136,10 @@ int32_t keyboard_read(int32_t fd, void* buf, int32_t nbytes)
 	* Return Value: pointer to dest
 	* Function: copy n bytes of the source string into the destination string */
 	
-	while(line_buffer[buffer_count-1]!='\n');
-	strncpy((int8_t*) buf, line_buffer, buffer_count);
-	clear_buffer();
+	while(line_buffer[buffer_count-1]!='\n') {
+		strncpy((int8_t*) buf, line_buffer, buffer_count);
+	}
+	//clear_buffer();
 
 	return buffer_count;
 
@@ -162,7 +164,7 @@ int32_t keyboard_read(int32_t fd, void* buf, int32_t nbytes)
 int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes)
 {
 	if(buf==NULL || nbytes<1 || nbytes>terminal_string_size) return -1;
-	clear_buffer();
+	//clear_buffer();
 	int i;
 
 	char* string = (char *) buf;
