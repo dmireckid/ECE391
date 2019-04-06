@@ -213,7 +213,14 @@ int32_t read_d(int32_t fp, uint8_t* buf, int32_t count){
 		return 0;
 	}
 	strncpy((int8_t*)buf, (const int8_t*)super_block->direntries[fp].filename, FILENAME_LEN);
-	return strlen((int8_t*)buf);
+	
+	int len = 1;
+    while (buf[len-1] != '\0' && buf[len-1] != '\n')
+	{
+		if(len==32)break;
+        len++;
+	}
+	return len;
 }
 
 /*
