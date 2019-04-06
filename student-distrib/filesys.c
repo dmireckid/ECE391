@@ -1,6 +1,7 @@
 #include "filesys.h"
 #include "types.h"
 #include "lib.h"
+#include "sys_calls.h"
 
 static uint32_t location_fs, location_i, location_d;
 static uint32_t num_direntries, num_inodes, num_datablocks, num_reads;
@@ -207,13 +208,11 @@ int32_t read_f(int32_t fd, uint32_t offset, void* buf,uint32_t length){
  *   RETURN VALUE: length of buffer, -1 for failure
  *   SIDE EFFECTS: fills buffer with contents of directory
  */
-int32_t read_d(int32_t fd, uint8_t* buf, int32_t count){
-	if(num_reads > num_direntries-1){
-		num_reads = 0;
+int32_t read_d(int32_t fp, uint8_t* buf, int32_t count){
+	if(fp > num_direntries-1){
 		return 0;
 	}
-	strncpy((int8_t*)buf, (const int8_t*)super_block->direntries[num_reads].filename, FILENAME_LEN);
-	num_reads++;
+	strncpy((int8_t*)buf, (const int8_t*)super_block->direntries[fp].filename, FILENAME_LEN);
 	return strlen((int8_t*)buf);
 }
 

@@ -199,7 +199,12 @@ int32_t read (int32_t fd, void* buf, int32_t nbytes)
 	//jump to the corresponding read function
     uint32_t* ptr = (uint32_t*)pcb_array[current_pid].fd_array[fd].fops; 
     int32_t (*fun_ptr)(int32_t, void*, int32_t) = (void*)ptr[1];
-    return (*fun_ptr)(fd,buf,nbytes);
+    uint32_t retval = (*fun_ptr)(pcb_array[current_pid].fd_array[fd].fp,buf,nbytes);
+	if (retval == 0)
+		pcb_array[current_pid].fd_array[fd].fp = 0;
+	else
+		pcb_array[current_pid].fd_array[fd].fp++;
+	return retval;
 }
 
 /*
