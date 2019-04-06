@@ -11,16 +11,20 @@
 #define MAX_PROCESSES 			6
 #define MAX_FILES 				8
 #define FILE_TYPE_2				2
+
 #define ELF_SIZE 				4
 #define ELF_0					0x7f
 #define ELF_1					0x45
 #define ELF_2					0x4c
 #define ELF_3					0x46
+
 #define INDEX_24				24
 #define PID_SHELL_0  			0
 #define PID_PROGRAM_0  			1
 #define PROGRAM_VIRTUAL_ADDRESS 0x08048000
 #define PROGRAM_VIRTUAL_END		0x83FFFFC
+
+#define EXCEPTION				256
 
 
 typedef struct __attribute__((packed))  file_entry{

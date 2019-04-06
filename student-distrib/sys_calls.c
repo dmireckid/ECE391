@@ -26,17 +26,13 @@ static pcb_t pcb_array[MAX_PROCESSES+1];
 /*
  *	halt 
  *
- *	INPUTS: uint8_t status - the number corresponding to pid
+ *	INPUTS: uint8_t status - the number corresponding to how halt was called
  *	OUTPUTS: none
- *	RETURN VALUE: the execute call returns after halting the program
+ *	RETURN VALUE: technically returns for execute
  *	SIDE EFFECTS: program is removed from PCB array
  */
 int32_t halt (uint8_t status){
-    /*    asm volatile("movl %%eax,%%ebp" 
-    : 
-    :"a"(pcb_array[current_pid].parent_kernel_ebp)
-    : "memory");*/
-	
+
 	// clear out the fd_array associated with the program being halted
 	int i;
 	for (i = FILE_TYPE_2; i < MAX_FILES; i++) {
@@ -57,9 +53,9 @@ int32_t halt (uint8_t status){
 	if (status == 0)
 		ret_val = 0;
 	else
-		ret_val = 256;
+		ret_val = EXCEPTION;
 
-	//move parent esp and ebp values back into esp/ebp registers
+	// move parent esp and ebp values back into esp/ebp registers
     asm volatile(
 		"movl %0, %%eax;"
 		"movl %1,%%esp;"
@@ -122,9 +118,6 @@ int32_t execute (const uint8_t* command)
     :
     : "memory");
 
-
-    
-
 	//set tss values
     tss.esp0 = MB_8 - current_pid*KB_8;
 	tss.ss0 = KERNEL_DS;
@@ -166,22 +159,23 @@ int32_t execute (const uint8_t* command)
  */
 void init_STD(uint32_t pid)
 {
+	// set stdin
     pcb_array[pid].fd_array[0].fops = (uint32_t)terminal_jumptable;
     pcb_array[pid].fd_array[0].inode =0;
     pcb_array[pid].fd_array[0].fp =0;
     pcb_array[pid].fd_array[0].flags =IN_USE_FLAG;
 
+	// set stdout
     pcb_array[pid].fd_array[1].fops = (uint32_t)terminal_jumptable;
     pcb_array[pid].fd_array[1].inode =0;
     pcb_array[pid].fd_array[1].fp =0;
     pcb_array[pid].fd_array[1].flags =IN_USE_FLAG;
 
+	// set all other file descriptors as not in use
 	int i;
 	for (i = FILE_TYPE_2; i < MAX_FILES; i++) {
 		pcb_array[pid].fd_array[i].flags = NOT_IN_USE_FLAG;
 	}
-
-
 }
 
 /*
@@ -191,7 +185,7 @@ void init_STD(uint32_t pid)
  * 			void* buf - buffer
  *			int32_t nbytes - file size (in bytes)
  *	OUTPUTS: none
- *	RETURN VALUE: number of bytes written, or -1 on failure
+ *	RETURN VALUE: number of bytes read, or -1 on failure
  *	SIDE EFFECTS: runs the read command based on the file type
  */
 int32_t read (int32_t fd, void* buf, int32_t nbytes)
@@ -200,6 +194,7 @@ int32_t read (int32_t fd, void* buf, int32_t nbytes)
     if(fd > MAX_FILES-1 || fd < 0) return -1;
 	if(pcb_array[current_pid].fd_array[fd].flags == NOT_IN_USE_FLAG) return -1;
  
+	//jump to the corresponding read function
     uint32_t* ptr = (uint32_t*)pcb_array[current_pid].fd_array[fd].fops; 
     int32_t (*fun_ptr)(int32_t, const void*, int32_t) = (void*)ptr[1];
     return (*fun_ptr)(fd,buf,nbytes);
@@ -221,6 +216,7 @@ int32_t write (int32_t fd, const void* buf, int32_t nbytes)
     if(fd > MAX_FILES-1 || fd < 0) return -1;
 	if(pcb_array[current_pid].fd_array[fd].flags == NOT_IN_USE_FLAG) return -1;
  
+	//jump to the corresponding write function
     uint32_t* ptr = (uint32_t*)pcb_array[current_pid].fd_array[fd].fops; 
     int32_t (*fun_ptr)(int32_t, const void*, int32_t) = (void*)ptr[FILE_TYPE_2];
     return (*fun_ptr)(fd,buf,nbytes);
@@ -232,7 +228,7 @@ int32_t write (int32_t fd, const void* buf, int32_t nbytes)
  *	INPUTS: const uint8_t* filename - pointer to file name
  *	OUTPUTS: none
  *	RETURN VALUE: file descriptor value
- * If the named file does not exist or no descriptors are free, the call returns -1.
+ *				  If the named file does not exist or no descriptors are free, the call returns -1.
  *	SIDE EFFECTS: runs the open command based on the file type
  */
 int32_t open (const uint8_t* filename)
@@ -240,15 +236,16 @@ int32_t open (const uint8_t* filename)
     dentry_t test;
     //check if file exists
     if(read_dentry_by_name(filename,&test)==-1) return -1;
-    //get a unused file discriptor
+    //get an unused file descriptor
     uint32_t unusedfd = FILE_TYPE_2;
-    for(unusedfd = FILE_TYPE_2;unusedfd<=MAX_FILES;unusedfd++)
+    for(unusedfd = FILE_TYPE_2; unusedfd<=MAX_FILES; unusedfd++)
     {
-       if(unusedfd==MAX_FILES) return -1;
+       if(unusedfd==MAX_FILES) return -1;	//if all file descriptors are in use, return -1
        if(pcb_array[current_pid].fd_array[unusedfd].flags == NOT_IN_USE_FLAG)
             break;
     }
 
+	//set the file descriptor values based on file type
     switch(test.filetype)
     {
         case 0://rtc
@@ -286,16 +283,25 @@ int32_t open (const uint8_t* filename)
 
     }
  
+	//jump to the corresponding open function
     uint32_t* ptr = (uint32_t*)pcb_array[current_pid].fd_array[unusedfd].fops; 
     int32_t (*fun_ptr)(const uint8_t*) = (void*)ptr[0];
     (*fun_ptr)(filename);
 
-    
     return unusedfd;
 }
 
+/*
+ *	close
+ *
+ *	INPUTS: int32_t fd - file descriptor value
+ *	OUTPUTS: none
+ *	RETURN VALUE: 0 if the close was successful, -1 if fd is out of bounds
+ *	SIDE EFFECTS: makes the certain file descriptor flagged as not in use
+ */
 int32_t close (int32_t fd)
 {
+	// check if fd is within range and set it to not in use, return -1 if fd is out of bounds
 	if(fd > MAX_FILES-1 || fd < FILE_TYPE_2){
 		return -1;
 	}
@@ -303,21 +309,55 @@ int32_t close (int32_t fd)
     return 0;
 }
 
+/*
+ *	getargs
+ *
+ *	INPUTS: uint8_t* buf -
+ *			int32_t nbytes -
+ *	OUTPUTS: none
+ *	RETURN VALUE: 0
+ *	SIDE EFFECTS:
+ */
 int32_t getargs (uint8_t* buf, int32_t nbytes)
 {
     return 0;
 }
 
+/*
+ *	vidmap
+ *
+ *	INPUTS: uint8_t** screen_start -
+ *	OUTPUTS: none
+ *	RETURN VALUE: 0
+ *	SIDE EFFECTS:
+ */
 int32_t vidmap (uint8_t** screen_start)
 {
     return 0;
 }
 
+/*
+ *	getargs
+ *
+ *	INPUTS: int32_t signum -
+ *			void* handler_address -
+ *	OUTPUTS: none
+ *	RETURN VALUE: 0
+ *	SIDE EFFECTS:
+ */
 int32_t set_handler (int32_t signum, void* handler_address)
 {
     return 0;
 }
 
+/*
+ *	sigreturn
+ *
+ *	INPUTS: none
+ *	OUTPUTS: none
+ *	RETURN VALUE: 0
+ *	SIDE EFFECTS:
+ */
 int32_t sigreturn (void)
 {
     return 0;
