@@ -1,17 +1,21 @@
 # sys_calls_asm.S - Assembly linkage for system calls
 
 .data
-    SYS_CALL_NUM_MIN = 1
-    SYS_CALL_NUM_MAX = 10
+    SYS_CALL_NUM_MIN =	1
+    SYS_CALL_NUM_MAX =	10
+	POP_12			 =	12
+	ABNORMAL		 =	3
+	GET_USER_DS		 =	4
+	GET_IRET_ESP	 =	12
+	IF_MASK			 =	0x200
+	GET_USER_CS		 =	24
+	GET_ENTRY_POINT	 =	32
 
 .text
 
 .globl sys_call_handler
 .globl context_switch, after_iret
 
-
-entry_point:
-    .long 0
 
 /* 
  * sys_call_handler
@@ -22,6 +26,7 @@ entry_point:
  *  Side Effects: 
  */
 sys_call_handler:
+	# check to see that the sys_call number is in bounds
     cmpl $SYS_CALL_NUM_MIN,%eax
     jb sys_call_invalid
 
@@ -47,7 +52,7 @@ sys_call_handler:
 	# disable interrupts
 	cli
 	# pop the arguments
-	addl $12, %esp
+	addl $POP_12, %esp
 	# pop the registers
 	popl %ebx
 	popl %ecx
@@ -60,14 +65,14 @@ sys_call_handler:
 
 /* 
  * sys_call_invalid
- *   Description: returns -1 due to invalid
+ *   Description: returns 3 due to an invalid sys_call number
  *        Inputs: None
  *        Output: None
  *        Return: None
  *  Side Effects: 
  */
 sys_call_invalid:
-    movl $-1,%eax
+    movl $ABNORMAL,%eax
     IRET
 
 /* 
@@ -98,9 +103,18 @@ context_switch:
 	pushl 32(%esp)
 	IRET
 
+/* 
+ * after_iret
+ *   Description: returns execute through halt
+ *        Inputs: None
+ *        Output: None
+ *        Return: None
+ *  Side Effects: returns execute
+ */
 after_iret:
 	leave
 	ret
 
+# jump table for system call C functions
 jump_table:
     .long 0, halt, execute, read, write, open, close, getargs, vidmap, set_handler, sigreturn
