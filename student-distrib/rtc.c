@@ -90,35 +90,36 @@ void rtc_interrupt(void){
 
 /*
  *	rtc_open
- *  DESCRIPTION:assigns a file descriptor based on a filename whose filetype is 0 (Appendix B) 
+ *  DESCRIPTION:sets rtc clock to 2Hz
  *	INPUTS:the name of a file , represented as a array of bytes, with max size of 32 (addresses in filesys.c)
  *	OUTPUTS: none
- *	RETURN VALUE:file descriptor 
+ *	RETURN VALUE: 0 for success
  *  If the named file does not exist or no descriptors are free, the call returns -1
  *	SIDE EFFECTS: none
  */
 int32_t rtc_open(const uint8_t* filename){
 	 
-
-	//functionality to be addressed for the System Calls and Schedulers CPs 
+	//set oscillator frequency
+	outb( RTC_REGISTER_A, RTC_MAR);
+	uint8_t reg_a = (uint8_t)inb(RTC_MDR);
+	reg_a |= A_2_Hz;//set bottom 4 bits
+	outb( RTC_REGISTER_A, RTC_MAR);
+	outb( reg_a,RTC_MDR);
 	interrupt_occurred = 0;
-	return -1;
+	return 0;
 
  }
  
 /*
  *	rtc_close()
- *  DESCRIPTION:closes the specified file descriptor
- *	INPUTS:a integer that is the file descriptor
+ *  DESCRIPTION: nothing for now
+ *	INPUTS: file descriptor
  *	OUTPUTS: none
- *	RETURN VALUE:Trying to close an invalid descriptor should result in a return value of -1; successful closes should return 0.
+ *	RETURN VALUE:0 for success
  *	SIDE EFFECTS: none
  */
  int32_t rtc_close(int32_t fd){
-
-	//functionality to be addressed for the System Calls and Schedulers CPs
-	//based on the file descriptor, global interrupt_rate array will be modified
-	return -1;
+	return 0;
 }
 
 /*
@@ -207,12 +208,12 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes){
  *	the file descriptor has occurred 
  *
  *	INPUTS:
- *  int32_t fd - a file descriptor that was assigned in rtc_open
+ *  int32_t fd - a file descriptor (used in sys_calls.c)
  *  const void* buf -not used, but required for system call syntax
  *  int32_t nbytes - not used, but required for system call syntax
  *	OUTPUTS: none
- *	RETURN VALUE:the number of bytes written, or -1 on failure
- *	SIDE EFFECTS: RTC may run faster 
+ *	RETURN VALUE:the number of bytes written (0 for success), or -1 on failure
+ *	SIDE EFFECTS: stalls a program
  */
 int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes)
 {
