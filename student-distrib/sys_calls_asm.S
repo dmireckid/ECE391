@@ -88,19 +88,19 @@ sys_call_invalid:
  */
 context_switch:
 	# push USER_DS
-	pushl 4(%esp)
+	pushl GET_USER_DS(%esp)
 	# push IRET ESP
-	pushl 12(%esp)
+	pushl GET_IRET_ESP(%esp)
 	# push flags
 	pushfl
 	# make IF to be 1
 	popl %eax
-	orl $0x200, %eax
+	orl $IF_MASK, %eax
 	pushl %eax
 	# push USER_CS
-	pushl 24(%esp)
+	pushl GET_USER_CS(%esp)
 	# push entry point
-	pushl 32(%esp)
+	pushl GET_ENTRY_POINT(%esp)
 	IRET
 
 /* 
