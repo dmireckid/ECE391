@@ -82,8 +82,6 @@ int32_t halt (uint8_t status){
  */
 int32_t execute (const uint8_t* command)
 {
-	//check if the max number of processes are running
-	if (current_pid == MAX_PROCESSES) return AB_STATUS;
 
     dentry_t test;
     int8_t buf[ELF_SIZE];
@@ -91,6 +89,8 @@ int32_t execute (const uint8_t* command)
     
     //check if file exists
     if(read_dentry_by_name(command,&test)==-1) return -1;
+	//check if the max number of processes are running
+	if (current_pid == MAX_PROCESSES) return AB_STATUS;
 	//check if the filetype is a file
     if(test.filetype != FILE_TYPE_2) return AB_STATUS;
     //check if the first 4 bytes are ELF magic number
@@ -317,12 +317,12 @@ int32_t close (int32_t fd)
  *	INPUTS: uint8_t* buf -
  *			int32_t nbytes -
  *	OUTPUTS: none
- *	RETURN VALUE: 0
+ *	RETURN VALUE:
  *	SIDE EFFECTS:
  */
 int32_t getargs (uint8_t* buf, int32_t nbytes)
 {
-    return 0;
+    return -1;
 }
 
 /*
@@ -330,12 +330,12 @@ int32_t getargs (uint8_t* buf, int32_t nbytes)
  *
  *	INPUTS: uint8_t** screen_start -
  *	OUTPUTS: none
- *	RETURN VALUE: 0
+ *	RETURN VALUE:
  *	SIDE EFFECTS:
  */
 int32_t vidmap (uint8_t** screen_start)
 {
-    return 0;
+    return -1;
 }
 
 /*
@@ -344,12 +344,12 @@ int32_t vidmap (uint8_t** screen_start)
  *	INPUTS: int32_t signum -
  *			void* handler_address -
  *	OUTPUTS: none
- *	RETURN VALUE: 0
+ *	RETURN VALUE:
  *	SIDE EFFECTS:
  */
 int32_t set_handler (int32_t signum, void* handler_address)
 {
-    return 0;
+    return -1;
 }
 
 /*
@@ -357,10 +357,10 @@ int32_t set_handler (int32_t signum, void* handler_address)
  *
  *	INPUTS: none
  *	OUTPUTS: none
- *	RETURN VALUE: 0
+ *	RETURN VALUE:
  *	SIDE EFFECTS:
  */
 int32_t sigreturn (void)
 {
-    return 0;
+    return -1;
 }
