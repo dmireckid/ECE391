@@ -18,8 +18,8 @@ static uint32_t file_jumptable[4] = {(uint32_t)&open_f,(uint32_t)&read_f,(uint32
 
 static int8_t elf_string[ELF_SIZE] = {0x7f,0x45,0x4c,0x46};
 
-static uint32_t current_pid=-1;
-static pcb_t pcb_array[MAX_PROCESSES];
+static uint32_t current_pid=0;
+static pcb_t pcb_array[MAX_PROCESSES+1];
 
 
 
@@ -28,10 +28,32 @@ int32_t halt (uint8_t status){
     : 
     :"a"(pcb_array[current_pid].parent_kernel_ebp)
     : "memory");*/
-  
-  
-    return 0;
+	
+	// clear out the fd_array associated with the program being halted
+	int i;
+	for (i = 2; i < MAX_FILES; i++) {
+		close(i);
+	}
 
+	// write parent process back info to tss.esp0
+	tss.esp0 = pcb_array[current_pid].parent_kernel_esp;
+	
+	// decrement current pid
+	current_pid--;
+	
+	// restore paging
+	remap_page(current_pid);
+
+	//move parent esp and ebp values back into esp/ebp registers
+    asm volatile(
+		"movl %0, %%eax;"
+		"movl %1,%%esp;"
+		"movl %2, %%ebp;"
+		"jmp after_iret"
+        : 
+        : "r"(0),"r"(pcb_array[current_pid+1].parent_kernel_esp), "r"(pcb_array[current_pid+1].parent_kernel_ebp)
+        : "memory");
+	return 0;
 }
 
 /*

@@ -7,7 +7,7 @@
 .text
 
 .globl sys_call_handler
-.globl context_switch
+.globl context_switch, after_iret
 
 
 entry_point:
@@ -97,6 +97,10 @@ context_switch:
 	# push entry point
 	pushl 32(%esp)
 	IRET
+
+after_iret:
+	leave
+	ret
 
 jump_table:
     .long 0, halt, execute, read, write, open, close, getargs, vidmap, set_handler, sigreturn
