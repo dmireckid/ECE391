@@ -178,11 +178,12 @@ void keyboard_handler_function() {
 		
 		/* if ctrl is currently being pressed and the character being entered is 'l', clear the screen and put the cursor on top */
 		if ( ctrl > 0 && keymap[(uint8_t)keycode] == 'l' ) {
-			clear_buffer();
+			//clear_buffer();
 			ctrl_l();
 
 			/* Start taking user inputs */
     		printf("> ");
+			terminal_write(0,line_buffer,buffer_count);
 
 			return;
 		}

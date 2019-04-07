@@ -166,8 +166,8 @@ void entry(unsigned long magic, unsigned long addr) {
     printf("Enabling Interrupts\n");
     sti();
 	
+	clear();
 	while(1) {
-		clear();
 		execute((unsigned char*)"shell");
 	}
 
