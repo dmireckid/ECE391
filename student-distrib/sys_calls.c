@@ -199,12 +199,45 @@ int32_t read (int32_t fd, void* buf, int32_t nbytes)
 	//jump to the corresponding read function
     uint32_t* ptr = (uint32_t*)pcb_array[current_pid].fd_array[fd].fops; 
     int32_t (*fun_ptr)(int32_t, void*, int32_t) = (void*)ptr[1];
-    uint32_t retval = (*fun_ptr)(pcb_array[current_pid].fd_array[fd].fp,buf,nbytes);
-	if (retval == 0)
-		pcb_array[current_pid].fd_array[fd].fp = 0;
-	else
-		pcb_array[current_pid].fd_array[fd].fp++;
-	return retval;
+    return (*fun_ptr)(fd,buf,nbytes);
+}
+
+/*
+ *	get_fp
+ *
+ *	INPUTS: int32_t fd - file descriptor
+ *	OUTPUTS: none
+ *	RETURN VALUE: value of fp
+ *	SIDE EFFECTS: none
+ */
+uint32_t get_fp(int32_t fd){
+	return pcb_array[current_pid].fd_array[fd].fp;
+}
+
+/*
+ *	clear_fp
+ *
+ *	INPUTS: int32_t fd - file descriptor
+ *	OUTPUTS: none
+ *	RETURN VALUE: none
+ *	SIDE EFFECTS: clears fp
+ */
+void clear_fp(int32_t fd){
+	pcb_array[current_pid].fd_array[fd].fp = 0;
+	return;
+}
+
+/*
+ *	fp_plus
+ *
+ *	INPUTS: int32_t fd - file descriptor
+ *	OUTPUTS: none
+ *	RETURN VALUE: none
+ *	SIDE EFFECTS: increment fp
+ */
+void fp_plus(int32_t fd){
+	pcb_array[current_pid].fd_array[fd].fp++;
+	return;
 }
 
 /*

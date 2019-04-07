@@ -50,6 +50,9 @@ typedef struct __attribute__((packed)) pcb{
 
 
 void init_STD(uint32_t pid);
+uint32_t get_fp(int32_t fd);
+void clear_fp(int32_t fd);
+void fp_plus(int32_t fd);
 
 int32_t halt(uint8_t status);
 int32_t execute(const uint8_t* command);
