@@ -95,7 +95,7 @@ void clear_buffer() {
 
 int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes)
 {
-	if(nbytes < LINE_BUFFER_SIZE || buf==NULL) return -1;
+	if(nbytes < LINE_BUFFER_SIZE-1 || buf==NULL) return -1;
 
 	/* int8_t* strcpy(int8_t* dest, const int8_t* src, uint32_t n)
 	* Inputs:      int8_t* dest = destination string of copy

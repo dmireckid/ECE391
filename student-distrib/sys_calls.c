@@ -195,6 +195,8 @@ int32_t read (int32_t fd, void* buf, int32_t nbytes)
     //check if file descriptor is in bounds and if the flag is IN_USE
     if(fd > MAX_FILES-1 || fd < 0) return -1;
 	if(pcb_array[current_pid].fd_array[fd].flags == NOT_IN_USE_FLAG) return -1;
+	
+	if(fd==1) return -1;
  
 	//jump to the corresponding read function
     uint32_t* ptr = (uint32_t*)pcb_array[current_pid].fd_array[fd].fops; 
@@ -255,6 +257,8 @@ int32_t write (int32_t fd, const void* buf, int32_t nbytes)
     //check if file descriptor is in bounds and if the flag is IN_USE
     if(fd > MAX_FILES-1 || fd < 0) return -1;
 	if(pcb_array[current_pid].fd_array[fd].flags == NOT_IN_USE_FLAG) return -1;
+	
+	if(fd==0) return -1;
  
 	//jump to the corresponding write function
     uint32_t* ptr = (uint32_t*)pcb_array[current_pid].fd_array[fd].fops; 
@@ -345,6 +349,10 @@ int32_t close (int32_t fd)
 	if(fd > MAX_FILES-1 || fd < FILE_TYPE_2){
 		return -1;
 	}
+	if (pcb_array[current_pid].fd_array[fd].flags == NOT_IN_USE_FLAG) {
+		return -1;
+	}
+	
 	pcb_array[current_pid].fd_array[fd].flags = NOT_IN_USE_FLAG;
     return 0;
 }
@@ -360,7 +368,7 @@ int32_t close (int32_t fd)
  */
 int32_t getargs (uint8_t* buf, int32_t nbytes)
 {
-    return 0;
+    return -1;
 }
 
 /*

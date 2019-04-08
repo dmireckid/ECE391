@@ -4,7 +4,7 @@
     SYS_CALL_NUM_MIN =	1
     SYS_CALL_NUM_MAX =	10
 	POP_12			 =	12
-	ABNORMAL		 =	3
+	ABNORMAL		 =	-1
 	GET_USER_DS		 =	4
 	GET_IRET_ESP	 =	12
 	IF_MASK			 =	0x200
