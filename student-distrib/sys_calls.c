@@ -196,6 +196,7 @@ int32_t read (int32_t fd, void* buf, int32_t nbytes)
     if(fd > MAX_FILES-1 || fd < 0) return -1;
 	if(pcb_array[current_pid].fd_array[fd].flags == NOT_IN_USE_FLAG) return -1;
 	
+	//if the fd called is stdout, return -1
 	if(fd==1) return -1;
  
 	//jump to the corresponding read function
@@ -258,6 +259,7 @@ int32_t write (int32_t fd, const void* buf, int32_t nbytes)
     if(fd > MAX_FILES-1 || fd < 0) return -1;
 	if(pcb_array[current_pid].fd_array[fd].flags == NOT_IN_USE_FLAG) return -1;
 	
+	//if the fd called is stin, return -1
 	if(fd==0) return -1;
  
 	//jump to the corresponding write function
@@ -349,6 +351,7 @@ int32_t close (int32_t fd)
 	if(fd > MAX_FILES-1 || fd < FILE_TYPE_2){
 		return -1;
 	}
+	// check if fd is unopened, if so, return -1
 	if (pcb_array[current_pid].fd_array[fd].flags == NOT_IN_USE_FLAG) {
 		return -1;
 	}
