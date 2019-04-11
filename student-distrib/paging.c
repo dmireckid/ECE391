@@ -77,4 +77,27 @@ void remap_page(uint8_t pid) {
 	enable_paging(directory_entry_array);
 }
 
+void vid_page() {
 
+	/*	vidmap virtual address will be at 136 MB, in other words in index 34 of the directory_entry_array, so
+	*	set the entry's present and read/write bits to 1 and page size to 0 since video memory
+	*	is of size 4 kB
+	*/
+	directory_entry_array[VID_MAP_INDEX].present = 1;
+	directory_entry_array[VID_MAP_INDEX].read_write = 1;
+	directory_entry_array[VID_MAP_INDEX].page_size = 0;
+	directory_entry_array[VID_MAP_INDEX].user_super = 1;
+	directory_entry_array[VID_MAP_INDEX].p_table_addr = ((int)vid_table_entry_array)>>SHIFT_12;
+
+	/*	vidmap memory is at index 0 of the vid_table_entry_array, at 136 MB, so
+	*	set the entry's present and read/write bits to 1 and set its base_address to the physical video address
+	*/
+	vid_table_entry_array[0].present = 1;
+	vid_table_entry_array[0].read_write = 1;
+	vid_table_entry_array[0].user_super = 1;
+	vid_table_entry_array[0].p_base_addr = VIDEO_ADDR/KB_4;
+	
+	enable_paging(directory_entry_array);
+	//uint32_t* pointer = VID_MAP_ADDR;
+	//*pointer = 0;
+}

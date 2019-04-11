@@ -16,6 +16,10 @@
 #define PROGRAM_INDEX	32
 #define SHELL_ADDR_1	0x800000//8MB
 #define PROGRAM_SIZE    0x400000//4MB 
+
+#define VID_MAP_INDEX	34
+#define VID_MAP_ADDR	0x8800000//136MB
+
 #define KB_8 			0x2000 //8KB
 #define MB_8 			0x800000//8MB
 #define MB_128			0x8000000//128MB
@@ -68,11 +72,16 @@ page_directory_entry_t directory_entry_array[NUM_ENTRIES] __attribute__((aligned
 
 page_table_entry_t table_entry_array[NUM_ENTRIES] __attribute__((aligned (KB_4)));
 
+page_table_entry_t vid_table_entry_array[NUM_ENTRIES] __attribute__((aligned (KB_4)));
+
 
 /* function to initialize paging */
 extern void initialize_page();
 
 /* function to remap paging */
 void remap_page(uint8_t pid);
+
+/* function to page for vidmap */
+void vid_page();
 
 #endif
