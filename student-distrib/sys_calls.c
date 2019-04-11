@@ -129,7 +129,7 @@ int32_t execute (const uint8_t* command)
     {
         i++;
         
-        while(i<LINE_BUFFER_SIZE && command[i]!='\0' && command[i]!=' '&& command[i]!= '\n')
+        while(i<LINE_BUFFER_SIZE && command[i]!='\0' && command[i]!= '\n')
         {
             pcb_array[current_pid].args[j] =command[i];
             i++;j++;
