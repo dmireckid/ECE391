@@ -42,9 +42,11 @@ int32_t halt (uint8_t status){
 	// write parent process back info to tss.esp0
 	tss.esp0 = pcb_array[current_pid].parent_kernel_esp;
 	
+  
 	// decrement current pid
 	current_pid--;
-	
+    tss.esp0 = MB_8 - current_pid*KB_8;
+    printf("\nhalt1: %x %x %x\n",tss.esp0,current_pid,pcb_array[current_pid].parent_kernel_esp);
 	// restore paging
 	remap_page(current_pid);
 
@@ -57,6 +59,7 @@ int32_t halt (uint8_t status){
 	else
 		ret_val = ABNORMAL;
 
+    printf("\nhalt2: %x %x %x\n",tss.esp0,current_pid,pcb_array[current_pid].parent_kernel_esp);
 	// move parent esp and ebp values back into esp/ebp registers
     asm volatile(
 		"movl %0, %%eax;"
@@ -66,6 +69,7 @@ int32_t halt (uint8_t status){
         : 
         : "r"(ret_val),"r"(pcb_array[current_pid+1].parent_kernel_esp), "r"(pcb_array[current_pid+1].parent_kernel_ebp)
         : "memory");
+
 	return 0;
 }
 
@@ -86,9 +90,18 @@ int32_t execute (const uint8_t* command)
     dentry_t test;
     int8_t buf[ELF_SIZE];
     int32_t file_size;
-    
+    /// '\0' ' ' '\n'
+    uint8_t exe[LINE_BUFFER_SIZE];exe[0] = '\0';
+    int i=0; 
+    while(i<LINE_BUFFER_SIZE && command[i]!='\0' && command[i]!=' '&& command[i]!= '\n')
+    {
+        exe[i] =command[i];
+        i++;
+    }
+    exe[i]='\0';
+
     //check if file exists
-    if(read_dentry_by_name(command,&test)==-1) return -1;
+    if(read_dentry_by_name(exe,&test)==-1) return -1;
 	//check if the max number of processes are running
 	if (current_pid == MAX_PROCESSES) return AB_STATUS;
 	//check if the filetype is a file
@@ -97,12 +110,36 @@ int32_t execute (const uint8_t* command)
     file_size = read_data(test.inode_num,0,(uint8_t*) buf,ELF_SIZE);
     if(strncmp(buf,elf_string,ELF_SIZE)!=0) return AB_STATUS;
 
-    //assign pid and memory for the process
+
+  
+
+    //assign pid 
     current_pid++;
-    remap_page(current_pid);
+  
 	//uint8_t* te = (uint8_t*)0x08048000;
 	//uint32_t blah = *te;
 
+    int j=0;
+    //save args for getargs 
+    if (command[i]=='\0' || command[i]=='\n') 
+    {
+        pcb_array[current_pid].args[j] ='\0';
+    }
+    else
+    {
+        i++;
+        
+        while(i<LINE_BUFFER_SIZE && command[i]!='\0' && command[i]!=' '&& command[i]!= '\n')
+        {
+            pcb_array[current_pid].args[j] =command[i];
+            i++;j++;
+        }
+        pcb_array[current_pid].args[j] ='\0';
+    }
+    
+    
+    //assign memory for the process
+      remap_page(current_pid);
     //copy program into memory
     read_data(test.inode_num,0,(uint8_t*)PROGRAM_VIRTUAL_ADDRESS,PROGRAM_SIZE);
 
@@ -123,7 +160,7 @@ int32_t execute (const uint8_t* command)
 	//set tss values
     tss.esp0 = MB_8 - current_pid*KB_8;
 	tss.ss0 = KERNEL_DS;
-
+    printf("\nexecute1: %x %x %x\n",tss.esp0,current_pid,pcb_array[current_pid].parent_kernel_esp);
     //get entry point
 	uint32_t entry;
 	read_data(test.inode_num,INDEX_24,(uint8_t*)&entry,ELF_SIZE);
@@ -134,6 +171,7 @@ int32_t execute (const uint8_t* command)
 	uint32_t iret_esp = PROGRAM_VIRTUAL_END; //store the IRET esp in a variable
 	
 	cli();
+    printf("\nexecute2: %x %x %x\n",tss.esp0,current_pid,pcb_array[current_pid].parent_kernel_esp);
 	context_switch(user_ds, iret_esp, user_cs, entry);
 
 /*    asm volatile(
@@ -148,6 +186,7 @@ int32_t execute (const uint8_t* command)
         : "memory"
 
     );*/
+
     return 0;
 }
 
@@ -363,15 +402,28 @@ int32_t close (int32_t fd)
 /*
  *	getargs
  *
- *	INPUTS: uint8_t* buf -
- *			int32_t nbytes -
+ *	INPUTS: uint8_t* buf - pointer to a buffer
+ *			int32_t nbytes - size of the buffer
  *	OUTPUTS: none
- *	RETURN VALUE:
- *	SIDE EFFECTS:
+ *	RETURN VALUE: Return 0 for success
+ *   If there are no arguments, 
+ *   or if the arguments and a terminal NULL (0-byte) do not fit in the buffer, simply return -1
+ *  
+ *	SIDE EFFECTS: modifies buffer / userspace memory
  */
 int32_t getargs (uint8_t* buf, int32_t nbytes)
 {
-    return -1;
+   if(nbytes < LINE_BUFFER_SIZE || pcb_array[current_pid].args[0] =='\0' ) return -1;
+   
+   
+    int32_t i = 0;
+    while (pcb_array[current_pid].args[i]!= '\0' && i<LINE_BUFFER_SIZE) {
+        buf[i] = pcb_array[current_pid].args[i];
+        i++;
+    }
+    buf[i] = '\0';
+    return 0;
+
 }
 
 /*
