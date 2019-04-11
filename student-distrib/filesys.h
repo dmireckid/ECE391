@@ -33,7 +33,7 @@ int32_t open_f(const uint8_t* fname);
 int32_t open_d(const uint8_t* fname);
 int32_t close_f(int32_t fd);
 int32_t close_d(int32_t fd);
-int32_t read_f(int32_t fd, uint32_t offset, void* buf,uint32_t length);
+int32_t read_f(int32_t fd, void* buf,uint32_t length);
 int32_t read_d(int32_t fd, uint8_t* buf, int32_t count);
 int32_t write_f(int32_t fd, int32_t count, void* buf);
 int32_t write_d(int32_t fd, int32_t count, void* buf);

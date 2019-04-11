@@ -244,6 +244,30 @@ int32_t read (int32_t fd, void* buf, int32_t nbytes)
     return (*fun_ptr)(fd,buf,nbytes);
 }
 
+
+/*
+ *	get_flags
+ *
+ *	INPUTS: int32_t fd - file descriptor
+ *	OUTPUTS: none
+ *	RETURN VALUE: flags
+ *	SIDE EFFECTS: none
+ */
+uint32_t get_flags(int32_t fd){
+	return pcb_array[current_pid].fd_array[fd].flags;
+}
+/*
+ *	get_inode
+ *
+ *	INPUTS: int32_t fd - file descriptor
+ *	OUTPUTS: none
+ *	RETURN VALUE: value of inode
+ *	SIDE EFFECTS: none
+ */
+uint32_t get_inode(int32_t fd){
+	return pcb_array[current_pid].fd_array[fd].inode;
+}
+
 /*
  *	get_fp
  *
@@ -255,7 +279,17 @@ int32_t read (int32_t fd, void* buf, int32_t nbytes)
 uint32_t get_fp(int32_t fd){
 	return pcb_array[current_pid].fd_array[fd].fp;
 }
-
+/*
+ *	set_fp
+ *
+ *	INPUTS: int32_t fd - file descriptor
+ *	OUTPUTS: none
+ *	RETURN VALUE: 
+ *	SIDE EFFECTS: changes fp
+ */
+void set_fp(int32_t fd,uint32_t fp){
+	pcb_array[current_pid].fd_array[fd].fp = fp;
+}
 /*
  *	clear_fp
  *

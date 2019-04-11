@@ -49,7 +49,9 @@ typedef struct __attribute__((packed)) pcb{
     
 }pcb_t;
 
-
+void set_fp(int32_t fd,uint32_t fp);
+uint32_t get_flags(int32_t fd);
+uint32_t get_inode(int32_t fd);
 void init_STD(uint32_t pid);
 uint32_t get_fp(int32_t fd);
 void clear_fp(int32_t fd);

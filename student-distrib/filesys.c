@@ -192,12 +192,17 @@ int32_t close_d(int32_t fd){
  *   RETURN VALUE: length of file, -1 for failure
  *   SIDE EFFECTS: fills buffer with contents of the file
  */
-int32_t read_f(int32_t fd, uint32_t offset, void* buf,uint32_t length){
-	dentry_t* direntry;
+int32_t read_f(int32_t fd, void* buf,uint32_t length){
+	/*dentry_t* direntry;
 	if(read_dentry_by_name((uint8_t*)fd, direntry) == -1){
 		return -1;
-	}
-	return read_data(direntry->inode_num, offset, buf, length);
+	}*/
+
+	if (get_flags(fd)==NOT_IN_USE_FLAG)return -1;
+	//if (length >   )return -1;
+	uint32_t ret_val = read_data(get_inode(fd), get_fp(fd), buf, length);
+	set_fp(fd,   get_fp(fd) + ret_val   );
+	return ret_val;
 }
 
 /*
