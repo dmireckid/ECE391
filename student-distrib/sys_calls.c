@@ -40,13 +40,13 @@ int32_t halt (uint8_t status){
 	}
 
 	// write parent process back info to tss.esp0
-	tss.esp0 = pcb_array[current_pid].parent_kernel_esp;
+	//tss.esp0 = pcb_array[current_pid].parent_kernel_esp;
 	
   
 	// decrement current pid
 	current_pid--;
     tss.esp0 = MB_8 - current_pid*KB_8;
-    printf("\nhalt1: %x %x %x\n",tss.esp0,current_pid,pcb_array[current_pid].parent_kernel_esp);
+    //printf("\nhalt1: %x %x %x\n",tss.esp0,current_pid,pcb_array[current_pid].parent_kernel_esp);
 	// restore paging
 	remap_page(current_pid);
 
@@ -59,7 +59,7 @@ int32_t halt (uint8_t status){
 	else
 		ret_val = ABNORMAL;
 
-    printf("\nhalt2: %x %x %x\n",tss.esp0,current_pid,pcb_array[current_pid].parent_kernel_esp);
+    //printf("\nhalt2: %x %x %x\n",tss.esp0,current_pid,pcb_array[current_pid].parent_kernel_esp);
 	// move parent esp and ebp values back into esp/ebp registers
     asm volatile(
 		"movl %0, %%eax;"
@@ -160,7 +160,7 @@ int32_t execute (const uint8_t* command)
 	//set tss values
     tss.esp0 = MB_8 - current_pid*KB_8;
 	tss.ss0 = KERNEL_DS;
-    printf("\nexecute1: %x %x %x\n",tss.esp0,current_pid,pcb_array[current_pid].parent_kernel_esp);
+    //printf("\nexecute1: %x %x %x\n",tss.esp0,current_pid,pcb_array[current_pid].parent_kernel_esp);
     //get entry point
 	uint32_t entry;
 	read_data(test.inode_num,INDEX_24,(uint8_t*)&entry,ELF_SIZE);
@@ -171,7 +171,7 @@ int32_t execute (const uint8_t* command)
 	uint32_t iret_esp = PROGRAM_VIRTUAL_END; //store the IRET esp in a variable
 	
 	cli();
-    printf("\nexecute2: %x %x %x\n",tss.esp0,current_pid,pcb_array[current_pid].parent_kernel_esp);
+    //printf("\nexecute2: %x %x %x\n",tss.esp0,current_pid,pcb_array[current_pid].parent_kernel_esp);
 	context_switch(user_ds, iret_esp, user_cs, entry);
 
 /*    asm volatile(
