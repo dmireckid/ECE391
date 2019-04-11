@@ -470,6 +470,8 @@ int32_t getargs (uint8_t* buf, int32_t nbytes)
  */
 int32_t vidmap (uint8_t** screen_start)
 {
+	if (screen_start == NULL) return -1;
+	if (screen_start >= (uint8_t**)PROGRAM_SIZE && screen_start <= (uint8_t**)SHELL_ADDR_1) return -1;
 	vid_page();
 	*screen_start = (uint8_t*)VID_MAP_ADDR;
     return 0;
