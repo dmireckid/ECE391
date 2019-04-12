@@ -86,11 +86,15 @@ int32_t halt (uint8_t status){
  */
 int32_t execute (const uint8_t* command)
 {
+	//check if command pointer is NULL
+	if(command == NULL) return -1;
+	//check if command points to NULL
+	if(*command == NULL) return -1;
 
     dentry_t test;
     int8_t buf[ELF_SIZE];
     int32_t file_size;
-    /// '\0' ' ' '\n'
+    // '\0', ' ', '\n'
     uint8_t exe[LINE_BUFFER_SIZE];exe[0] = '\0';
     int i=0; 
     while(i<LINE_BUFFER_SIZE && command[i]!='\0' && command[i]!=' '&& command[i]!= '\n')
@@ -99,13 +103,15 @@ int32_t execute (const uint8_t* command)
         i++;
     }
     exe[i]='\0';
+	
+	// move through the rest of the spaces that occur after the command
+	while(i<LINE_BUFFER_SIZE && command[i]==' ')
+	{
+		i++;
+	}
 
     //check if file exists
     if(read_dentry_by_name(exe,&test)==-1) return -1;
-	//check if command pointer is NULL
-	if(command == NULL) return -1;
-	//check if command points to NULL
-	if(*command == NULL) return -1;
 	//check if the max number of processes are running
 	if (current_pid == MAX_PROCESSES) return AB_STATUS;
 	//check if the filetype is a file
@@ -131,8 +137,6 @@ int32_t execute (const uint8_t* command)
     }
     else
     {
-        i++;
-        
         while(i<LINE_BUFFER_SIZE && command[i]!='\0' && command[i]!= '\n')
         {
             pcb_array[current_pid].args[j] =command[i];
