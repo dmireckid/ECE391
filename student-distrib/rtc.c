@@ -133,7 +133,7 @@ int32_t rtc_open(const uint8_t* filename){
  *  
  *	INPUTS:
  *  int32_t fd - a file descriptor that was assigned in rtc_open
- *  const void* buf -  a integer specifying the interrupt rate in Hz
+ *  const void* buf -  a pointer to an integer specifying the interrupt rate in Hz
  *  int32_t nbytes - number of bytes in buffer (must be 4)
  *	OUTPUTS: none
  *	RETURN VALUE:the number of bytes written, or -1 on failure
@@ -149,7 +149,7 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes){
 
 	//the allowed frequencies are powers of two between 2 and 1024 
 	//get the frequency
-	volatile int32_t freq =  ((int32_t) buf);
+	volatile int32_t freq = *((int32_t*)buf);
 	//check the frequency
 	switch(freq)
 	{
