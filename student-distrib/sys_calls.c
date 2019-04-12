@@ -102,6 +102,10 @@ int32_t execute (const uint8_t* command)
 
     //check if file exists
     if(read_dentry_by_name(exe,&test)==-1) return -1;
+	//check if command pointer is NULL
+	if(command == NULL) return -1;
+	//check if command points to NULL
+	if(*command == NULL) return -1;
 	//check if the max number of processes are running
 	if (current_pid == MAX_PROCESSES) return AB_STATUS;
 	//check if the filetype is a file
@@ -470,8 +474,12 @@ int32_t getargs (uint8_t* buf, int32_t nbytes)
  */
 int32_t vidmap (uint8_t** screen_start)
 {
+	// check if pointer is NULL, if so, return -1
 	if (screen_start == NULL) return -1;
-	if (screen_start >= (uint8_t**)PROGRAM_SIZE && screen_start <= (uint8_t**)SHELL_ADDR_1) return -1;
+	// check if pointer is an address within a user-level page, if so, return -1
+	if (screen_start < (uint8_t**)PROGRAM_VIRTUAL_ADDRESS || screen_start > (uint8_t**)PROGRAM_VIRTUAL_END) return -1;
+	
+	// map the video memory to a virtual address that permits access to user
 	vid_page();
 	*screen_start = (uint8_t*)VID_MAP_ADDR;
     return 0;
