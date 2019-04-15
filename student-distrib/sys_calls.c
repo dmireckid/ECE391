@@ -90,6 +90,12 @@ int32_t execute (const uint8_t* command)
 	if(command == NULL) return -1;
 	//check if command points to NULL
 	if(*command == NULL) return -1;
+	
+	//check if the max number of processes are running
+	if (current_pid == MAX_PROCESSES) {
+		printf("Max number of processes reached \n");
+		return 0;
+	}
 
     dentry_t test;
     int8_t buf[ELF_SIZE];
@@ -97,12 +103,17 @@ int32_t execute (const uint8_t* command)
     // '\0', ' ', '\n'
     uint8_t exe[LINE_BUFFER_SIZE];exe[0] = '\0';
     int i=0; 
+	while (i<LINE_BUFFER_SIZE && command[i] == ' ') {
+		i++;
+	}
+	int k=0;
     while(i<LINE_BUFFER_SIZE && command[i]!='\0' && command[i]!=' '&& command[i]!= '\n')
     {
-        exe[i] =command[i];
-        i++;
+        exe[k] = command[i];
+        k++;
+		i++;
     }
-    exe[i]='\0';
+    exe[k]='\0';
 	
 	// move through the rest of the spaces that occur after the command
 	while(i<LINE_BUFFER_SIZE && command[i]==' ')
@@ -112,8 +123,6 @@ int32_t execute (const uint8_t* command)
 
     //check if file exists
     if(read_dentry_by_name(exe,&test)==-1) return -1;
-	//check if the max number of processes are running
-	if (current_pid == MAX_PROCESSES) return AB_STATUS;
 	//check if the filetype is a file
     if(test.filetype != FILE_TYPE_2) return AB_STATUS;
     //check if the first 4 bytes are ELF magic number
