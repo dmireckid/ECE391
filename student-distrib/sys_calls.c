@@ -455,9 +455,10 @@ int32_t close (int32_t fd)
  */
 int32_t getargs (uint8_t* buf, int32_t nbytes)
 {
-   if(nbytes < LINE_BUFFER_SIZE || pcb_array[current_pid].args[0] =='\0' ) return -1;
-   
-   
+	if (buf == NULL) return -1;
+	if(nbytes < LINE_BUFFER_SIZE || pcb_array[current_pid].args[0] =='\0' ) return -1;
+
+
     int32_t i = 0;
     while (pcb_array[current_pid].args[i]!= '\0' && i<LINE_BUFFER_SIZE) {
         buf[i] = pcb_array[current_pid].args[i];
@@ -471,10 +472,10 @@ int32_t getargs (uint8_t* buf, int32_t nbytes)
 /*
  *	vidmap
  *
- *	INPUTS: uint8_t** screen_start -
+ *	INPUTS: uint8_t** screen_start - pointer to virtual address
  *	OUTPUTS: none
- *	RETURN VALUE:
- *	SIDE EFFECTS:
+ *	RETURN VALUE: 0 for success, -1 for failure
+ *	SIDE EFFECTS: maps a user-accessible virtual address to the physical video memory
  */
 int32_t vidmap (uint8_t** screen_start)
 {
