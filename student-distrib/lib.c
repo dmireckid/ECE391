@@ -15,8 +15,7 @@
 #define SENDING_POSITION_LOW    0x0F
 #define NUMBER_OF_BITS_IN_BYTE  8
 
-static int screen_x;
-static int screen_y;
+
 static char* video_mem = (char *)VIDEO;
 
 /* void update_corsor(int screen_x, int screen_y)
