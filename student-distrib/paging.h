@@ -13,6 +13,10 @@
 #define KERNEL_ADDR		0x400000
 #define VIDEO_ADDR		0xB8000
 
+#define TERM_VID_1		0xB9000
+#define TERM_VID_2		0xBA000
+#define TERM_VID_3		0xBB000
+
 #define PROGRAM_INDEX	32
 #define SHELL_ADDR_1	0x800000//8MB
 #define PROGRAM_SIZE    0x400000//4MB 
@@ -72,7 +76,7 @@ page_directory_entry_t directory_entry_array[NUM_ENTRIES] __attribute__((aligned
 
 page_table_entry_t table_entry_array[NUM_ENTRIES] __attribute__((aligned (KB_4)));
 
-page_table_entry_t vid_table_entry_array[NUM_ENTRIES] __attribute__((aligned (KB_4)));
+page_table_entry_t vidmap_table_entry_array[NUM_ENTRIES] __attribute__((aligned (KB_4)));
 
 
 /* function to initialize paging */

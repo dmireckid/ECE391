@@ -6,6 +6,7 @@
 #include "lib.h"
 #include "i8259.h"
 #include "term_driver.h"
+#include "term_switch.h"
 
 /* maps keycode to ASCII character code */
 char keymap[NUM_ASCII] =  {   '\0', '\0' /*0x01: escape*/,							/* 0x00: not used, 0x01: esc key */
@@ -47,8 +48,9 @@ char shifted_symbols_map[21][2] = {	/* symbols on number keys */
 									{KB_SLASH, 				'?'}     // / to ?
 };
 
-/* flags for Shift, Control, and Caps Lock */
+/* flags for Shift, Alt, Control, and Caps Lock */
 uint8_t ctrl = 0;
+uint8_t alt_pressed = 0;
 uint8_t shift_pressed = 0;
 uint8_t caps_lock = 0;
 
@@ -138,12 +140,23 @@ void keyboard_handler_function() {
 			if ( (uint8_t)keycode == CTRL_R ) {
 				ctrl--;
 			}
+			if ( (uint8_t)keycode == ALT_R ) {
+				alt_pressed--;
+			}
+			if ( (uint8_t)keycode == F1_P && alt_pressed > 0 ) {
+			}
+			if ( (uint8_t)keycode == F2_P && alt_pressed > 0 ) {
+			}
+			if ( (uint8_t)keycode == F3_P && alt_pressed > 0 ) {
+			}
 			return;
 		}
 		
 		/* if the keycode received is Left Alt, don't do anything */
-		if ( (uint8_t)keycode == LALT )
+		if ( (uint8_t)keycode == ALT_P ) {
+			alt_pressed++;
 			return;
+		}
 
 		/* if the key that's pressed is Control, set its flag to 1 */
 		if ( (uint8_t)keycode == CTRL_P ) {
@@ -225,11 +238,11 @@ void keyboard_handler_function() {
  *  If the named file does not exist or no descriptors are free, the call returns -1
  *	SIDE EFFECTS: none
  */
-int32_t keyboard_open(const uint8_t* filename){
-	 
+int32_t keyboard_open(const uint8_t* filename)
+{
 	return -1;
+}
 
- }
 
  /*
  *	keyboard_close
@@ -239,9 +252,8 @@ int32_t keyboard_open(const uint8_t* filename){
  *	RETURN VALUE:Trying to close an invalid descriptor should result in a return value of -1; successful closes should return 0.
  *	SIDE EFFECTS: none
  */
- int32_t keyboard_close(int32_t fd){
-
-
+ int32_t keyboard_close(int32_t fd)
+{
 	return -1;
 }
 
@@ -249,8 +261,6 @@ int32_t keyboard_open(const uint8_t* filename){
 /*
  *	keyboard_write
  *  DESCRIPTION:do nothing
- * 
- *  
  *	INPUTS:
  *  int32_t fd - file descriptor (not used)
  *  const void* buf - not used
@@ -259,10 +269,7 @@ int32_t keyboard_open(const uint8_t* filename){
  *	RETURN VALUE:the number of bytes written, or -1 on failure
  *	SIDE EFFECTS: none
  */
-
 int32_t keyboard_write(int32_t fd, const void* buf, int32_t nbytes)
 {
 	return -1;
-
-
 }

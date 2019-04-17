@@ -37,6 +37,27 @@ void initialize_page() {
 	table_entry_array[VIDEO_ADDR/KB_4].read_write = 1;
 	table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = VIDEO_ADDR/KB_4;			// address has to be mapped from 4 kB
 
+	/*	terminal 1 memory is at 0xB9000, in other words in index TERM_VID_1/KB_4 of the table_entry_array, so
+	*	set the entry's present and re/write bits to 1
+	*/
+	table_entry_array[TERM_VID_1/KB_4].present = 1;
+	table_entry_array[TERM_VID_1/KB_4].read_write = 1;
+	table_entry_array[TERM_VID_1/KB_4].p_base_addr = TERM_VID_1/KB_4;			// address has to be mapped from 4 kB
+	
+	/*	terminal 2 memory is at 0xBA000, in other words in index TERM_VID_2/KB_4 of the table_entry_array, so
+	*	set the entry's present and re/write bits to 1
+	*/
+	table_entry_array[TERM_VID_2/KB_4].present = 1;
+	table_entry_array[TERM_VID_2/KB_4].read_write = 1;
+	table_entry_array[TERM_VID_2/KB_4].p_base_addr = TERM_VID_2/KB_4;			// address has to be mapped from 4 kB
+	
+	/*	terminal 3 memory is at 0xBB000, in other words in index TERM_VID_3/KB_4 of the table_entry_array, so
+	*	set the entry's present and re/write bits to 1
+	*/
+	table_entry_array[TERM_VID_3/KB_4].present = 1;
+	table_entry_array[TERM_VID_3/KB_4].read_write = 1;
+	table_entry_array[TERM_VID_3/KB_4].p_base_addr = TERM_VID_3/KB_4;			// address has to be mapped from 4 kB
+
 	/*	kernel space is at 4 MB (0x400000), in other words in index 1 of the directory_entry_array, so
 	*	set the entry's present and read/write bits to 1 and page size to 1 since kernel memory
 	*	is of size 4 MB
@@ -87,15 +108,15 @@ void vid_page() {
 	directory_entry_array[VID_MAP_INDEX].read_write = 1;
 	directory_entry_array[VID_MAP_INDEX].page_size = 0;
 	directory_entry_array[VID_MAP_INDEX].user_super = 1;
-	directory_entry_array[VID_MAP_INDEX].p_table_addr = ((int)vid_table_entry_array)>>SHIFT_12;
+	directory_entry_array[VID_MAP_INDEX].p_table_addr = ((int)vidmap_table_entry_array)>>SHIFT_12;
 
 	/*	vidmap memory is at index 0 of the vid_table_entry_array, at 136 MB, so
 	*	set the entry's present and read/write bits to 1 and set its base_address to the physical video address
 	*/
-	vid_table_entry_array[0].present = 1;
-	vid_table_entry_array[0].read_write = 1;
-	vid_table_entry_array[0].user_super = 1;
-	vid_table_entry_array[0].p_base_addr = VIDEO_ADDR/KB_4;
+	vidmap_table_entry_array[0].present = 1;
+	vidmap_table_entry_array[0].read_write = 1;
+	vidmap_table_entry_array[0].user_super = 1;
+	vidmap_table_entry_array[0].p_base_addr = VIDEO_ADDR/KB_4;
 	
 	enable_paging(directory_entry_array);
 	//uint32_t* pointer = VID_MAP_ADDR;

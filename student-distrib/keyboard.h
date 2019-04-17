@@ -15,9 +15,7 @@
 /* Number of available ASCII characters */
 #define NUM_ASCII		256
 
-/* Pre-defined keycodes for Left Shift, Right Shift, Backspace, Caps Lock, Left Alt, Control, and F1 */
-#define F1_P			0x3B
-#define LALT			0x38
+/* Pre-defined keycodes for Left Shift, Right Shift, Backspace, Caps Lock, Control */
 #define CTRL_P			0x1D
 #define CTRL_R			0x9D
 #define BACKSPACE		0x0E
@@ -26,6 +24,13 @@
 #define LSHIFT_R		0xAA
 #define RSHIFT_P		0x36
 #define RSHIFT_R		0xB6
+
+/* Pre-defined keycodes for Alt, F1, F2, and F3 */
+#define ALT_P			0x38
+#define ALT_R			0xB8
+#define F1_P			0x3B
+#define F2_P			0x3C
+#define F3_P			0x3D
 
 /* Offset between lower and upper case letters and mapped locations of letters in keycode table */
 #define CAP_OFFSET		32
