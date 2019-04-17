@@ -144,10 +144,13 @@ void keyboard_handler_function() {
 				alt_pressed--;
 			}
 			if ( (uint8_t)keycode == F1_P && alt_pressed > 0 ) {
+				switch_terminal(keycode);
 			}
 			if ( (uint8_t)keycode == F2_P && alt_pressed > 0 ) {
+				switch_terminal(keycode);
 			}
 			if ( (uint8_t)keycode == F3_P && alt_pressed > 0 ) {
+				switch_terminal(keycode);
 			}
 			return;
 		}

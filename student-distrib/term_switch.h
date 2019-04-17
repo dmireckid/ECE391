@@ -9,6 +9,8 @@
 #define SHELL2	2
 #define SHELL3	3
 
-void switch_terminal();
+uint8_t curr_term;
+
+void switch_terminal(uint8_t keycode);
 
 #endif
