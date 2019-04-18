@@ -2,6 +2,8 @@
  * vim:ts=4 noexpandtab */
 
 #include "lib.h"
+#include "paging.h"
+#include "term_switch.h"
 
 #define VIDEO       0xB8000
 #define NUM_COLS    80
@@ -17,6 +19,35 @@
 
 
 static char* video_mem = (char *)VIDEO;
+
+
+/* void set_vidmem(uint32_t terminal_num)
+ *  Inputs: a terminal number corresponding to the process to switch to in the scheduler
+ *  Outputs:  None
+ *  Return:   None
+ *  Function: changes the the video memory pointer to a terminals video memory
+ */
+void set_vidmem(uint32_t terminal_num)
+{
+    if(curr_term == terminal_num)
+    {
+        video_mem = VIDEO;
+        return;
+    }
+    switch(terminal_num)
+    {
+
+        case SHELL1:
+            video_mem = TERM_VID_1; break;
+        case SHELL2:
+            video_mem = TERM_VID_2; break;
+        case SHELL3:
+            video_mem = TERM_VID_3; break;
+        default:
+            break;
+    }
+    return;
+}
 
 /* void update_corsor(int screen_x, int screen_y)
  *  Inputs:   int screen_x and int screen_y which are x and y coordinate on the screen

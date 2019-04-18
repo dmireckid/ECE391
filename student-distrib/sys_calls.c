@@ -147,7 +147,10 @@ int32_t execute (const uint8_t* command)
 		new_pid++;
 	}
 	pcb_array[new_pid].flag = IN_USE_FLAG;
-	
+	//assign terminal
+    pcb_array[new_pid].flag = IN_USE_FLAG; 
+
+
 	//increment number of processes
 	num_processes++;
   

@@ -10,6 +10,10 @@
 int screen_x;
 int screen_y;
 
+//changes video memory to a terminal's video memory
+void set_vidmem(uint32_t terminal_num);
+
+
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
 int32_t puts(int8_t *s);
