@@ -169,9 +169,10 @@ void entry(unsigned long magic, unsigned long addr) {
 	
 	clear();
 	init_pcb_array();
-	while(1) {
+    execute((unsigned char*)"shell");
+	/*while(1) {
 		execute((unsigned char*)"shell");
-	}
+	}*/
 
 #ifdef RUN_TESTS
     /* Run tests */

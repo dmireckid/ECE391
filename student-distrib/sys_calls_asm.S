@@ -33,6 +33,7 @@ sys_call_handler:
     cmpl $SYS_CALL_NUM_MAX,%eax
     ja sys_call_invalid
 	
+	pushfl
 	# push the registers
 	pushl %ebp
 	pushl %edi
@@ -44,6 +45,7 @@ sys_call_handler:
 	pushl %edx
     pushl %ecx
 	pushl %ebx
+ 
 	# enable interrupts
 	sti
 
@@ -51,6 +53,7 @@ sys_call_handler:
 	
 	# disable interrupts
 	cli
+
 	# pop the arguments
 	addl $POP_12, %esp
 	# pop the registers
@@ -60,7 +63,7 @@ sys_call_handler:
 	popl %esi
 	popl %edi
 	popl %ebp
-	
+	popfl
 	IRET
 
 /* 

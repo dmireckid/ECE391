@@ -31,18 +31,18 @@ void set_vidmem(uint32_t terminal_num)
 {
     if(curr_term == terminal_num)
     {
-        video_mem = VIDEO;
+        video_mem =(char *) VIDEO;
         return;
     }
     switch(terminal_num)
     {
 
         case SHELL1:
-            video_mem = TERM_VID_1; break;
+            video_mem = (char *)TERM_VID_1; break;
         case SHELL2:
-            video_mem = TERM_VID_2; break;
+            video_mem = (char *)TERM_VID_2; break;
         case SHELL3:
-            video_mem = TERM_VID_3; break;
+            video_mem = (char *)TERM_VID_3; break;
         default:
             break;
     }
