@@ -13,6 +13,7 @@
 #include "rtc.h"
 #include "filesys.h"
 #include "sys_calls.h"
+#include "term_switch.h"
 
 #define RUN_TESTS
 
@@ -167,6 +168,7 @@ void entry(unsigned long magic, unsigned long addr) {
     sti();
 	
 	clear();
+	init_pcb_array();
 	while(1) {
 		execute((unsigned char*)"shell");
 	}

@@ -46,12 +46,14 @@ typedef struct __attribute__((packed)) pcb{
     uint32_t parent_kernel_esp;
     uint32_t parent_kernel_ebp;
     uint8_t args[128];
+	uint8_t flag;
     
 }pcb_t;
 
 void set_fp(int32_t fd,uint32_t fp);
 uint32_t get_flags(int32_t fd);
 uint32_t get_inode(int32_t fd);
+void init_pcb_array();
 void init_STD(uint32_t pid);
 uint32_t get_fp(int32_t fd);
 void clear_fp(int32_t fd);

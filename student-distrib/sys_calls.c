@@ -44,15 +44,21 @@ int32_t halt (uint8_t status){
 	// write parent process back info to tss.esp0
 	//tss.esp0 = pcb_array[current_pid].parent_kernel_esp;
 	
-  
-	// decrement current pid
-	current_pid--;
+	// set the flag of the pcb we're going to leave to NOT_IN_USE
+	pcb_array[current_pid].flag = NOT_IN_USE_FLAG;
+	
+	// get new pid after halt is done
+	uint32_t old_pid = current_pid;
+	uint32_t new_pid = pcb_array[current_pid].parent_pid;
+	current_pid = new_pid;
+
 	// decrement number of processes
 	num_processes--;
-    tss.esp0 = MB_8 - current_pid*KB_8;
+	
+    tss.esp0 = MB_8 - new_pid*KB_8;
     //printf("\nhalt1: %x %x %x\n",tss.esp0,current_pid,pcb_array[current_pid].parent_kernel_esp);
 	// restore paging
-	remap_page(current_pid);
+	remap_page(new_pid);
 
 	// set the return value for execute
 	uint32_t ret_val;
@@ -71,7 +77,7 @@ int32_t halt (uint8_t status){
 		"movl %2, %%ebp;"
 		"jmp after_iret"
         : 
-        : "r"(ret_val),"r"(pcb_array[current_pid+1].parent_kernel_esp), "r"(pcb_array[current_pid+1].parent_kernel_ebp)
+        : "r"(ret_val),"r"(pcb_array[old_pid].parent_kernel_esp), "r"(pcb_array[old_pid].parent_kernel_ebp)
         : "memory");
 
 	return 0;
@@ -118,7 +124,7 @@ int32_t execute (const uint8_t* command)
 		i++;
     }
     exe[k]='\0';
-	
+
 	// move through the rest of the spaces that occur after the command
 	while(i<LINE_BUFFER_SIZE && command[i]==' ')
 	{
@@ -134,10 +140,13 @@ int32_t execute (const uint8_t* command)
     if(strncmp(buf,elf_string,ELF_SIZE)!=0) return AB_STATUS;
 
 
-  
 
-    //assign pid 
-    current_pid++;
+	//assign pid
+	uint32_t new_pid = 1;
+	while (pcb_array[new_pid].flag != NOT_IN_USE_FLAG) {
+		new_pid++;
+	}
+	pcb_array[new_pid].flag = IN_USE_FLAG;
 	
 	//increment number of processes
 	num_processes++;
@@ -149,42 +158,42 @@ int32_t execute (const uint8_t* command)
     //save args for getargs 
     if (command[i]=='\0' || command[i]=='\n') 
     {
-        pcb_array[current_pid].args[j] ='\0';
+        pcb_array[new_pid].args[j] ='\0';
     }
     else
     {
         while(i<LINE_BUFFER_SIZE && command[i]!='\0' && command[i]!= '\n')
         {
-            pcb_array[current_pid].args[j] =command[i];
+            pcb_array[new_pid].args[j] =command[i];
             i++;j++;
         }
-        pcb_array[current_pid].args[j] ='\0';
+        pcb_array[new_pid].args[j] ='\0';
     }
     
     
     //assign memory for the process
-      remap_page(current_pid);
+    remap_page(new_pid);
     //copy program into memory
     read_data(test.inode_num,0,(uint8_t*)PROGRAM_VIRTUAL_ADDRESS,PROGRAM_SIZE);
 
     //Initialize PCB values and stdin/out file descriptors
-    init_STD(current_pid);
-    pcb_array[current_pid].parent_pid = current_pid-1;
+    init_STD(new_pid);
+    pcb_array[new_pid].parent_pid = current_pid;
     
 	//save parent esp and ebp values
     asm volatile("movl %%esp,%%eax;"
-        : "=a"(pcb_array[current_pid].parent_kernel_esp)
+        : "=a"(pcb_array[new_pid].parent_kernel_esp)
         :
         : "memory");
     asm volatile("movl %%ebp,%%eax;" 
-    : "=a"(pcb_array[current_pid].parent_kernel_ebp)
+    : "=a"(pcb_array[new_pid].parent_kernel_ebp)
     :
     : "memory");
 
 	//set tss values
-    tss.esp0 = MB_8 - current_pid*KB_8;
+    tss.esp0 = MB_8 - new_pid*KB_8;
 	tss.ss0 = KERNEL_DS;
-    //printf("\nexecute1: %x %x %x\n",tss.esp0,current_pid,pcb_array[current_pid].parent_kernel_esp);
+    //printf("\nexecute1: %x %x %x\n",tss.esp0,new_pid,pcb_array[new_pid].parent_kernel_esp);
     //get entry point
 	uint32_t entry;
 	read_data(test.inode_num,INDEX_24,(uint8_t*)&entry,ELF_SIZE);
@@ -194,8 +203,10 @@ int32_t execute (const uint8_t* command)
 	uint32_t user_cs = USER_CS; //store USER_CS in a variable
 	uint32_t iret_esp = PROGRAM_VIRTUAL_END; //store the IRET esp in a variable
 	
+	current_pid = new_pid;
+	
 	cli();
-    //printf("\nexecute2: %x %x %x\n",tss.esp0,current_pid,pcb_array[current_pid].parent_kernel_esp);
+    //printf("\nexecute2: %x %x %x\n",tss.esp0,new_pid,pcb_array[current_pid].parent_kernel_esp);
 	context_switch(user_ds, iret_esp, user_cs, entry);
 
 /*    asm volatile(
@@ -212,6 +223,22 @@ int32_t execute (const uint8_t* command)
     );*/
 
     return 0;
+}
+
+/*
+ *	init_pcb_array
+ *
+ *	INPUTS: none
+ *	OUTPUTS: none
+ *	RETURN VALUE: none
+ *	SIDE EFFECTS: intializes all pcb's flags to unused
+ */
+void init_pcb_array()
+{
+	int i;
+	for (i = 0; i < MAX_PROCESSES+1; i++) {
+		pcb_array[i].flag = NOT_IN_USE_FLAG;
+	}
 }
 
 /*

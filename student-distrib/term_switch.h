@@ -19,6 +19,7 @@ typedef struct __attribute__((packed)) term{
 	uint8_t buf_count;
     uint8_t screenx;
     uint8_t screeny;
+	uint8_t curr_pid;
 
 }term_t;
 
