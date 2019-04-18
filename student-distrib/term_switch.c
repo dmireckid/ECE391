@@ -19,6 +19,14 @@ uint8_t curr_term=SHELL1;
 term_t* curr_term_struct=&term1;
 uint32_t curr_addr=TERM_VID_1;
 
+/*
+ *	switch_terminal 
+ *
+ *	INPUTS: uint8_t keycode - the keycode of the function button pressed
+ *	OUTPUTS: none
+ *	RETURN VALUE: none
+ *	SIDE EFFECTS: transfers the vid memory of new terminal and stores the vid memory of the terminal being left
+ */
 void switch_terminal(uint8_t keycode) {
 	
 	term_t* load_term;
@@ -52,12 +60,13 @@ void switch_terminal(uint8_t keycode) {
 	curr_addr = load_addr;
 	curr_term = keycode-F1_P+1;
 	
-	/* transfer keyboard stuff */
+	/* store keyboard stuff from kernel vid memory to vid memory of terminal being left */
 	memcpy(curr_term_struct->keyboard,line_buffer,LINE_BUFFER_SIZE);
 	curr_term_struct->buf_count = buffer_count;
 	curr_term_struct->screenx = screen_x;
 	curr_term_struct->screeny = screen_y;
-	
+
+	/* move keyboard stuff from vid memory of terminal being entered to kernel vid memory */
 	memcpy(line_buffer,load_term->keyboard,LINE_BUFFER_SIZE);
 	buffer_count = load_term->buf_count;
 	screen_x = load_term->screenx;
