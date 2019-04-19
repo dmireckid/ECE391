@@ -17,3 +17,15 @@ void init_pit(){
 	outb(PIT_FREQ >> SHIFT_8, CHANNEL0);
 	enable_irq(PIT_IRQ);
 }
+
+/* 
+ * pit_handler_function()
+ *   Description: The PIT interrupt handler for scheduling
+ *         Input: None
+ *        Output: None
+ *        Return: None
+ *  Side Effects: Sends EOI to PIT_IRQ and switches to another process through a round-robin scheduler
+ */
+void pit_handler_function(){
+	send_eoi(PIT_IRQ);
+}

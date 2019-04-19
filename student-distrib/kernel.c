@@ -14,6 +14,7 @@
 #include "filesys.h"
 #include "sys_calls.h"
 #include "term_switch.h"
+#include "pit.h"
 
 #define RUN_TESTS
 
@@ -159,6 +160,9 @@ void entry(unsigned long magic, unsigned long addr) {
 	
 	/*Initialize the filesystem*/
 	init_filesystem(fs_addr);
+	
+	/*Initialize the PIT*/
+	init_pit();
 
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your

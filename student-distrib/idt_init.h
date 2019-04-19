@@ -1,5 +1,7 @@
 //IDT_INIT HEADER FILE
 
+#define PIT_VAL 0x20
+
 void idt_init();
 void divide_error();
 void debug();
