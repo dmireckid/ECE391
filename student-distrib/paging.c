@@ -123,14 +123,14 @@ void vid_page() {
 	//uint32_t* pointer = VID_MAP_ADDR;
 	//*pointer = 0;
 }
-void remap_real_vid_page()
+void remap_real()
 {
 	vidmap_table_entry_array[0].p_base_addr = VIDEO_ADDR/KB_4;
 	table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = VIDEO_ADDR/KB_4;	
 	enable_paging(directory_entry_array);
 }
 
-void remap_shadow_vid_page(uint32_t terminal)
+void remap_shadow(uint32_t terminal)
 {
 	switch(terminal)
 	{
@@ -144,6 +144,33 @@ void remap_shadow_vid_page(uint32_t terminal)
 			break;
 		case SHELL3:
 			vidmap_table_entry_array[0].p_base_addr = TERM_VID_3/KB_4;
+			table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = TERM_VID_3/KB_4;
+			break;
+		case default:
+			return;break;
+	}
+	
+	enable_paging(directory_entry_array);
+
+}
+
+void remap_real_lib()
+{
+	table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = VIDEO_ADDR/KB_4;	
+	enable_paging(directory_entry_array);
+}
+
+void remap_shadow_lib(uint32_t terminal)
+{
+	switch(terminal)
+	{
+		case SHELL1:
+			table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = TERM_VID_1/KB_4;
+			break;	
+		case SHELL2:
+			table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = TERM_VID_2/KB_4;
+			break;
+		case SHELL3:
 			table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = TERM_VID_3/KB_4;
 			break;
 		case default:

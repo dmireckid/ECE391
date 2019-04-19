@@ -89,7 +89,9 @@ void remap_page(uint8_t pid);
 void vid_page();
 
 
-void remap_shadow_vid_page(uint32_t terminal);
-void remap_real_vid_page();
+void remap_shadow(uint32_t terminal);
+void remap_real();
+void remap_real_lib();
+void remap_shadow_lib(uint32_t terminal);
 
 #endif
