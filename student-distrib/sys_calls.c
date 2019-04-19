@@ -35,6 +35,20 @@ static pcb_t pcb_array[MAX_PROCESSES+1];
  */
 int32_t halt (uint8_t status){
 
+    if(current_pid==1)
+    {
+        num_processes--;
+        pcb_array[current_pid].flag = NOT_IN_USE_FLAG;
+        asm volatile(
+		"movl %0,%%esp;"
+		"movl %1, %%ebp;"
+        : 
+        : "r"(tss.esp0), "r"(tss.esp0)
+        : "memory");
+
+        execute((const uint8_t*)"shell");
+
+    }
 	// clear out the fd_array associated with the program being halted
 	int i;
 	for (i = FILE_TYPE_2; i < MAX_FILES; i++) {
@@ -68,7 +82,7 @@ int32_t halt (uint8_t status){
 		ret_val = EXCEPTION;
 	else
 		ret_val = ABNORMAL;
-
+    
     //printf("\nhalt2: %x %x %x\n",tss.esp0,current_pid,pcb_array[current_pid].parent_kernel_esp);
 	// move parent esp and ebp values back into esp/ebp registers
     asm volatile(
@@ -101,6 +115,8 @@ int32_t execute (const uint8_t* command)
 	//check if command points to NULL
 	if(*command == NULL) return -1;
 	
+
+
 	//check if the max number of processes are running
 	if (num_processes == MAX_PROCESSES) {
 		printf("Max number of processes reached \n");
