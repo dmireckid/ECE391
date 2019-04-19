@@ -88,4 +88,8 @@ void remap_page(uint8_t pid);
 /* function to page for vidmap */
 void vid_page();
 
+
+void remap_shadow_vid_page(uint32_t terminal);
+void remap_real_vid_page();
+
 #endif
