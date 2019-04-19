@@ -46,7 +46,8 @@ typedef struct __attribute__((packed)) pcb{
     uint32_t parent_kernel_esp;
     uint32_t parent_kernel_ebp;
     uint8_t args[128];
-	uint8_t flag;
+	uint8_t in_use_flag;
+	uint8_t active_flag;
     uint32_t terminal;
     
 }pcb_t;

@@ -15,7 +15,7 @@ static term_t term1;
 static term_t term2;
 static term_t term3;
 
-uint8_t curr_term=SHELL1;
+uint8_t curr_term_num=SHELL1;
 term_t* curr_term_struct=&term1;
 uint32_t curr_addr=TERM_VID_1;
 
@@ -33,19 +33,19 @@ void switch_terminal(uint8_t keycode) {
 	uint32_t load_addr;
 	switch (keycode) {
 		case (F1_P):
-			if (curr_term == SHELL1)
+			if (curr_term_num == SHELL1)
 				return;
 			load_addr = TERM_VID_1;
 			load_term = &term1;
 			break;
 		case (F2_P):
-			if (curr_term == SHELL2)
+			if (curr_term_num == SHELL2)
 				return;
 			load_addr = TERM_VID_2;
 			load_term = &term2;
 			break;
 		case (F3_P):
-			if (curr_term == SHELL3)
+			if (curr_term_num == SHELL3)
 				return;
 			load_addr = TERM_VID_3;
 			load_term = &term3;
@@ -58,7 +58,7 @@ void switch_terminal(uint8_t keycode) {
 	memcpy((uint32_t*)curr_addr, (uint32_t*)VIDEO_ADDR, KB_4);
 	memcpy((uint32_t*)VIDEO_ADDR, (uint32_t*)load_addr, KB_4);
 	curr_addr = load_addr;
-	curr_term = keycode-F1_P+1;
+	curr_term_num = keycode-F1_P+1;
 	
 	/* store keyboard stuff from kernel vid memory to vid memory of terminal being left */
 	memcpy(curr_term_struct->keyboard,line_buffer,LINE_BUFFER_SIZE);
@@ -87,4 +87,8 @@ void switch_terminal(uint8_t keycode) {
 			return;
 	}
 
+}
+
+void backstage(uint8_t term_num) {
+	
 }

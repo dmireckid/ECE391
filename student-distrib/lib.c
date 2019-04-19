@@ -29,7 +29,7 @@ static char* video_mem = (char *)VIDEO;
  */
 void set_vidmem(uint32_t terminal_num)
 {
-    if(curr_term == terminal_num)
+    if(curr_term_num == terminal_num)
     {
         video_mem =(char *) VIDEO;
         return;

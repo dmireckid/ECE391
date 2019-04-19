@@ -38,7 +38,7 @@ int32_t halt (uint8_t status){
     if(current_pid==1)
     {
         num_processes--;
-        pcb_array[current_pid].flag = NOT_IN_USE_FLAG;
+        pcb_array[current_pid].in_use_flag = NOT_IN_USE_FLAG;
         asm volatile(
 		"movl %0,%%esp;"
 		"movl %1, %%ebp;"
@@ -58,8 +58,8 @@ int32_t halt (uint8_t status){
 	// write parent process back info to tss.esp0
 	//tss.esp0 = pcb_array[current_pid].parent_kernel_esp;
 	
-	// set the flag of the pcb we're going to leave to NOT_IN_USE
-	pcb_array[current_pid].flag = NOT_IN_USE_FLAG;
+	// set the in_use_flag of the pcb we're going to leave to NOT_IN_USE
+	pcb_array[current_pid].in_use_flag = NOT_IN_USE_FLAG;
 	
 	// get new pid after halt is done
 	uint32_t old_pid = current_pid;
@@ -114,7 +114,7 @@ int32_t execute (const uint8_t* command)
 	if(command == NULL) return -1;
 	//check if command points to NULL
 	if(*command == NULL) return -1;
-	
+
 
 
 	//check if the max number of processes are running
@@ -159,13 +159,13 @@ int32_t execute (const uint8_t* command)
 
 	//assign pid
 	uint32_t new_pid = 1;
-	while (pcb_array[new_pid].flag != NOT_IN_USE_FLAG) {
+	while (pcb_array[new_pid].in_use_flag != NOT_IN_USE_FLAG) {
 		new_pid++;
 	}
-	pcb_array[new_pid].flag = IN_USE_FLAG;
+	pcb_array[new_pid].in_use_flag = IN_USE_FLAG;
+	
 	//assign terminal
-    pcb_array[new_pid].flag = IN_USE_FLAG; 
-
+    pcb_array[new_pid].terminal = curr_term_num;
 
 	//increment number of processes
 	num_processes++;
@@ -188,8 +188,9 @@ int32_t execute (const uint8_t* command)
         }
         pcb_array[new_pid].args[j] ='\0';
     }
-    
-    
+
+
+
     //assign memory for the process
     remap_page(new_pid);
     //copy program into memory
@@ -198,7 +199,7 @@ int32_t execute (const uint8_t* command)
     //Initialize PCB values and stdin/out file descriptors
     init_STD(new_pid);
     pcb_array[new_pid].parent_pid = current_pid;
-    
+
 	//save parent esp and ebp values
     asm volatile("movl %%esp,%%eax;"
         : "=a"(pcb_array[new_pid].parent_kernel_esp)
@@ -222,6 +223,7 @@ int32_t execute (const uint8_t* command)
 	uint32_t user_cs = USER_CS; //store USER_CS in a variable
 	uint32_t iret_esp = PROGRAM_VIRTUAL_END; //store the IRET esp in a variable
 	
+	//update the current pid
 	current_pid = new_pid;
 	
 	cli();
@@ -256,7 +258,7 @@ void init_pcb_array()
 {
 	int i;
 	for (i = 0; i < MAX_PROCESSES+1; i++) {
-		pcb_array[i].flag = NOT_IN_USE_FLAG;
+		pcb_array[i].in_use_flag = NOT_IN_USE_FLAG;
 	}
 }
 
