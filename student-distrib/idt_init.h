@@ -1,6 +1,7 @@
 //IDT_INIT HEADER FILE
 
 #define PIT_VAL 0x20
+#define SYSCALL_VAL 0x80
 
 void idt_init();
 void divide_error();

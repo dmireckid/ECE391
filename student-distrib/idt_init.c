@@ -64,7 +64,7 @@ void idt_init(){
 	SET_IDT_ENTRY(idt[PIT_VAL], pit_handler);			//PIC timer handler
 	SET_IDT_ENTRY(idt[KEYBOARD_VAL], keyboard_handler);	//keyboard handler
 	SET_IDT_ENTRY(idt[RTC_VAL], rtc_handler); 			//RTC handler
-	SET_IDT_ENTRY(idt[0x80], sys_call_handler);			//syscall handler
+	SET_IDT_ENTRY(idt[SYSCALL_VAL], sys_call_handler);			//syscall handler
 }
 
 
