@@ -2,6 +2,8 @@
 #include "keyboard.h"
 #include "types.h"
 #include "lib.h"
+#include "term_switch.h"
+
 int buffer_count = 0;
 
 /* 

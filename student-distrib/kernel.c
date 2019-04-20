@@ -157,12 +157,19 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
     initialize_page();
-	
+
 	/*Initialize the filesystem*/
 	init_filesystem(fs_addr);
 	
+	/*Initialize the pcb array*/
+	init_pcb_array();
+	
+	/*Initialize the terminal*/
+	init_terminal();
+	
 	/*Initialize the PIT*/
 	init_pit();
+	
 
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
@@ -172,7 +179,6 @@ void entry(unsigned long magic, unsigned long addr) {
     sti();
 	
 	clear();
-	init_pcb_array();
     execute((unsigned char*)"shell");
 	/*while(1) {
 		execute((unsigned char*)"shell");

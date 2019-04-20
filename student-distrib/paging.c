@@ -146,7 +146,7 @@ void remap_shadow(uint32_t terminal)
 			vidmap_table_entry_array[0].p_base_addr = TERM_VID_3/KB_4;
 			table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = TERM_VID_3/KB_4;
 			break;
-		case default:
+		default:
 			return;break;
 	}
 	
@@ -173,7 +173,7 @@ void remap_shadow_lib(uint32_t terminal)
 		case SHELL3:
 			table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = TERM_VID_3/KB_4;
 			break;
-		case default:
+		default:
 			return;break;
 	}
 	
