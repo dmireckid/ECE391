@@ -3,6 +3,9 @@
 #include "sys_calls.h"
 #include "i8259.h"
 
+
+uint32_t PIT_terminal=1;
+
 /*
  * init_pit
  *   DESCRIPTION: Initializes the PIT to proper values.

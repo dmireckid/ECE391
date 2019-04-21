@@ -12,7 +12,7 @@ uint8_t term1pid = TERM_1;
 uint8_t term2pid = TERM_2;
 uint8_t term3pid = TERM_3;
 
-uint8_t curr_term_num = TERM_1;
+uint32_t curr_term_num = TERM_1;
 uint32_t curr_addr = TERM_VID_1;
 
 /*
@@ -37,7 +37,7 @@ void init_terminal(){
  */
 void switch_terminal(uint8_t keycode) {
 	
-	uint8_t new_term_num = keycode-F1_P+1;
+	uint32_t new_term_num = keycode-F1_P+1;
 	uint32_t new_addr;
 	switch (keycode) {
 		case (F1_P):
@@ -80,6 +80,40 @@ void switch_terminal(uint8_t keycode) {
 
 }
 
-void backstage(uint8_t term_num) {
+
+
+/*
+ *	switch_terminal (uint32_t old_terminal)
+ *
+ *	INPUTS: uint32_t old_terminal - terminal the scheduler is leaving
+ *	OUTPUTS: none
+ *	RETURN VALUE: none
+ *	SIDE EFFECTS:remaps video memory for the next program on the scheduler
+ */
+void schedule_terminal(uint32_t old_terminal) {
+	
+	
+	uint32_t new_addr;
+	
+	uint32_t new_terminal = old_terminal + 1;
+	if(new_terminal==4) new_terminal=1;
+
+	if(current_term_num == new_terminal)
+	{
+		remap_real();set_vidmem(new_terminal);
+	}
+	else
+	{
+		remap_shadow(new_terminal);set_vidmem(new_terminal);
+	}
+
+
+
+
+
+}
+
+
+void backstage(uint32_t term_num) {
 	
 }

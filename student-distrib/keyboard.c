@@ -3,6 +3,7 @@
  */
 
 #include "keyboard.h"
+#include "PIT.h"
 #include "lib.h"
 #include "i8259.h"
 #include "term_driver.h"
@@ -125,8 +126,11 @@ void keyboard_handler_function() {
 			//terminal_write(0,string,string_size);
 
 			//clear_buffer();
+			cli();
+			set_vidmem(curr_term_num);
 			putc('\n');
-			
+			set_vidmem(PIT_terminal);
+			sti();
 			/* Start taking user inputs */
     		//printf("> ");
 			return;
@@ -173,7 +177,13 @@ void keyboard_handler_function() {
 			if (buffer_count == 0)
 				return;
 			remove_from_buffer();
+			
+			cli();
+			set_vidmem(curr_term_num);
 			backspace();
+			set_vidmem(PIT_terminal);
+			sti();
+			
 			return;
 		}
 		
@@ -213,7 +223,13 @@ void keyboard_handler_function() {
 			char found_symbol = get_shifted_symbol(keycode);
 			if (found_symbol>0) {	// if symbol found
 				type_to_buffer(found_symbol);
+
+				cli();
+				set_vidmem(curr_term_num);
 				putc(found_symbol);
+				set_vidmem(PIT_terminal);
+				sti();
+				
 				return;
 			}
 		}
@@ -222,12 +238,24 @@ void keyboard_handler_function() {
         if ( (caps_lock^shift_pressed) == 1 ) {
 			if ( (((uint8_t)keycode >= Q_MAP) && ((uint8_t)keycode <= P_MAP)) || (((uint8_t)keycode >= A_MAP) && ((uint8_t)keycode <= L_MAP)) || (((uint8_t)keycode >= Z_MAP) && ((uint8_t)keycode <= M_MAP)) ) {
 				type_to_buffer(keymap[(uint8_t)keycode]-CAP_OFFSET);
+				
+				cli();
+				set_vidmem(curr_term_num);
 				putc(keymap[(uint8_t)keycode]-CAP_OFFSET);
+				set_vidmem(PIT_terminal);
+				sti();
+
 				return;
 			}
 		}
 		type_to_buffer(keymap[(uint8_t)keycode]);
+
+		cli();
+		
+		set_vidmem(curr_term_num);
 		putc(keymap[(uint8_t)keycode]);
+		set_vidmem(PIT_terminal);
+		sti();
     }
 }
 

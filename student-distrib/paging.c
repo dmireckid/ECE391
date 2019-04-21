@@ -125,8 +125,7 @@ void vid_page() {
 }
 void remap_real()
 {
-	vidmap_table_entry_array[0].p_base_addr = VIDEO_ADDR/KB_4;
-	table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = VIDEO_ADDR/KB_4;	
+	vidmap_table_entry_array[0].p_base_addr = VIDEO_ADDR/KB_4;	
 	enable_paging(directory_entry_array);
 }
 
@@ -136,15 +135,15 @@ void remap_shadow(uint32_t terminal)
 	{
 		case TERM_1:
 			vidmap_table_entry_array[0].p_base_addr = TERM_VID_1/KB_4;
-			table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = TERM_VID_1/KB_4;
+
 			break;	
 		case TERM_2:
 			vidmap_table_entry_array[0].p_base_addr = TERM_VID_2/KB_4;
-			table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = TERM_VID_2/KB_4;
+
 			break;
 		case TERM_3:
 			vidmap_table_entry_array[0].p_base_addr = TERM_VID_3/KB_4;
-			table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = TERM_VID_3/KB_4;
+
 			break;
 		default:
 			return;break;

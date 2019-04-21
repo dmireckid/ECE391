@@ -11,5 +11,9 @@
 #define SHIFT_8 8
 
 
+uint32_t PIT_terminal;
+
 void init_pit();
 void pit_handler_function();
+
+
