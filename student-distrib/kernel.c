@@ -179,7 +179,7 @@ void entry(unsigned long magic, unsigned long addr) {
     sti();
 	
 	clear();
-    execute((unsigned char*)"shell");
+    //execute((unsigned char*)"shell");
 	/*while(1) {
 		execute((unsigned char*)"shell");
 	}*/

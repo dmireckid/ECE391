@@ -25,7 +25,7 @@ void type_to_buffer(char input) {
 		return;
 	
 	*(line_buffer+*buffer_count) = input;
-	*buffer_count++;
+	(*buffer_count)++;
 }
 
 /* 
@@ -44,7 +44,7 @@ void remove_from_buffer() {
 	if (*buffer_count == 0)
 		return;
 	
-	*buffer_count--;
+	(*buffer_count)--;
 	*(line_buffer+*buffer_count) = '\0';
 }
 
@@ -137,12 +137,11 @@ int32_t keyboard_read(int32_t fd, void* buf, int32_t nbytes)
 	* Return Value: pointer to dest
 	* Function: copy n bytes of the source string into the destination string */
 	
-	while(line_buffer[buffer_count-1]!='\n') {
-		strncpy((int8_t*) buf, line_buffer, buffer_count);
-	}
-	//clear_buffer();
-
-	return buffer_count;
+	while(terminal_array[PIT_terminal].keyboard[terminal_array[PIT_terminal].buf_count-1]!='\n');
+		uint32_t count = terminal_array[PIT_terminal].buf_count;
+		strncpy((int8_t*) buf, terminal_array[PIT_terminal].keyboard, terminal_array[PIT_terminal].buf_count);
+	clear_buffer();
+	return count;
 
 
 }

@@ -16,7 +16,7 @@ pit_handler:
     # saving registers and flags
     pushal
     pushfl
-	#call the actual function
+	# call the actual function
     call pit_handler_function
     popfl
     popal

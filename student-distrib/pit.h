@@ -1,5 +1,7 @@
 /* PIT HEADER FILE */
 
+#include "types.h"
+
 #define CHANNEL0 0x40
 #define CHANNEL1 0x41
 #define CHANNEL2 0x42

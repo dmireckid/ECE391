@@ -2,9 +2,12 @@
 #include "lib.h"
 #include "sys_calls.h"
 #include "i8259.h"
-
+#include "term_switch.h" 
+#include "paging.h"
 
 uint32_t PIT_terminal=1;
+uint32_t first_rotation = 1;
+
 
 /*
  * init_pit
@@ -31,4 +34,52 @@ void init_pit(){
  */
 void pit_handler_function(){
 	send_eoi(PIT_IRQ);
+	
+	uint32_t new_terminal = PIT_terminal + 1;
+	if(new_terminal==4) new_terminal=1;
+	
+	
+	//save esp ebp
+    asm volatile("movl %%esp,%%eax;"
+        : "=a"(terminal_array[PIT_terminal].esp)
+        :
+        : "memory");
+    asm volatile("movl %%ebp,%%eax;" 
+    : "=a"(terminal_array[PIT_terminal].ebp)
+    :
+    : "memory");
+
+	schedule_terminal(PIT_terminal);
+	if(first_rotation==TERM_1 ||first_rotation==TERM_2|| first_rotation==TERM_3){
+		uint32_t pid = first_rotation;
+		first_rotation++; PIT_terminal=new_terminal;
+
+		uint32_t kernel_stack_bottom = MB_8 - pid*KB_8;
+
+		asm volatile(
+		"movl %0,%%esp;"
+		"movl %1, %%ebp;"
+        : 
+        : "r"(kernel_stack_bottom ), "r"(kernel_stack_bottom )
+        : "memory");
+
+
+		execute((uint8_t*)"shell");
+	}
+	else{
+		//restore esp ebp of new terminal
+		PIT_terminal = new_terminal;
+
+		asm volatile(
+		"movl %0,%%esp;"
+		"movl %1, %%ebp;"
+		"jmp after_iret"
+        : 
+        : "r"(terminal_array[new_terminal].esp), "r"(terminal_array[new_terminal].ebp)
+        : "memory");
+		return;
+
+
+	}
+
 }

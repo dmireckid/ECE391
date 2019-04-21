@@ -101,14 +101,12 @@ void switch_terminal(uint8_t keycode) {
  *	SIDE EFFECTS:remaps video memory for the next program on the scheduler
  */
 void schedule_terminal(uint32_t old_terminal) {
-	
-	
-	uint32_t new_addr;
+
 	
 	uint32_t new_terminal = old_terminal + 1;
 	if(new_terminal==4) new_terminal=1;
 
-	if(current_term_num == new_terminal)
+	if(curr_term_num == new_terminal)
 	{
 		remap_real();set_vidmem(new_terminal);
 	}
