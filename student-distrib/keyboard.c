@@ -3,7 +3,7 @@
  */
 
 #include "keyboard.h"
-#include "PIT.h"
+#include "pit.h"
 #include "lib.h"
 #include "i8259.h"
 #include "term_driver.h"

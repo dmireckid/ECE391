@@ -3,6 +3,7 @@
 #include "types.h"
 #include "lib.h"
 #include "term_switch.h"
+#include "pit.h"
 
 int buffer_count = 0;
 
@@ -106,7 +107,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes)
 	* Return Value: pointer to dest
 	* Function: copy n bytes of the source string into the destination string */
 	
-	while(line_buffer[buffer_count-1]!='\n');
+	while(terminal_array[PIT_terminal].keyboard[terminal_array[PIT_terminal].buf_count-1]!='\n');
 		uint32_t count = buffer_count;
 		strncpy((int8_t*) buf, line_buffer, buffer_count);
 	clear_buffer();
