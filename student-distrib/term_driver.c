@@ -5,8 +5,6 @@
 #include "term_switch.h"
 #include "pit.h"
 
-int buffer_count = 0;
-
 /* 
  * type_to_buffer(char input)
  *   Description: Adds a character into the line buffer
@@ -20,13 +18,13 @@ void type_to_buffer(char input) {
 	if (line_buffer == NULL)
 		return;
 	/* if the line buffer has one slot left and the input isn't Enter, don't do anything */
-	if (buffer_count == LINE_BUFFER_SIZE-1 && input != '\n')
+	if (*buffer_count == LINE_BUFFER_SIZE-1 && input != '\n')
 		return;
 	/* if the line buffer is full, don't do anything */
-	if (buffer_count == LINE_BUFFER_SIZE)
+	if (*buffer_count == LINE_BUFFER_SIZE)
 		return;
 	
-	*(line_buffer+buffer_count) = input;
+	*(line_buffer+*buffer_count) = input;
 	*buffer_count++;
 }
 
@@ -43,11 +41,11 @@ void remove_from_buffer() {
 	if (line_buffer == NULL)
 		return;
 	/* if the line buffer is empty, don't do anything */
-	if (buffer_count == 0)
+	if (*buffer_count == 0)
 		return;
 	
-	buffer_count--;
-	*(line_buffer+buffer_count) = '\0';
+	*buffer_count--;
+	*(line_buffer+*buffer_count) = '\0';
 }
 
 /* 
@@ -108,8 +106,8 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes)
 	* Function: copy n bytes of the source string into the destination string */
 	
 	while(terminal_array[PIT_terminal].keyboard[terminal_array[PIT_terminal].buf_count-1]!='\n');
-		uint32_t count = buffer_count;
-		strncpy((int8_t*) buf, line_buffer, buffer_count);
+		uint32_t count = terminal_array[PIT_terminal].buf_count;
+		strncpy((int8_t*) buf, terminal_array[PIT_terminal].keyboard, terminal_array[PIT_terminal].buf_count);
 	clear_buffer();
 	return count;
 
