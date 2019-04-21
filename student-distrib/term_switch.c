@@ -24,6 +24,16 @@ uint32_t curr_addr = TERM_VID_1;
  *	SIDE EFFECTS: set the global line buffer pointer to the buffer in terminal 1
  */
 void init_terminal(){
+	int i;
+	int j;
+	for (i = 0; i < TERM_3+1; i++) {
+		for (j = 0; j < LINE_BUFFER_SIZE; j++) {
+			terminal_array[i].keyboard[j] = '\0';
+		}
+		terminal_array[i].buf_count = 0;
+		terminal_array[i].screenx = 0;
+		terminal_array[i].screeny = 0;
+	}
 	line_buffer = terminal_array[1].keyboard;
 	buffer_count = &terminal_array[1].buf_count;
 }
