@@ -15,7 +15,7 @@ uint32_t curr_term_num;
 typedef struct __attribute__((packed)) term{
 
     char keyboard[LINE_BUFFER_SIZE];
-	uint8_t buf_count;
+	int buf_count;
     uint8_t screenx;
     uint8_t screeny;
 	uint8_t curr_pid;

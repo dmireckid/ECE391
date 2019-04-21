@@ -27,7 +27,7 @@ void type_to_buffer(char input) {
 		return;
 	
 	*(line_buffer+buffer_count) = input;
-	buffer_count++;
+	*buffer_count++;
 }
 
 /* 
@@ -73,15 +73,15 @@ void buffer_command() {
  */
 void clear_buffer() {
 	/* if the pointer to the line buffer is NULL, return */
-	if (line_buffer == NULL)
+	if (terminal_array[PIT_terminal].keyboard == NULL)
 		return;
 	
 	int i;
 	for (i = 0; i < LINE_BUFFER_SIZE; i++) {
-		*(line_buffer+i) = '\0';
+		*(terminal_array[PIT_terminal].keyboard+i) = '\0';
 	}
 	
-	buffer_count = 0;
+	terminal_array[PIT_terminal].buf_count = 0;
 }
 
 /*

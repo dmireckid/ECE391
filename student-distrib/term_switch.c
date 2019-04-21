@@ -25,6 +25,7 @@ uint32_t curr_addr = TERM_VID_1;
  */
 void init_terminal(){
 	line_buffer = terminal_array[1].keyboard;
+	buffer_count = &terminal_array[1].buf_count;
 }
 
 /*
@@ -65,13 +66,12 @@ void switch_terminal(uint8_t keycode) {
 	curr_addr = new_addr;
 	
 	/* store keyboard stuff from kernel vid memory to vid memory of terminal being left */
-	terminal_array[curr_term_num].buf_count = buffer_count;
 	terminal_array[curr_term_num].screenx = screen_x;
 	terminal_array[curr_term_num].screeny = screen_y;
 
 	/* move keyboard stuff from vid memory of terminal being entered to kernel vid memory */
 	line_buffer = terminal_array[new_term_num].keyboard;
-	buffer_count = terminal_array[new_term_num].buf_count;
+	buffer_count = &terminal_array[new_term_num].buf_count;
 	screen_x = terminal_array[new_term_num].screenx;
 	screen_y = terminal_array[new_term_num].screeny;
 	update_cursor(screen_x, screen_y);

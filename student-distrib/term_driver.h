@@ -5,7 +5,7 @@
 
 #define LINE_BUFFER_SIZE	128
 
-int buffer_count;
+int* buffer_count;
 char* line_buffer;
 
 /* Add a character to the line buffer */

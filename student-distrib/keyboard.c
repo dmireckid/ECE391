@@ -131,8 +131,7 @@ void keyboard_handler_function() {
 			putc('\n');
 			set_vidmem(PIT_terminal);
 			sti();
-			/* Start taking user inputs */
-    		//printf("> ");
+
 			return;
 		}
 
@@ -177,7 +176,7 @@ void keyboard_handler_function() {
 			if (buffer_count == 0)
 				return;
 			remove_from_buffer();
-			
+
 			cli();
 			set_vidmem(curr_term_num);
 			backspace();
@@ -208,8 +207,12 @@ void keyboard_handler_function() {
 			ctrl_l();
 
 			/* Start taking user inputs */
+			cli();
+			set_vidmem(curr_term_num);
     		printf("> ");
 			terminal_write(0,line_buffer,buffer_count);
+			set_vidmem(PIT_terminal);
+			sti();
 
 			return;
 		}
