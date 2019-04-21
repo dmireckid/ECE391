@@ -52,7 +52,8 @@ void pit_handler_function(){
 	schedule_terminal(PIT_terminal);
 	if(first_rotation==TERM_1 ||first_rotation==TERM_2|| first_rotation==TERM_3){
 		uint32_t pid = first_rotation;
-		first_rotation++; PIT_terminal=new_terminal;
+		first_rotation++; PIT_terminal=new_terminal; 
+		current_pid = 0;
 
 		uint32_t kernel_stack_bottom = MB_8 - pid*KB_8;
 
@@ -69,6 +70,7 @@ void pit_handler_function(){
 	else{
 		//restore esp ebp of new terminal
 		PIT_terminal = new_terminal;
+		current_pid = terminal_array[PIT_terminal].curr_pid;		
 
 		asm volatile(
 		"movl %0,%%esp;"

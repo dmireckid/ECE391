@@ -11,6 +11,7 @@
 #include "lib.h"
 #include "paging.h"
 #include "term_switch.h"
+#include "pit.h"
 
 static uint32_t rtc_jumptable[ELF_SIZE] = { (uint32_t)&rtc_open,(uint32_t)&rtc_read,(uint32_t)&rtc_write,(uint32_t)&rtc_close};
 static uint32_t terminal_jumptable[ELF_SIZE] = {(uint32_t)&terminal_open,(uint32_t)&terminal_read,(uint32_t)&terminal_write,(uint32_t)&terminal_close};
@@ -19,7 +20,7 @@ static uint32_t file_jumptable[ELF_SIZE] = {(uint32_t)&open_f,(uint32_t)&read_f,
 
 static int8_t elf_string[ELF_SIZE] = {ELF_0,ELF_1,ELF_2,ELF_3};
 
-static uint32_t current_pid=0;
+uint32_t current_pid=0;
 static uint32_t num_processes=0;
 //	index 0 will hold the data for kernel.c process, 1-6 will hold the base shell and command programs
 static pcb_t pcb_array[MAX_PROCESSES+1];
@@ -35,10 +36,12 @@ static pcb_t pcb_array[MAX_PROCESSES+1];
  */
 int32_t halt (uint8_t status){
 
-    if(current_pid==1)
+    if(current_pid==1 ||current_pid==2|| current_pid==3)
     {
         num_processes--;
         pcb_array[current_pid].in_use_flag = NOT_IN_USE_FLAG;
+        terminal_array[PIT_terminal].curr_pid = pcb_array[current_pid].parent_pid;
+        current_pid =pcb_array[current_pid].parent_pid;
         asm volatile(
 		"movl %0,%%esp;"
 		"movl %1, %%ebp;"
@@ -162,6 +165,7 @@ int32_t execute (const uint8_t* command)
 	while (pcb_array[new_pid].in_use_flag != NOT_IN_USE_FLAG) {
 		new_pid++;
 	}
+    terminal_array[PIT_terminal].curr_pid = new_pid;
 	pcb_array[new_pid].in_use_flag = IN_USE_FLAG;
 	
 	//assign terminal
@@ -198,7 +202,18 @@ int32_t execute (const uint8_t* command)
 
     //Initialize PCB values and stdin/out file descriptors
     init_STD(new_pid);
-    pcb_array[new_pid].parent_pid = current_pid;
+    
+    
+    if(0<= current_pid ||current_pid<= 2 )
+    {
+        pcb_array[new_pid].parent_pid = 0;
+    }
+    else
+    {
+        pcb_array[new_pid].parent_pid = current_pid;
+    }
+    
+
 
 	//save parent esp and ebp values
     asm volatile("movl %%esp,%%eax;"

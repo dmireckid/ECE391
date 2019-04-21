@@ -30,6 +30,7 @@
 #define AB_STATUS				3
 
 
+uint32_t current_pid;
 typedef struct __attribute__((packed))  file_entry{
 
     uint32_t fops	: 32; //file operations table pointer	
