@@ -37,11 +37,11 @@ void set_vidmem(uint32_t terminal_num)
     switch(terminal_num)
     {
 
-        case SHELL1:
+        case TERM_1:
             video_mem = (char *)TERM_VID_1; break;
-        case SHELL2:
+        case TERM_2:
             video_mem = (char *)TERM_VID_2; break;
-        case SHELL3:
+        case TERM_3:
             video_mem = (char *)TERM_VID_3; break;
         default:
             break;

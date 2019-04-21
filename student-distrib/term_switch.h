@@ -6,9 +6,9 @@
 #include "types.h"
 #include "term_driver.h"
 
-#define SHELL1	1
-#define SHELL2	2
-#define SHELL3	3
+#define TERM_1	1
+#define TERM_2	2
+#define TERM_3	3
 
 uint8_t curr_term_num;
 
@@ -23,6 +23,8 @@ typedef struct __attribute__((packed)) term{
     uint32_t ebp;
 
 }term_t;
+
+term_t terminal_array[TERM_3+1];
 
 void init_terminal();
 void switch_terminal(uint8_t keycode);

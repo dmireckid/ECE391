@@ -8,16 +8,12 @@
 #include "lib.h"
 #include "term_driver.h"
 
-uint8_t term1pid=SHELL1;
-uint8_t term2pid=SHELL2;
-uint8_t term3pid=SHELL3;
+uint8_t term1pid = TERM_1;
+uint8_t term2pid = TERM_2;
+uint8_t term3pid = TERM_3;
 
-static term_t term1;
-static term_t term2;
-static term_t term3;
-
-uint8_t curr_term_num=SHELL1;
-term_t* curr_term_struct=&term1;
+uint8_t curr_term_num = TERM_1;
+uint8_t curr_term_struct = TERM_1;
 uint32_t curr_addr=TERM_VID_1;
 
 /*
@@ -29,7 +25,7 @@ uint32_t curr_addr=TERM_VID_1;
  *	SIDE EFFECTS: set the global line buffer pointer to the buffer in terminal 1
  */
 void init_terminal(){
-	line_buffer = term1.keyboard;
+	line_buffer = terminal_array[1].keyboard;
 }
 
 /*
@@ -42,26 +38,23 @@ void init_terminal(){
  */
 void switch_terminal(uint8_t keycode) {
 	
-	term_t* new_term;
+	uint8_t new_term = keycode-F1_P+1;
 	uint32_t new_addr;
 	switch (keycode) {
 		case (F1_P):
-			if (curr_term_num == SHELL1)
+			if (curr_term_num == TERM_1)
 				return;
 			new_addr = TERM_VID_1;
-			new_term = &term1;
 			break;
 		case (F2_P):
-			if (curr_term_num == SHELL2)
+			if (curr_term_num == TERM_2)
 				return;
 			new_addr = TERM_VID_2;
-			new_term = &term2;
 			break;
 		case (F3_P):
-			if (curr_term_num == SHELL3)
+			if (curr_term_num == TERM_3)
 				return;
 			new_addr = TERM_VID_3;
-			new_term = &term3;
 			break;
 		default:
 			return;
@@ -74,30 +67,18 @@ void switch_terminal(uint8_t keycode) {
 	curr_term_num = keycode-F1_P+1;
 	
 	/* store keyboard stuff from kernel vid memory to vid memory of terminal being left */
-	curr_term_struct->buf_count = buffer_count;
-	curr_term_struct->screenx = screen_x;
-	curr_term_struct->screeny = screen_y;
+	terminal_array[curr_term_struct].buf_count = buffer_count;
+	terminal_array[curr_term_struct].screenx = screen_x;
+	terminal_array[curr_term_struct].screeny = screen_y;
 
 	/* move keyboard stuff from vid memory of terminal being entered to kernel vid memory */
-	line_buffer = new_term->keyboard;
-	buffer_count = new_term->buf_count;
-	screen_x = new_term->screenx;
-	screen_y = new_term->screeny;
+	line_buffer = terminal_array[new_term].keyboard;
+	buffer_count = terminal_array[new_term].buf_count;
+	screen_x = terminal_array[new_term].screenx;
+	screen_y = terminal_array[new_term].screeny;
 	update_cursor(screen_x, screen_y);
 
-	switch (keycode) {
-		case (F1_P):
-			curr_term_struct = &term1;
-			break;
-		case (F2_P):
-			curr_term_struct = &term2;
-			break;
-		case (F3_P):
-			curr_term_struct = &term3;
-			break;
-		default:
-			return;
-	}
+	curr_term_struct = new_term;
 
 }
 
