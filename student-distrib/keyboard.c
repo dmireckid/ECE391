@@ -155,13 +155,13 @@ void keyboard_handler_function() {
 			return;
 		}
 		
-		/* if the keycode received is Left Alt, don't do anything */
+		/* if the keycode received is Alt, increment the alt_pressed variable */
 		if ( (uint8_t)keycode == ALT_P ) {
 			alt_pressed++;
 			return;
 		}
 
-		/* if the key that's pressed is Control, set its flag to 1 */
+		/* if the key that's pressed is Control, increment the ctrl variable */
 		if ( (uint8_t)keycode == CTRL_P ) {
 			ctrl++;
 			return;
