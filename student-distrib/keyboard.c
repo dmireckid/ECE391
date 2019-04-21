@@ -210,7 +210,7 @@ void keyboard_handler_function() {
 			cli();
 			set_vidmem(curr_term_num);
     		printf("> ");
-			terminal_write(0,line_buffer,buffer_count);
+			terminal_write(0,line_buffer,*buffer_count);
 			set_vidmem(PIT_terminal);
 			sti();
 
@@ -218,7 +218,7 @@ void keyboard_handler_function() {
 		}
 		
 		/* if the line buffer is full, don't do anything */
-		if (buffer_count == LINE_BUFFER_SIZE-1)
+		if (*buffer_count == LINE_BUFFER_SIZE-1)
 			return;
 
 		/* if shift is being pressed and the key is symbol or number, look up that symbol and print */
