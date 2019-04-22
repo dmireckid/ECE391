@@ -11,6 +11,7 @@
 #include "lib.h"
 #include "paging.h"
 #include "term_switch.h"
+#include "types.h"
 #include "pit.h"
 
 static uint32_t rtc_jumptable[ELF_SIZE] = { (uint32_t)&rtc_open,(uint32_t)&rtc_read,(uint32_t)&rtc_write,(uint32_t)&rtc_close};
@@ -20,7 +21,7 @@ static uint32_t file_jumptable[ELF_SIZE] = {(uint32_t)&open_f,(uint32_t)&read_f,
 
 static int8_t elf_string[ELF_SIZE] = {ELF_0,ELF_1,ELF_2,ELF_3};
 
-uint32_t current_pid=0;
+
 static uint32_t num_processes=0;
 //	index 0 will hold the data for kernel.c process, 1-6 will hold the base shell and command programs
 static pcb_t pcb_array[MAX_PROCESSES+1];
@@ -36,17 +37,24 @@ static pcb_t pcb_array[MAX_PROCESSES+1];
  */
 int32_t halt (uint8_t status){
 
-    if(current_pid==1 ||current_pid==2|| current_pid==3)
+    if(terminal_array[PIT_terminal].curr_pid==1 ||terminal_array[PIT_terminal].curr_pid==2|| terminal_array[PIT_terminal].curr_pid==3)
     {
         num_processes--;
-        pcb_array[current_pid].in_use_flag = NOT_IN_USE_FLAG;
-        terminal_array[PIT_terminal].curr_pid = pcb_array[current_pid].parent_pid;
-        current_pid =pcb_array[current_pid].parent_pid;
+        pcb_array[terminal_array[PIT_terminal].curr_pid].in_use_flag = NOT_IN_USE_FLAG;
+        //terminal_array[PIT_terminal].curr_pid = pcb_array[terminal_array[PIT_terminal].curr_pid].parent_pid;
+        uint32_t kernel_stack_bottom = MB_8 - terminal_array[PIT_terminal].curr_pid*KB_8;
+        if(terminal_array[PIT_terminal].curr_pid != PIT_terminal)
+        {
+            while(1)
+            {
+                printf("\nhalt error 1\n");
+            }
+        }
         asm volatile(
 		"movl %0,%%esp;"
 		"movl %1, %%ebp;"
         : 
-        : "r"(tss.esp0), "r"(tss.esp0)
+        : "r"(kernel_stack_bottom), "r"(kernel_stack_bottom)
         : "memory");
 
         execute((const uint8_t*)"shell");
@@ -62,12 +70,12 @@ int32_t halt (uint8_t status){
 	//tss.esp0 = pcb_array[current_pid].parent_kernel_esp;
 	
 	// set the in_use_flag of the pcb we're going to leave to NOT_IN_USE
-	pcb_array[current_pid].in_use_flag = NOT_IN_USE_FLAG;
+	pcb_array[terminal_array[PIT_terminal].curr_pid].in_use_flag = NOT_IN_USE_FLAG;
 	
 	// get new pid after halt is done
-	uint32_t old_pid = current_pid;
-	uint32_t new_pid = pcb_array[current_pid].parent_pid;
-	current_pid = new_pid;
+	uint32_t old_pid = terminal_array[PIT_terminal].curr_pid;
+	uint32_t new_pid = pcb_array[terminal_array[PIT_terminal].curr_pid].parent_pid;
+	terminal_array[PIT_terminal].curr_pid = new_pid;
 
 	// decrement number of processes
 	num_processes--;
@@ -165,11 +173,10 @@ int32_t execute (const uint8_t* command)
 	while (pcb_array[new_pid].in_use_flag != NOT_IN_USE_FLAG) {
 		new_pid++;
 	}
-    terminal_array[PIT_terminal].curr_pid = new_pid;
+
 	pcb_array[new_pid].in_use_flag = IN_USE_FLAG;
 	
-	//assign terminal
-    pcb_array[new_pid].terminal = curr_term_num;
+
 
 	//increment number of processes
 	num_processes++;
@@ -204,13 +211,13 @@ int32_t execute (const uint8_t* command)
     init_STD(new_pid);
     
     
-    if(0<= current_pid ||current_pid<= 2 )
+    if( new_pid >= 1 && new_pid <= 3 )
     {
         pcb_array[new_pid].parent_pid = 0;
     }
     else
     {
-        pcb_array[new_pid].parent_pid = current_pid;
+        pcb_array[new_pid].parent_pid = terminal_array[PIT_terminal].curr_pid;
     }
     
 
@@ -238,9 +245,9 @@ int32_t execute (const uint8_t* command)
 	uint32_t user_cs = USER_CS; //store USER_CS in a variable
 	uint32_t iret_esp = PROGRAM_VIRTUAL_END; //store the IRET esp in a variable
 	
-	//update the current pid
-	current_pid = new_pid;
-	
+	//update the current terminal pid
+	terminal_array[PIT_terminal].curr_pid = new_pid;
+
 	cli();
     //printf("\nexecute2: %x %x %x\n",tss.esp0,new_pid,pcb_array[current_pid].parent_kernel_esp);
 	context_switch(user_ds, iret_esp, user_cs, entry);
@@ -320,13 +327,13 @@ int32_t read (int32_t fd, void* buf, int32_t nbytes)
 {
     //check if file descriptor is in bounds and if the flag is IN_USE
     if(fd > MAX_FILES-1 || fd < 0) return -1;
-	if(pcb_array[current_pid].fd_array[fd].flags == NOT_IN_USE_FLAG) return -1;
+	if(pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[fd].flags == NOT_IN_USE_FLAG) return -1;
 	
 	//if the fd called is stdout, return -1
 	if(fd==1) return -1;
  
 	//jump to the corresponding read function
-    uint32_t* ptr = (uint32_t*)pcb_array[current_pid].fd_array[fd].fops; 
+    uint32_t* ptr = (uint32_t*)pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[fd].fops; 
     int32_t (*fun_ptr)(int32_t, void*, int32_t) = (void*)ptr[1];
     return (*fun_ptr)(fd,buf,nbytes);
 }
@@ -341,7 +348,7 @@ int32_t read (int32_t fd, void* buf, int32_t nbytes)
  *	SIDE EFFECTS: none
  */
 uint32_t get_flags(int32_t fd){
-	return pcb_array[current_pid].fd_array[fd].flags;
+	return pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[fd].flags;
 }
 /*
  *	get_inode
@@ -352,7 +359,7 @@ uint32_t get_flags(int32_t fd){
  *	SIDE EFFECTS: none
  */
 uint32_t get_inode(int32_t fd){
-	return pcb_array[current_pid].fd_array[fd].inode;
+	return pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[fd].inode;
 }
 
 /*
@@ -364,7 +371,7 @@ uint32_t get_inode(int32_t fd){
  *	SIDE EFFECTS: none
  */
 uint32_t get_fp(int32_t fd){
-	return pcb_array[current_pid].fd_array[fd].fp;
+	return pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[fd].fp;
 }
 /*
  *	set_fp
@@ -375,7 +382,7 @@ uint32_t get_fp(int32_t fd){
  *	SIDE EFFECTS: changes fp
  */
 void set_fp(int32_t fd,uint32_t fp){
-	pcb_array[current_pid].fd_array[fd].fp = fp;
+	pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[fd].fp = fp;
 }
 /*
  *	clear_fp
@@ -386,7 +393,7 @@ void set_fp(int32_t fd,uint32_t fp){
  *	SIDE EFFECTS: clears fp
  */
 void clear_fp(int32_t fd){
-	pcb_array[current_pid].fd_array[fd].fp = 0;
+	pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[fd].fp = 0;
 	return;
 }
 
@@ -399,7 +406,7 @@ void clear_fp(int32_t fd){
  *	SIDE EFFECTS: increment fp
  */
 void fp_plus(int32_t fd){
-	pcb_array[current_pid].fd_array[fd].fp++;
+	pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[fd].fp++;
 	return;
 }
 
@@ -417,13 +424,13 @@ int32_t write (int32_t fd, const void* buf, int32_t nbytes)
 {
     //check if file descriptor is in bounds and if the flag is IN_USE
     if(fd > MAX_FILES-1 || fd < 0) return -1;
-	if(pcb_array[current_pid].fd_array[fd].flags == NOT_IN_USE_FLAG) return -1;
+	if(pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[fd].flags == NOT_IN_USE_FLAG) return -1;
 	
 	//if the fd called is stin, return -1
 	if(fd==0) return -1;
  
 	//jump to the corresponding write function
-    uint32_t* ptr = (uint32_t*)pcb_array[current_pid].fd_array[fd].fops; 
+    uint32_t* ptr = (uint32_t*)pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[fd].fops; 
     int32_t (*fun_ptr)(int32_t, const void*, int32_t) = (void*)ptr[FILE_TYPE_2];
     return (*fun_ptr)(fd,buf,nbytes);
 }
@@ -447,7 +454,7 @@ int32_t open (const uint8_t* filename)
     for(unusedfd = FILE_TYPE_2; unusedfd<=MAX_FILES; unusedfd++)
     {
        if(unusedfd==MAX_FILES) return -1;	//if all file descriptors are in use, return -1
-       if(pcb_array[current_pid].fd_array[unusedfd].flags == NOT_IN_USE_FLAG)
+       if(pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[unusedfd].flags == NOT_IN_USE_FLAG)
             break;
     }
 
@@ -457,30 +464,30 @@ int32_t open (const uint8_t* filename)
         case 0://rtc
         {
 
-            pcb_array[current_pid].fd_array[unusedfd].fops = (uint32_t)rtc_jumptable;
-            pcb_array[current_pid].fd_array[unusedfd].inode = 0;
-            pcb_array[current_pid].fd_array[unusedfd].fp = 0;
-            pcb_array[current_pid].fd_array[unusedfd].flags = IN_USE_FLAG;
+            pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[unusedfd].fops = (uint32_t)rtc_jumptable;
+            pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[unusedfd].inode = 0;
+            pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[unusedfd].fp = 0;
+            pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[unusedfd].flags = IN_USE_FLAG;
             break;
         }
         case 1://directory
         {
 
 
-            pcb_array[current_pid].fd_array[unusedfd].fops = (uint32_t)directory_jumptable;
-            pcb_array[current_pid].fd_array[unusedfd].inode = 0;
-            pcb_array[current_pid].fd_array[unusedfd].fp = 0;
-            pcb_array[current_pid].fd_array[unusedfd].flags = IN_USE_FLAG;
+            pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[unusedfd].fops = (uint32_t)directory_jumptable;
+            pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[unusedfd].inode = 0;
+            pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[unusedfd].fp = 0;
+            pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[unusedfd].flags = IN_USE_FLAG;
             break;
         }
         case FILE_TYPE_2://file
         {
 
 
-            pcb_array[current_pid].fd_array[unusedfd].fops = (uint32_t)file_jumptable;
-            pcb_array[current_pid].fd_array[unusedfd].inode = test.inode_num;
-            pcb_array[current_pid].fd_array[unusedfd].fp = 0;
-            pcb_array[current_pid].fd_array[unusedfd].flags = IN_USE_FLAG;
+            pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[unusedfd].fops = (uint32_t)file_jumptable;
+            pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[unusedfd].inode = test.inode_num;
+            pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[unusedfd].fp = 0;
+            pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[unusedfd].flags = IN_USE_FLAG;
             break;
         }
         default:
@@ -490,7 +497,7 @@ int32_t open (const uint8_t* filename)
     }
  
 	//jump to the corresponding open function
-    uint32_t* ptr = (uint32_t*)pcb_array[current_pid].fd_array[unusedfd].fops; 
+    uint32_t* ptr = (uint32_t*)pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[unusedfd].fops; 
     int32_t (*fun_ptr)(const uint8_t*) = (void*)ptr[0];
     (*fun_ptr)(filename);
 
@@ -512,11 +519,11 @@ int32_t close (int32_t fd)
 		return -1;
 	}
 	// check if fd is unopened, if so, return -1
-	if (pcb_array[current_pid].fd_array[fd].flags == NOT_IN_USE_FLAG) {
+	if (pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[fd].flags == NOT_IN_USE_FLAG) {
 		return -1;
 	}
 	
-	pcb_array[current_pid].fd_array[fd].flags = NOT_IN_USE_FLAG;
+	pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[fd].flags = NOT_IN_USE_FLAG;
     return 0;
 }
 
@@ -535,12 +542,12 @@ int32_t close (int32_t fd)
 int32_t getargs (uint8_t* buf, int32_t nbytes)
 {
 	if (buf == NULL) return -1;
-	if(nbytes < LINE_BUFFER_SIZE || pcb_array[current_pid].args[0] =='\0' ) return -1;
+	if(nbytes < LINE_BUFFER_SIZE || pcb_array[terminal_array[PIT_terminal].curr_pid].args[0] =='\0' ) return -1;
 
 
     int32_t i = 0;
-    while (pcb_array[current_pid].args[i]!= '\0' && i<LINE_BUFFER_SIZE) {
-        buf[i] = pcb_array[current_pid].args[i];
+    while (pcb_array[terminal_array[PIT_terminal].curr_pid].args[i]!= '\0' && i<LINE_BUFFER_SIZE) {
+        buf[i] = pcb_array[terminal_array[PIT_terminal].curr_pid].args[i];
         i++;
     }
     buf[i] = '\0';
