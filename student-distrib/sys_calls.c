@@ -123,8 +123,6 @@ int32_t execute (const uint8_t* command)
 {
 	//check if command pointer is NULL
 	if(command == NULL) return -1;
-	//check if command points to NULL
-	if(*command == NULL) return -1;
 
 
 
@@ -151,6 +149,7 @@ int32_t execute (const uint8_t* command)
 		i++;
     }
     exe[k]='\0';
+	if (exe[0] == '\n' || exe[0]=='\0') return 0;
 
 	// move through the rest of the spaces that occur after the command
 	while(i<LINE_BUFFER_SIZE && command[i]==' ')

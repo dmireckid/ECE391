@@ -117,6 +117,7 @@ void keyboard_handler_function() {
 		
 		/* if the keycode received is Enter, add the character to the line buffer and call the command */
 		if ( keymap[(uint8_t)keycode] == '\n' ) {
+			if (line_buffer[(*buffer_count)-1] == '\n') return;
 			type_to_buffer('\n');
 			//buffer_command();
 
