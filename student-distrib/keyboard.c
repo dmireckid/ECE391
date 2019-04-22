@@ -173,7 +173,7 @@ void keyboard_handler_function() {
 		/* if the key that's pressed is Backspace, clear the previously entered symbol and move the cursor back */
 		if ((uint8_t)keycode == BACKSPACE) {
 			/* if the line buffer is empty, don't do anything */
-			if (buffer_count == 0)
+			if (*buffer_count == 0)
 				return;
 			remove_from_buffer();
 
