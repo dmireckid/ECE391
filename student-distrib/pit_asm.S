@@ -2,6 +2,7 @@
 
 .globl pit_handler
 
+.globl test_cr2
 /* 
  * pit_handler()
  *   Description: Calls pit_handler_function at pit.h
@@ -21,3 +22,7 @@ pit_handler:
     popfl
     popal
     iret
+
+
+
+

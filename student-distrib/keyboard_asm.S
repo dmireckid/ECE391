@@ -4,6 +4,7 @@
 .text
 
 .globl keyboard_handler
+.globl test_cr2
 
 /* 
  * keyboard_handler()
@@ -22,3 +23,8 @@ keyboard_handler:
     popfl
     popal
     iret
+
+
+test_cr2:
+    movl %cr2,%eax
+    ret

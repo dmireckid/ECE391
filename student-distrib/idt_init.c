@@ -178,8 +178,10 @@ void gen_prot(){
 
 void page_fault(){
 	cli();
-	//clear();				//clear the screen
-	printf("Page fault\n");	//print error message
+	clear();
+	uint32_t addr = test_cr2();	
+
+	printf("\n0x%x\nPage fault\n",addr);	//print error message
 	halt(EX_STATUS);		//call halt
 }
 

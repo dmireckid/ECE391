@@ -70,7 +70,8 @@ void pit_handler_function(){
 	}
 	else{
 		//restore esp ebp of new terminal
-		PIT_terminal = new_terminal;		
+		PIT_terminal = new_terminal;	
+		remap_page(terminal_array[PIT_terminal].curr_pid);	
 		tss.esp0 = MB_8 - terminal_array[PIT_terminal].curr_pid*KB_8;
 		asm volatile(
 		"movl %0,%%esp;"

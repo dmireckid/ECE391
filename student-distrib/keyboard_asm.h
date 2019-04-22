@@ -9,5 +9,7 @@
 
 /* keyboard_handler function from keyboard_asm.S file called externally by interrupt handler */
 extern void keyboard_handler(void);
+extern uint32_t test_cr2(void);
+
 
 #endif
