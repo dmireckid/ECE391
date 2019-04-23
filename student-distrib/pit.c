@@ -51,7 +51,20 @@ void pit_handler_function(){
     : "memory");
 
 	schedule_terminal(PIT_terminal);
+
+
+
+
 	if(first_rotation==TERM_1 ||first_rotation==TERM_2|| first_rotation==TERM_3){
+			terminal_array[PIT_terminal].screenx = screen_x;
+			terminal_array[PIT_terminal].screeny = screen_y;
+
+			screen_x = terminal_array[new_terminal].screenx;
+			screen_y = terminal_array[new_terminal].screeny;
+
+		clear();
+		ctrl_l();
+
 		uint8_t pid = new_terminal;
 		terminal_array[new_terminal].curr_pid = pid;
 		first_rotation++; PIT_terminal=new_terminal; 
@@ -69,6 +82,22 @@ void pit_handler_function(){
 		execute((uint8_t*)"shell");
 	}
 	else{
+
+
+			terminal_array[PIT_terminal].screenx = screen_x;
+			terminal_array[PIT_terminal].screeny = screen_y;
+
+			screen_x = terminal_array[new_terminal].screenx;
+			screen_y = terminal_array[new_terminal].screeny;
+			
+			if(new_terminal == curr_term_num) update_cursor(screen_x,screen_y);
+		
+
+
+
+
+
+
 		//restore esp ebp of new terminal
 		PIT_terminal = new_terminal;	
 		remap_page(terminal_array[PIT_terminal].curr_pid);	

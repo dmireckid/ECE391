@@ -129,7 +129,21 @@ void keyboard_handler_function() {
 			//clear_buffer();
 			cli();
 			set_vidmem(curr_term_num);
+
+			terminal_array[PIT_terminal].screenx = screen_x;
+			terminal_array[PIT_terminal].screeny = screen_y;
+
+
+			screen_x = terminal_array[curr_term_num].screenx;
+			screen_y = terminal_array[curr_term_num].screeny;
+
 			putc('\n');
+
+			terminal_array[curr_term_num].screenx = screen_x;
+			terminal_array[curr_term_num].screeny = screen_y;
+
+			screen_x = terminal_array[PIT_terminal].screenx;
+			screen_y = terminal_array[PIT_terminal].screeny;
 			set_vidmem(PIT_terminal);
 			sti();
 
@@ -180,7 +194,19 @@ void keyboard_handler_function() {
 
 			cli();
 			set_vidmem(curr_term_num);
+			terminal_array[PIT_terminal].screenx = screen_x;
+			terminal_array[PIT_terminal].screeny = screen_y;
+
+
+			screen_x = terminal_array[curr_term_num].screenx;
+			screen_y = terminal_array[curr_term_num].screeny;
 			backspace();
+			
+			terminal_array[curr_term_num].screenx = screen_x;
+			terminal_array[curr_term_num].screeny = screen_y;
+
+			screen_x = terminal_array[PIT_terminal].screenx;
+			screen_y = terminal_array[PIT_terminal].screeny;
 			set_vidmem(PIT_terminal);
 			sti();
 			
@@ -210,7 +236,18 @@ void keyboard_handler_function() {
 			/* Start taking user inputs */
 			cli();
 			set_vidmem(curr_term_num);
+			terminal_array[PIT_terminal].screenx = screen_x;
+			terminal_array[PIT_terminal].screeny = screen_y;
+
+
+			screen_x = terminal_array[curr_term_num].screenx;
+			screen_y = terminal_array[curr_term_num].screeny;
     		printf("> ");
+			terminal_array[curr_term_num].screenx = screen_x;
+			terminal_array[curr_term_num].screeny = screen_y;
+
+			screen_x = terminal_array[PIT_terminal].screenx;
+			screen_y = terminal_array[PIT_terminal].screeny;
 			terminal_write(0,line_buffer,*buffer_count);
 			set_vidmem(PIT_terminal);
 			sti();
@@ -230,7 +267,18 @@ void keyboard_handler_function() {
 
 				cli();
 				set_vidmem(curr_term_num);
+				terminal_array[PIT_terminal].screenx = screen_x;
+				terminal_array[PIT_terminal].screeny = screen_y;
+
+
+				screen_x = terminal_array[curr_term_num].screenx;
+				screen_y = terminal_array[curr_term_num].screeny;
 				putc(found_symbol);
+				terminal_array[curr_term_num].screenx = screen_x;
+				terminal_array[curr_term_num].screeny = screen_y;
+
+				screen_x = terminal_array[PIT_terminal].screenx;
+				screen_y = terminal_array[PIT_terminal].screeny;
 				set_vidmem(PIT_terminal);
 				sti();
 				
@@ -245,7 +293,18 @@ void keyboard_handler_function() {
 				
 				cli();
 				set_vidmem(curr_term_num);
+				terminal_array[PIT_terminal].screenx = screen_x;
+				terminal_array[PIT_terminal].screeny = screen_y;
+
+
+				screen_x = terminal_array[curr_term_num].screenx;
+				screen_y = terminal_array[curr_term_num].screeny;
 				putc(keymap[(uint8_t)keycode]-CAP_OFFSET);
+				terminal_array[curr_term_num].screenx = screen_x;
+				terminal_array[curr_term_num].screeny = screen_y;
+
+				screen_x = terminal_array[PIT_terminal].screenx;
+				screen_y = terminal_array[PIT_terminal].screeny;
 				set_vidmem(PIT_terminal);
 				sti();
 
@@ -257,7 +316,18 @@ void keyboard_handler_function() {
 		cli();
 		
 		set_vidmem(curr_term_num);
+		terminal_array[PIT_terminal].screenx = screen_x;
+		terminal_array[PIT_terminal].screeny = screen_y;
+
+
+		screen_x = terminal_array[curr_term_num].screenx;
+		screen_y = terminal_array[curr_term_num].screeny;
 		putc(keymap[(uint8_t)keycode]);
+		terminal_array[curr_term_num].screenx = screen_x;
+		terminal_array[curr_term_num].screeny = screen_y;
+
+		screen_x = terminal_array[PIT_terminal].screenx;
+		screen_y = terminal_array[PIT_terminal].screeny;
 		set_vidmem(PIT_terminal);
 		sti();
     }

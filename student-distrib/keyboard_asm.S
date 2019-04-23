@@ -19,7 +19,9 @@ keyboard_handler:
     # saving flags
     pushal
     pushfl
+    cli
     call keyboard_handler_function
+    sti
     popfl
     popal
     iret
