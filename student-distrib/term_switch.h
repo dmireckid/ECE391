@@ -27,8 +27,7 @@ typedef struct __attribute__((packed)) term{
 term_t terminal_array[TERM_3+1];
 
 void init_terminal();
-void schedule_terminal(uint32_t old_terminal);
 void switch_terminal(uint8_t keycode);
-void backstage(uint32_t term_num);
+void schedule_terminal(uint32_t old_terminal);
 
 #endif

@@ -36,6 +36,7 @@ void init_terminal(){
 	}
 	line_buffer = terminal_array[1].keyboard;
 	buffer_count = &terminal_array[1].buf_count;
+	map_terminal(1);
 }
 
 /*
@@ -70,9 +71,13 @@ void switch_terminal(uint8_t keycode) {
 			return;
 	}
 	
+	cli();
+	
 	/* transfer video memory */
+	reset_mapping();
 	memcpy((uint32_t*)curr_addr, (uint32_t*)VIDEO_ADDR, KB_4);
 	memcpy((uint32_t*)VIDEO_ADDR, (uint32_t*)new_addr, KB_4);
+	map_terminal(new_term_num);
 	curr_addr = new_addr;
 	
 	/* store keyboard stuff from kernel vid memory to vid memory of terminal being left */
@@ -85,6 +90,8 @@ void switch_terminal(uint8_t keycode) {
 	screen_x = terminal_array[new_term_num].screenx;
 	screen_y = terminal_array[new_term_num].screeny;
 	update_cursor(screen_x, screen_y);
+	
+	sti();
 
 	curr_term_num = new_term_num;
 
@@ -115,13 +122,4 @@ void schedule_terminal(uint32_t old_terminal) {
 		remap_shadow(new_terminal);set_vidmem(new_terminal);
 	}
 
-
-
-
-
-}
-
-
-void backstage(uint32_t term_num) {
-	
 }

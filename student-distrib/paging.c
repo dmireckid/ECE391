@@ -179,3 +179,47 @@ void remap_shadow_lib(uint32_t terminal)
 	enable_paging(directory_entry_array);
 
 }
+
+void reset_mapping()
+{
+	table_entry_array[TERM_VID_1/KB_4].present = 1;
+	table_entry_array[TERM_VID_1/KB_4].read_write = 1;
+	table_entry_array[TERM_VID_1/KB_4].p_base_addr = TERM_VID_1/KB_4;			// address has to be mapped from 4 kB
+	
+	/*	terminal 2 memory is at 0xBA000, in other words in index TERM_VID_2/KB_4 of the table_entry_array, so
+	*	set the entry's present and re/write bits to 1
+	*/
+	table_entry_array[TERM_VID_2/KB_4].present = 1;
+	table_entry_array[TERM_VID_2/KB_4].read_write = 1;
+	table_entry_array[TERM_VID_2/KB_4].p_base_addr = TERM_VID_2/KB_4;			// address has to be mapped from 4 kB
+	
+	/*	terminal 3 memory is at 0xBB000, in other words in index TERM_VID_3/KB_4 of the table_entry_array, so
+	*	set the entry's present and re/write bits to 1
+	*/
+	table_entry_array[TERM_VID_3/KB_4].present = 1;
+	table_entry_array[TERM_VID_3/KB_4].read_write = 1;
+	table_entry_array[TERM_VID_3/KB_4].p_base_addr = TERM_VID_3/KB_4;
+	
+	enable_paging(directory_entry_array);
+}
+
+void map_terminal(uint32_t terminal)
+{
+	switch(terminal)
+	{
+		case TERM_1:
+			table_entry_array[TERM_VID_1/KB_4].p_base_addr = VIDEO_ADDR/KB_4;
+			break;	
+		case TERM_2:
+			table_entry_array[TERM_VID_2/KB_4].p_base_addr = VIDEO_ADDR/KB_4;
+			break;
+		case TERM_3:
+			table_entry_array[TERM_VID_3/KB_4].p_base_addr = VIDEO_ADDR/KB_4;
+			break;
+		default:
+			return;
+	}
+	
+	enable_paging(directory_entry_array);
+}
+

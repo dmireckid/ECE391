@@ -94,4 +94,7 @@ void remap_real();
 void remap_real_lib();
 void remap_shadow_lib(uint32_t terminal);
 
+void reset_mapping();
+void map_terminal();
+
 #endif
