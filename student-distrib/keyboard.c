@@ -242,13 +242,15 @@ void keyboard_handler_function() {
 
 			screen_x = terminal_array[curr_term_num].screenx;
 			screen_y = terminal_array[curr_term_num].screeny;
-    		ctrl_l();printf("391OS> ");			
+    		ctrl_l();
+			printf("391OS> ");
+			terminal_write(0,line_buffer,*buffer_count);
 			terminal_array[curr_term_num].screenx = screen_x;
 			terminal_array[curr_term_num].screeny = screen_y;
 
 			screen_x = terminal_array[PIT_terminal].screenx;
 			screen_y = terminal_array[PIT_terminal].screeny;
-			terminal_write(0,line_buffer,*buffer_count);
+
 			set_vidmem(PIT_terminal);
 			sti();
 
