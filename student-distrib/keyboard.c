@@ -231,7 +231,7 @@ void keyboard_handler_function() {
 		/* if ctrl is currently being pressed and the character being entered is 'l', clear the screen and put the cursor on top */
 		if ( ctrl > 0 && keymap[(uint8_t)keycode] == 'l' ) {
 			//clear_buffer();
-			ctrl_l();
+
 
 			/* Start taking user inputs */
 			cli();
@@ -242,7 +242,7 @@ void keyboard_handler_function() {
 
 			screen_x = terminal_array[curr_term_num].screenx;
 			screen_y = terminal_array[curr_term_num].screeny;
-    		printf("> ");
+    		ctrl_l();printf("391OS> ");			
 			terminal_array[curr_term_num].screenx = screen_x;
 			terminal_array[curr_term_num].screeny = screen_y;
 
