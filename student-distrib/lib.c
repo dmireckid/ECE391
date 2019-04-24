@@ -4,6 +4,7 @@
 #include "lib.h"
 #include "paging.h"
 #include "term_switch.h"
+#include "pit.h"
 
 #define VIDEO       0xB8000
 #define NUM_COLS    80
@@ -53,17 +54,32 @@ void set_vidmem(uint32_t terminal_num)
  */
 void update_cursor(int screen_x, int screen_y)
 {
-    /* calculate the indexed location of cursor */
-    uint16_t cur_pos = screen_y * NUM_COLS + screen_x;
-    
-    /* send 0x0E to the VGA controller to tell it that we are sending higher byte of cursor position */
-    outb(SENDING_POSITION_HIGH, CURSOR_COMMAND);
-    outb((uint8_t)(cur_pos >> NUMBER_OF_BITS_IN_BYTE), CURSOR_DATA);
-    /* send 0x0F to tell that we are sending lower byte */
-    outb(SENDING_POSITION_LOW, CURSOR_COMMAND);
-    outb((uint8_t)(cur_pos), CURSOR_DATA);
+
+    if(curr_term_num==PIT_terminal)
+    {
+        /* calculate the indexed location of cursor */
+        uint16_t cur_pos = screen_y * NUM_COLS + screen_x;
+        /* send 0x0E to the VGA controller to tell it that we are sending higher byte of cursor position */
+        outb(SENDING_POSITION_HIGH, CURSOR_COMMAND);
+        outb((uint8_t)(cur_pos >> NUMBER_OF_BITS_IN_BYTE), CURSOR_DATA);
+        /* send 0x0F to tell that we are sending lower byte */
+        outb(SENDING_POSITION_LOW, CURSOR_COMMAND);
+        outb((uint8_t)(cur_pos), CURSOR_DATA);
+    }
+
 }
 
+void display_cursor(int screen_x, int screen_y)
+{
+        /* calculate the indexed location of cursor */
+        uint16_t cur_pos = screen_y * NUM_COLS + screen_x;
+        /* send 0x0E to the VGA controller to tell it that we are sending higher byte of cursor position */
+        outb(SENDING_POSITION_HIGH, CURSOR_COMMAND);
+        outb((uint8_t)(cur_pos >> NUMBER_OF_BITS_IN_BYTE), CURSOR_DATA);
+        /* send 0x0F to tell that we are sending lower byte */
+        outb(SENDING_POSITION_LOW, CURSOR_COMMAND);
+        outb((uint8_t)(cur_pos), CURSOR_DATA);
+}
 /* void ctrl_l(void);
  * Inputs: void
  * Return Value: none

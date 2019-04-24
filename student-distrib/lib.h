@@ -7,8 +7,8 @@
 
 #include "types.h"
 
-int screen_x;
-int screen_y;
+volatile int screen_x;
+volatile int screen_y;
 
 //changes video memory to a terminal's video memory
 void set_vidmem(uint32_t terminal_num);
@@ -24,6 +24,7 @@ void clear(void);
 
 /* moves the cursor to desired screen location */
 void update_cursor(int screen_x, int screen_y);
+void display_cursor(int screen_x, int screen_y);
 /* clear the screen and put the cursor on top */
 void ctrl_l(void);
 /* move back one position and clear the previously printed char */

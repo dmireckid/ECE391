@@ -90,7 +90,7 @@ void pit_handler_function(){
 			screen_x = terminal_array[new_terminal].screenx;
 			screen_y = terminal_array[new_terminal].screeny;
 			
-			if(new_terminal == curr_term_num) update_cursor(screen_x,screen_y);
+			if(new_terminal == curr_term_num) display_cursor(screen_x,screen_y);
 		
 
 

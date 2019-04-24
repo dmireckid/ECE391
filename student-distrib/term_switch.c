@@ -7,6 +7,7 @@
 #include "paging.h"
 #include "lib.h"
 #include "term_driver.h"
+#include "pit.h"
 
 uint8_t term1pid = TERM_1;
 uint8_t term2pid = TERM_2;
@@ -81,19 +82,24 @@ void switch_terminal(uint8_t keycode) {
 	curr_addr = new_addr;
 	
 	/* store keyboard stuff from kernel vid memory to vid memory of terminal being left */
-	terminal_array[curr_term_num].screenx = screen_x;
-	terminal_array[curr_term_num].screeny = screen_y;
+	//terminal_array[PIT_terminal].screenx = screen_x;
+	//terminal_array[PIT_terminal].screeny = screen_y;
+
+
 
 	/* move keyboard stuff from vid memory of terminal being entered to kernel vid memory */
 	line_buffer = terminal_array[new_term_num].keyboard;
 	buffer_count = &terminal_array[new_term_num].buf_count;
-	screen_x = terminal_array[new_term_num].screenx;
-	screen_y = terminal_array[new_term_num].screeny;
-	update_cursor(screen_x, screen_y);
+	//screen_x = terminal_array[new_term_num].screenx;
+	//screen_y = terminal_array[new_term_num].screeny;
+	
+
+	
+	curr_term_num = new_term_num;
+	display_cursor(terminal_array[curr_term_num].screenx, terminal_array[curr_term_num].screeny);
 	
 	sti();
 
-	curr_term_num = new_term_num;
 
 }
 
