@@ -29,8 +29,8 @@ static char* video_mem = (char *)VIDEO;
  *  Function: changes the the video memory pointer to a terminals video memory
  */
 void set_vidmem(uint32_t terminal_num)
-{
-    switch(terminal_num)
+{	
+	switch(terminal_num)
     {
 
         case TERM_1:
@@ -294,21 +294,29 @@ int32_t puts(int8_t* s) {
  *  Function: Output a character to the console */
 void putc(uint8_t c) {
     if(c == '\n' || c == '\r') {
-        screen_y++;
-        screen_x = 0;
-    } else {
-        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
-        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
-        screen_x++;
-        if (screen_x == NUM_COLS) {
+        if (screen_y == NUM_ROWS-1) {
+			scroll_down();
+		}
+		else {
 			screen_y++;
 		}
-        screen_x %= NUM_COLS;
+        screen_x = 0;
     }
-	if (screen_y == NUM_ROWS) {
-		scroll_down();
-		screen_y--;
-	}
+	else {
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+        if (screen_x == NUM_COLS-1) {
+			if (screen_y == NUM_ROWS-1) {
+				scroll_down();
+			}
+			else {
+				screen_y++;
+			}
+			screen_x = 0;
+		}
+		else
+			screen_x++;
+    }
     update_cursor(screen_x, screen_y);
 }
 
