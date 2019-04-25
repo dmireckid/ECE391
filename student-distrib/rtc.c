@@ -5,6 +5,7 @@
 #include "i8259.h"
 #include "lib.h"
 #include "types.h"
+#include "pit.h"
 //https://wiki.osdev.org/RTC
 
 #define RTC_MAR	0x70	//address Register / Index register
@@ -22,8 +23,11 @@
 #define init_B 0x40 //control register B Interrupt enable setting
 
 
+#define rtc_max_index 7
 //toggle to 1 when interrupt handler is called, and toggle to 0 when rtc_read is called
-static volatile int interrupt_occurred = 0;
+static volatile int interrupt_occurred[rtc_max_index] = {0,0,0,0,0,0,0};
+static volatile int rate[rtc_max_index]  = {2,2,2,2,2,2,2} ;
+static volatile int count[rtc_max_index] = {0,0,0,0,0,0,0};
 
 /*
  *	init_rtc
@@ -46,7 +50,7 @@ void init_rtc(void){
 	//set oscillator frequency
 	outb( RTC_REGISTER_A, RTC_MAR);
 	reg_a = (uint8_t)inb(RTC_MDR);
-	reg_a |= A_2_Hz;//set bottom 4 bits
+	reg_a |= A_256_Hz;//set bottom 4 bits
 	outb( RTC_REGISTER_A, RTC_MAR);
 	outb( reg_a,RTC_MDR);
 	
@@ -61,7 +65,6 @@ void init_rtc(void){
 	
 	
 	
-	interrupt_occurred=0;
 	enable_irq(RTC_IRQ_LINE);
 	
 }
@@ -80,17 +83,17 @@ void rtc_interrupt(void){
 	//read register C so interrupt is cleared from the RTC
 	outb( RTC_REGISTER_C, RTC_MAR);
 	inb(RTC_MDR);
-	//set off global so rtc_read can continue
-	interrupt_occurred = 1;
-	//required functionality for cp1
-	//test_interrupts();
+
+	int i=0;
+	for (i=0;i<=rtc_max_index;i++)
+		count[i]++;
 	
 }
 
 
 /*
  *	rtc_open
- *  DESCRIPTION:sets rtc clock to 2Hz
+ *  DESCRIPTION:assigns 2Hz to a processes rtc
  *	INPUTS:the name of a file , represented as a array of bytes, with max size of 32 (addresses in filesys.c)
  *	OUTPUTS: none
  *	RETURN VALUE: 0 for success
@@ -99,13 +102,9 @@ void rtc_interrupt(void){
  */
 int32_t rtc_open(const uint8_t* filename){
 	 
-	//set oscillator frequency
-	outb( RTC_REGISTER_A, RTC_MAR);
-	uint8_t reg_a = (uint8_t)inb(RTC_MDR);
-	reg_a |= A_2_Hz;//set bottom 4 bits
-	outb( RTC_REGISTER_A, RTC_MAR);
-	outb( reg_a,RTC_MDR);
-	interrupt_occurred = 0;
+	rate[PIT_terminal] = 2;
+	count[PIT_terminal] = 0;
+
 	return 0;
 
  }
@@ -119,6 +118,8 @@ int32_t rtc_open(const uint8_t* filename){
  *	SIDE EFFECTS: none
  */
  int32_t rtc_close(int32_t fd){
+	rate[PIT_terminal] = 2;
+	count[PIT_terminal] = 0;
 	return 0;
 }
 
@@ -144,9 +145,6 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes){
 	//number of bytes in buffer must be 4
 	if (nbytes!=4) return -1;
 	
-	// this byte will contain the bottom 4 bits that have to be changed to control register A of the RTC
-	volatile uint8_t reg_a_bottom_4 = 0;volatile uint8_t reg_a = 0;
-
 	//the allowed frequencies are powers of two between 2 and 1024 
 	//get the frequency
 	volatile int32_t freq = *((int32_t*)buf);
@@ -154,40 +152,30 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes){
 	switch(freq)
 	{
 		case f_2_Hz:
-			reg_a_bottom_4 = A_2_Hz;break;
+			rate[PIT_terminal] = f_2_Hz;break;
 		case f_4_Hz:
-			reg_a_bottom_4 = A_4_Hz;break;
+			rate[PIT_terminal] = f_4_Hz;break;
 		case f_8_Hz:
-			reg_a_bottom_4 = A_8_Hz;break;
+			rate[PIT_terminal] = f_8_Hz;break;
 		case f_16_Hz:
-			reg_a_bottom_4 = A_16_Hz;break;
+			rate[PIT_terminal] = f_16_Hz;break;
 		case f_32_Hz:
-			reg_a_bottom_4 = A_32_Hz;break;
+			rate[PIT_terminal] = f_32_Hz;break;
 		case f_64_Hz:
-			reg_a_bottom_4 = A_64_Hz;break;
+			rate[PIT_terminal] = f_64_Hz;break;
 		case f_128_Hz:
-			reg_a_bottom_4 = A_128_Hz;break;
+			rate[PIT_terminal] = f_128_Hz;break;
 		case f_256_Hz:
-			reg_a_bottom_4 = A_256_Hz;break;
+			rate[PIT_terminal] = f_256_Hz;break;
 		case f_512_Hz:
-			reg_a_bottom_4 = A_512_Hz;break;
+			rate[PIT_terminal] = f_512_Hz;break;
 		case f_1024_Hz:
-			reg_a_bottom_4 = A_1024_Hz;break;
+			rate[PIT_terminal] = f_1024_Hz;break;
 		default:
 			return -1;
 	}
 
 
-	//set oscillator frequency
-	outb( RTC_REGISTER_A, RTC_MAR);
-	reg_a= 0xF0 & (uint8_t)inb(RTC_MDR); //get the top 4 bits only
-
-	reg_a |= reg_a_bottom_4;//set bottom 4 bits
-
-	outb( RTC_REGISTER_A, RTC_MAR);
-	outb( reg_a,RTC_MDR);
-
-	interrupt_occurred =0;
 
 
 	return nbytes;
@@ -217,12 +205,10 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes){
  */
 int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes)
 {
-	interrupt_occurred =0;
-	while(interrupt_occurred==0);
-	interrupt_occurred =0;
+	while(count[PIT_terminal] < f_256_Hz/rate[PIT_terminal]  );
+	count[PIT_terminal] = 0;
 	return 0;
 
 }
-
 
 
