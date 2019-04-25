@@ -23,16 +23,15 @@ static char* video_mem = (char *)VIDEO;
 
 
 /* void set_vidmem(uint32_t terminal_num)
- *  Inputs: a terminal number corresponding to the process to switch to in the scheduler
+ *  Inputs:   terminal_num - a number corresponding to the terminal to switch to in the scheduler
  *  Outputs:  None
  *  Return:   None
- *  Function: changes the the video memory pointer to a terminals video memory
+ *  Function: changes the the video memory pointer to a terminals virtual address
  */
 void set_vidmem(uint32_t terminal_num)
-{	
+{
 	switch(terminal_num)
     {
-
         case TERM_1:
             video_mem = (char *)TERM_VID_1; break;
         case TERM_2:
@@ -45,12 +44,12 @@ void set_vidmem(uint32_t terminal_num)
     return;
 }
 
-/* void update_corsor(int screen_x, int screen_y)
+/* void update_cursor(int screen_x, int screen_y)
  *  Inputs:   int screen_x and int screen_y which are x and y coordinate on the screen
  *            where the cursor will be moved
  *  Outputs:  None
  *  Return:   None
- *  Function: Moves the cursor to desired screen location
+ *  Function: Moves the cursor to desired screen location ONLY IF the PIT is on the currently displayed terminal
  */
 void update_cursor(int screen_x, int screen_y)
 {
@@ -69,6 +68,13 @@ void update_cursor(int screen_x, int screen_y)
 
 }
 
+/* void display_cursor(int screen_x, int screen_y)
+ *  Inputs:   int screen_x and int screen_y which are x and y coordinate on the screen
+ *            where the cursor will be moved
+ *  Outputs:  None
+ *  Return:   None
+ *  Function: Moves the cursor to desired screen location
+ */
 void display_cursor(int screen_x, int screen_y)
 {
         /* calculate the indexed location of cursor */
@@ -80,6 +86,7 @@ void display_cursor(int screen_x, int screen_y)
         outb(SENDING_POSITION_LOW, CURSOR_COMMAND);
         outb((uint8_t)(cur_pos), CURSOR_DATA);
 }
+
 /* void ctrl_l(void);
  * Inputs: void
  * Return Value: none

@@ -6,7 +6,7 @@
 #include "paging.h"
 #include "x86_desc.h"
 
-uint32_t PIT_terminal=3;
+uint32_t PIT_terminal=TERM_3;
 uint32_t first_rotation = 1;
 
 
@@ -34,13 +34,16 @@ void init_pit(){
  *  Side Effects: Sends EOI to PIT_IRQ and switches to another process through a round-robin scheduler
  */
 void pit_handler_function(){
+	
+	//send an EOI to allow other interrupts to occur
 	send_eoi(PIT_IRQ);
-	
+
+	//create the new terminal number, which cycles between 1-3
 	uint32_t new_terminal = PIT_terminal + 1;
-	if(new_terminal==4) new_terminal=1;
-	
-	
-	//save esp ebp
+	if(new_terminal==TERM_3+1) new_terminal=1;
+
+
+	//save esp/ebp of current terminal
     asm volatile("movl %%esp,%%eax;"
         : "=a"(terminal_array[PIT_terminal].esp)
         :
@@ -50,19 +53,19 @@ void pit_handler_function(){
     :
     : "memory");
 
+	//set the video paging so that it points to the correct terminal buffer/display
 	schedule_terminal(PIT_terminal);
 
 
-
-
+	/* if the PIT interrupt is one of the first three when the system's booted up, boot up a base shell instead */
 	if(first_rotation==TERM_1 ||first_rotation==TERM_2|| first_rotation==TERM_3){
-			terminal_array[PIT_terminal].screenx = screen_x;
-			terminal_array[PIT_terminal].screeny = screen_y;
 
-			screen_x = terminal_array[new_terminal].screenx;
-			screen_y = terminal_array[new_terminal].screeny;
+		terminal_array[PIT_terminal].screenx = screen_x;
+		terminal_array[PIT_terminal].screeny = screen_y;
+		screen_x = terminal_array[new_terminal].screenx;
+		screen_y = terminal_array[new_terminal].screeny;
 
-		clear();
+		//clear();
 		ctrl_l();
 
 		uint8_t pid = new_terminal;
@@ -83,25 +86,21 @@ void pit_handler_function(){
 	}
 	else{
 
+		terminal_array[PIT_terminal].screenx = screen_x;
+		terminal_array[PIT_terminal].screeny = screen_y;
+		screen_x = terminal_array[new_terminal].screenx;
+		screen_y = terminal_array[new_terminal].screeny;
 
-			terminal_array[PIT_terminal].screenx = screen_x;
-			terminal_array[PIT_terminal].screeny = screen_y;
+		//if the PIT is working on the currently displayed terminal, update the cursor
+		if(new_terminal == curr_term_num) display_cursor(screen_x,screen_y);
 
-			screen_x = terminal_array[new_terminal].screenx;
-			screen_y = terminal_array[new_terminal].screeny;
-			
-			if(new_terminal == curr_term_num) display_cursor(screen_x,screen_y);
-		
-
-
-
-
-
-
-		//restore esp ebp of new terminal
-		PIT_terminal = new_terminal;	
+		//set PIT_terminal to hold the new terminal number
+		PIT_terminal = new_terminal;
+		//switch process paging
 		remap_page(terminal_array[PIT_terminal].curr_pid);	
+		//set tss
 		tss.esp0 = MB_8 - terminal_array[PIT_terminal].curr_pid*KB_8;
+		//restore esp ebp of new terminal
 		asm volatile(
 		"movl %0,%%esp;"
 		"movl %1, %%ebp;"
@@ -110,8 +109,5 @@ void pit_handler_function(){
         : "r"(terminal_array[new_terminal].esp), "r"(terminal_array[new_terminal].ebp)
         : "memory");
 		return;
-
-
 	}
-
 }
