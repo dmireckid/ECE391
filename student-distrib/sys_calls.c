@@ -23,7 +23,7 @@ static int8_t elf_string[ELF_SIZE] = {ELF_0,ELF_1,ELF_2,ELF_3};
 
 
 static uint32_t num_processes=0;
-//	index 0 will hold the data for kernel.c process, 1-6 will hold the base shell and command programs
+//index 0 is skipped for our implementation, 1-6 will hold the base shell and command programs
 static pcb_t pcb_array[MAX_PROCESSES+1];
 
 
@@ -60,6 +60,7 @@ int32_t halt (uint8_t status){
         execute((const uint8_t*)"shell");
 
     }
+	
 	// clear out the fd_array associated with the program being halted
 	int i;
 	for (i = FILE_TYPE_2; i < MAX_FILES; i++) {
@@ -80,8 +81,10 @@ int32_t halt (uint8_t status){
 	// decrement number of processes
 	num_processes--;
 	
+	//set tss.esp0 back to original address
     tss.esp0 = MB_8 - new_pid*KB_8;
     //printf("\nhalt1: %x %x %x\n",tss.esp0,current_pid,pcb_array[current_pid].parent_kernel_esp);
+	
 	// restore paging
 	remap_page(new_pid);
 
@@ -125,16 +128,13 @@ int32_t execute (const uint8_t* command)
 	if(command == NULL) return -1;
 
 
-
 	//check if the max number of processes are running
 	if (num_processes == MAX_PROCESSES) {
 		printf("Max number of processes reached \n");
 		return 0;
 	}
 
-    dentry_t test;
-    int8_t buf[ELF_SIZE];
-    int32_t file_size;
+	// parse the execute command from the original buffer
     // '\0', ' ', '\n'
     uint8_t exe[LINE_BUFFER_SIZE];exe[0] = '\0';
     int i=0; 
@@ -157,6 +157,9 @@ int32_t execute (const uint8_t* command)
 		i++;
 	}
 
+    dentry_t test;
+    int8_t buf[ELF_SIZE];
+    int32_t file_size;
     //check if file exists
     if(read_dentry_by_name(exe,&test)==-1) return -1;
 	//check if the filetype is a file
@@ -166,16 +169,12 @@ int32_t execute (const uint8_t* command)
     if(strncmp(buf,elf_string,ELF_SIZE)!=0) return AB_STATUS;
 
 
-
 	//assign pid
 	uint32_t new_pid = 1;
 	while (pcb_array[new_pid].in_use_flag != NOT_IN_USE_FLAG) {
 		new_pid++;
 	}
-
 	pcb_array[new_pid].in_use_flag = IN_USE_FLAG;
-	
-
 
 	//increment number of processes
 	num_processes++;
@@ -200,16 +199,16 @@ int32_t execute (const uint8_t* command)
     }
 
 
-
     //assign memory for the process
     remap_page(new_pid);
+
     //copy program into memory
     read_data(test.inode_num,0,(uint8_t*)PROGRAM_VIRTUAL_ADDRESS,PROGRAM_SIZE);
 
     //Initialize PCB values and stdin/out file descriptors
     init_STD(new_pid);
-    
-    
+
+
     if( new_pid >= 1 && new_pid <= 3 )
     {
         pcb_array[new_pid].parent_pid = 0;
@@ -219,7 +218,6 @@ int32_t execute (const uint8_t* command)
         pcb_array[new_pid].parent_pid = terminal_array[PIT_terminal].curr_pid;
     }
     
-
 
 	//save parent esp and ebp values
     asm volatile("movl %%esp,%%eax;"
@@ -235,18 +233,19 @@ int32_t execute (const uint8_t* command)
     tss.esp0 = MB_8 - new_pid*KB_8;
 	tss.ss0 = KERNEL_DS;
     //printf("\nexecute1: %x %x %x\n",tss.esp0,new_pid,pcb_array[new_pid].parent_kernel_esp);
+
     //get entry point
 	uint32_t entry;
 	read_data(test.inode_num,INDEX_24,(uint8_t*)&entry,ELF_SIZE);
-	//entry += MB_128;
-	
+
 	uint32_t user_ds = USER_DS; //store USER_DS in a variable
 	uint32_t user_cs = USER_CS; //store USER_CS in a variable
 	uint32_t iret_esp = PROGRAM_VIRTUAL_END; //store the IRET esp in a variable
-	
+
 	//update the current terminal pid
 	terminal_array[PIT_terminal].curr_pid = new_pid;
 
+	//next is context switching, so close interrupts
 	cli();
     //printf("\nexecute2: %x %x %x\n",tss.esp0,new_pid,pcb_array[current_pid].parent_kernel_esp);
 	context_switch(user_ds, iret_esp, user_cs, entry);
@@ -576,7 +575,7 @@ int32_t vidmap (uint8_t** screen_start)
 }
 
 /*
- *	getargs
+ *	set_handler
  *
  *	INPUTS: int32_t signum -
  *			void* handler_address -
