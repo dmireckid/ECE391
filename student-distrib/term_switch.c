@@ -16,13 +16,14 @@ uint8_t term3pid = TERM_3;
 uint32_t curr_term_num = TERM_1;
 uint32_t curr_addr = TERM_VID_1;
 
+
 /*
  *	init_terminal
  *
  *	INPUTS: none
  *	OUTPUTS: none
  *	RETURN VALUE: none
- *	SIDE EFFECTS: set the global line buffer pointer to the buffer in terminal 1
+ *	SIDE EFFECTS: set all global variables affiliated with terminal programs to start in terminal 1
  */
 void init_terminal(){
 	int i;
@@ -46,10 +47,9 @@ void init_terminal(){
  *	INPUTS: uint8_t keycode - the keycode of the function button pressed
  *	OUTPUTS: none
  *	RETURN VALUE: none
- *	SIDE EFFECTS: transfers the vid memory of new terminal and stores the vid memory of the terminal being left
+ *	SIDE EFFECTS: remaps the terminal's virtual addresses and transfers the vid memory of old and new terminal
  */
 void switch_terminal(uint8_t keycode) {
-	
 	uint32_t new_term_num = keycode-F1_P+1;
 	uint32_t new_addr;
 	switch (keycode) {
@@ -71,53 +71,43 @@ void switch_terminal(uint8_t keycode) {
 		default:
 			return;
 	}
-	
+
 	cli();
-	
-	/* transfer video memory */
+
+	/* transfer video memory and remap terminal's virtual addresses */
 	reset_mapping();
 	memcpy((uint32_t*)curr_addr, (uint32_t*)VIDEO_ADDR, KB_4);
 	memcpy((uint32_t*)VIDEO_ADDR, (uint32_t*)new_addr, KB_4);
 	map_terminal(new_term_num);
 	curr_addr = new_addr;
-	
+
 	/* store keyboard stuff from kernel vid memory to vid memory of terminal being left */
 	//terminal_array[PIT_terminal].screenx = screen_x;
 	//terminal_array[PIT_terminal].screeny = screen_y;
-
-
 
 	/* move keyboard stuff from vid memory of terminal being entered to kernel vid memory */
 	line_buffer = terminal_array[new_term_num].keyboard;
 	buffer_count = &terminal_array[new_term_num].buf_count;
 	//screen_x = terminal_array[new_term_num].screenx;
 	//screen_y = terminal_array[new_term_num].screeny;
-	
 
-	
 	curr_term_num = new_term_num;
 	display_cursor(terminal_array[curr_term_num].screenx, terminal_array[curr_term_num].screeny);
-	
+
 	sti();
-
-
 }
 
-
-
 /*
- *	switch_terminal (uint32_t old_terminal)
+ *	schedule_terminal (uint32_t old_terminal)
  *
  *	INPUTS: uint32_t old_terminal - terminal the scheduler is leaving
  *	OUTPUTS: none
  *	RETURN VALUE: none
- *	SIDE EFFECTS:remaps video memory for the next program on the scheduler
+ *	SIDE EFFECTS: remaps vid_map virtual address and sets lib.c video pointer for the next program on the scheduler
  */
 void schedule_terminal(uint32_t old_terminal) {
-
-	
 	uint32_t new_terminal = old_terminal + 1;
-	if(new_terminal==4) new_terminal=1;
+	if(new_terminal==TERM_3+1) new_terminal=1;
 
 	if(curr_term_num == new_terminal)
 	{
@@ -127,5 +117,4 @@ void schedule_terminal(uint32_t old_terminal) {
 	{
 		remap_shadow(new_terminal);set_vidmem(new_terminal);
 	}
-
 }
