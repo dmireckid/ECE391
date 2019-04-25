@@ -29,6 +29,8 @@
 #define f_512_Hz 512
 #define f_1024_Hz 1024
 
+#define NUM_BYTES	4
+
 extern void init_rtc(void);
 
 extern void rtc_interrupt(void);
