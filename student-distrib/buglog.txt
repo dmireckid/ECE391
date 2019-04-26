@@ -1,0 +1,113 @@
+BUG LOG:
+	Checkpoint 1:
+		Chris & Suman:
+			Bug: Assembly couldn't access the 4MB-size kernel
+			Solution: Set the PSE (Page Size Extension) value in CR4 to 1
+
+			Bug: Assembly still didn't initialize paging properly
+			Solution: Set the PE (Protection Enable) value in CR0 to 1 along with PG (Paging) to enable paging
+
+			Bug: Segmentation fault when attempting to call a print function after initialize_page()
+			Solution: Properly truncate the pointer value of table_entry_array in directory_entry_array.p_table_addr
+
+		Jason:
+			Bug: RTC interrupt handler doesn’t get called
+			Solution: Properly enable the IRQ for both slave and master
+
+			Bug: RTC doesn’t cause periodic interrupts
+			Solution: Make sure that Register C is read every time there’s a new RTC interrupt
+
+			Bug: Printed characters from Keyboard interrupt ends up printing what we don’t want
+			Solution: Prevent negative-valued int-casted char variables from being accepted
+
+		Damian:
+			Bug: Keyboard and RTC interrupts could still be triggered after an exception.
+			Solution: Put CLI() before printing exception message and entering while(1) loop.
+
+
+	Checkpoint 2:
+		Chris & Jason:
+			Bug: Keyboard handler doesn’t receive a Shift release input
+			Solution: Original code basically ignored all inputs that has the MSB set to 1 (a lot of released keys have the MSB set to 1), so rewrite code to ignore all released inputs except L-Shift and R-Shift
+
+			Bug: Second-last line of text stays in place and doesn’t properly scroll
+			Solution: Repositioned code to make sure second-to-last line of text is properly overwritten by bottom-most line of text
+
+			Bug: Buffer content was not clearing appropriately when clear_buffer() was executed
+			Solution: Fixed wrong variable in for loop that resets the buffer character by character
+
+			Bug: Shift key only mapped to letters but not symbols
+			Solution: Created a mapping array that assigns the correct keys to their corresponding symbols
+
+		Damian:
+			Bug: Page fault when returning from a test for reading the contents of a file
+			Solution: Pass address of a dentry_t into read_by_name/index function instead of pointer to the dentry_t
+
+			Bug: Smiley face printed at the end of “verylargetextwithverylongname.txt” when printing directory contents
+			Solution: Print only 32 characters and clear buffer afterwards
+
+
+	Checkpoint 3:
+			Bug: Inline assembly wasn’t working properly when doing IRET stack
+			Solution: Instead of using inline assembly, call a function connected to the assembly linkage while passing in the required values as arguments, then push the IRET stack directly in the assembly file
+
+			Bug: Page fault when attempting to call execute
+			Solution: Stack before using IRET did not have correct values and positions, so the values were re-calculated and repositioned to match the paging boundaries
+
+			Bug: Interrupts were not activated when doing IRET from execute
+			Solution: Push the flag register to the stack, retrieve the value from within the stack, and mask the value so that the Interrupt Flag is set to 1 before calling IRET, then push the new value back into the stack
+
+			Bug: Function terminal_read() wasn’t being read correctly
+			Solution: Returned number of bytes wasn’t implemented correctly, so number of bytes within buffer kept track from within while(1) loop
+
+			Bug: System call execute wasn’t showing the correct error messages
+			Solution: Set the return value in execute and the status value in halt properly to send back the correct values for abnormal errors and exception errors
+
+			Bug: Page fault when attempting to do “ls” in shell
+			Solution: Argument parameters for the read() command of directories were mixed up, so they were repositioned to match the desired parameters
+
+			Bug: All files don’t display correctly when “ls” is called twice in a row
+			Solution: For the read() command on directories, the length of bytes returned was being done by looking for a NULL character in the buffer, which doesn’t really exist, so to fix it, the length returned was limited to 32 bytes, in order to keep the function consistent
+
+			Bug: CTRL+L doesn’t properly recover the line buffer
+			Solution: Avoided clearing the line buffer and called terminal_write() when the screen is cleared
+
+			Bug: Certain conditions weren’t checked for close() and stdin/stdout
+			Solution: Added cases that returned -1 if terminal_read() was called in stdout, if terminal_write() was called in stdin, or if close() attempted to close an unopened file
+
+
+	Checkpoint 4:
+			Bug: Page fault when calling ‘cat [filename]’
+			Solution: Fixed read_file to have proper inputs and track file position
+
+			Bug: Spaces aren’t ignored before and after commands/arguments
+			Solution: Changed code in execute to separate commands and arguments from spaces and each other
+
+			Bug: Page fault when doing vidmap
+			Solution: Page structure wasn’t initialized correctly for user access
+
+
+	Checkpoint 5:
+			Bug: Initialization and halting of base shell wasn’t working
+			Solution: Properly set parent register values of esp and ebp for each terminal’s base shell and re-execute shell if halt() is called in a base shell
+
+			Bug: Page fault whenever attempting to exit any program
+			Solution: TSS nor program paging was set correctly whenever PIT handler was called
+
+			Bug: Video memory from one terminal is (sometimes) leaked into another when the switching displays
+			Solution: Modified keyboard-handled terminal switching so that all interrupts are masked while video memories are copied and that all terminal virtual addresses are properly remapped
+
+			Bug: Keyboard buffer and cursor aren’t tracked properly
+			Solution: Create a struct for each terminal that keeps a snapshot of the keyboard buffer and cursor position for kernel video memory when the terminal is called again
+
+			Bug: Cursor wasn’t managed properly
+			Solution: Cursor coordinates for each terminal ended up overwriting each other while both the PIT handler and keyboard handler were being called, so proper coordinate switching was implemented
+
+			Bug: CTRL+L wasn’t functioning 100% of the time
+			Solution: terminal_write() wasn’t being called in the right context after CTRL+L was pressed
+
+			Bug: CTRL+L leaks to lower-numbered terminal while counter is running
+			Solution: putc() function increments screen_y and screen_x, BUT problem is that putc() can be interrupted at any time, even when screen_y and screen_x are unacceptable values so we changed it to prevent screen_y and screen_x from EVER going out of bounds
+
+			Bug: System call rtc_open() doesn’t pass through after receiving an interrupt when two programs are using RTC
+			Solution: RTC was virtualized so that each individual program has an independent rate and interrupt-tracker for one globally fixed oscillator rate in the RTC
