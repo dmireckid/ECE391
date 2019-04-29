@@ -570,6 +570,10 @@ int32_t vidmap (uint8_t** screen_start)
 	
 	// map the video memory to a virtual address that permits access to user
 	vid_page();
+	// if the terminal that will vidmap is not currently being displayed, remap vidmap so that it points to the buffer instead
+	if (curr_term_num != PIT_terminal) {
+		remap_shadow(PIT_terminal);
+	}
 	*screen_start = (uint8_t*)VID_MAP_ADDR;
     return 0;
 }

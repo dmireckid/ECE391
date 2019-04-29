@@ -93,6 +93,12 @@ void switch_terminal(uint8_t keycode) {
 	/* update the number of currently displayed terminal */
 	curr_term_num = new_term_num;
 	display_cursor(terminal_array[curr_term_num].screenx, terminal_array[curr_term_num].screeny);
+	
+	/* update the vidmap mapping in case PIT is currently working on a different program when the switch happens */
+	if (PIT_terminal != curr_term_num)
+		remap_shadow(PIT_terminal);
+	else
+		remap_real();
 
 	sti();
 }
