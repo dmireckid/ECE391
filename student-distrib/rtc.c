@@ -42,7 +42,7 @@ void init_rtc(void){
 	outb( RTC_REGISTER_A, RTC_MAR);
 	outb( reg_a,RTC_MDR);
 
-	//set oscillator frequency to 256 (this NEVER changes due to rtc virtualization style)
+	//set oscillator frequency to max frequency: 1024 (this NEVER changes due to rtc virtualization style)
 	outb( RTC_REGISTER_A, RTC_MAR);
 	reg_a = (uint8_t)inb(RTC_MDR);
 	reg_a |= A_1024_Hz;//set bottom 4 bits
