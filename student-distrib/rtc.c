@@ -45,7 +45,7 @@ void init_rtc(void){
 	//set oscillator frequency to max frequency: 1024 (this NEVER changes due to rtc virtualization style)
 	outb( RTC_REGISTER_A, RTC_MAR);
 	reg_a = (uint8_t)inb(RTC_MDR);
-	reg_a |= A_1024_Hz;//set bottom 4 bits
+	reg_a |= A_256_Hz;//set bottom 4 bits
 	outb( RTC_REGISTER_A, RTC_MAR);
 	outb( reg_a,RTC_MDR);
 
@@ -173,7 +173,7 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes){
 int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes)
 {
 	//wait until the adequate number of ticks for that program has been reached
-	while(count[PIT_terminal] < f_1024_Hz/rate[PIT_terminal]);
+	while(count[PIT_terminal] < f_256_Hz/rate[PIT_terminal]);
 	count[PIT_terminal] = 0;
 	return 0;
 }
