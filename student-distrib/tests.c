@@ -213,11 +213,11 @@ int paging_test(){
 static inline void freq_test_1(int freq, int fd)
 {
 	//int32_t* buf = &freq;
-	rtc_write(fd,(void *)freq,4);
+	rtc_write(fd,(void *)&freq,4);
 	int count;
 	for(count = 0;count<9;count++) 
 	{
-		rtc_read(fd,(void *)freq,4);
+		rtc_read(fd,(void *)&freq,4);
 		printf("%u ", freq);
 	}
 }
@@ -235,11 +235,11 @@ static inline void freq_test_1(int freq, int fd)
 static inline void freq_test_2(int freq, int fd)
 {
 	//int32_t* buf = &freq;
-	rtc_write(fd,(void *)freq,4);
+	rtc_write(fd,(void *)&freq,4);
 	int count;
 	for(count = 0;count<freq;count++) 
 	{
-		rtc_read(fd,(void *)freq,4);
+		rtc_read(fd,(void *)&freq,4);
 	}
 	printf("%u rtc interrupts at %u Hz \n",freq,freq);
 }
@@ -468,7 +468,7 @@ void launch_tests(){
 
 	/* CP 2 */
 
-	//rtc_test();
+	rtc_test();
 	//kt_test();
 	//filesys_test();
 	//filesys_test_index(10);
