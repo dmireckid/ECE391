@@ -96,9 +96,18 @@ void remap_page(uint8_t pid) {
 	directory_entry_array[PROGRAM_INDEX].page_size = 1;
 	directory_entry_array[PROGRAM_INDEX].user_super = 1;
 	directory_entry_array[PROGRAM_INDEX].p_table_addr = (SHELL_ADDR_1+pid*PROGRAM_SIZE)>>SHIFT_12;
+	
 	enable_paging(directory_entry_array);
 }
 
+/*
+ * vid_page
+ *   DESCRIPTION: Maps and initializes vidmap paging (for the currently displayed terminal)
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: maps and initializes vidmap paging
+ */
 void vid_page() {
 
 	/*	vidmap virtual address will be at 136 MB, in other words in index 34 of the directory_entry_array, so
@@ -118,19 +127,38 @@ void vid_page() {
 	vidmap_table_entry_array[0].read_write = 1;
 	vidmap_table_entry_array[0].user_super = 1;
 	vidmap_table_entry_array[0].p_base_addr = VIDEO_ADDR/KB_4;
-	
+
 	enable_paging(directory_entry_array);
 	//uint32_t* pointer = VID_MAP_ADDR;
 	//*pointer = 0;
 }
+
+/*
+ * remap_real
+ *   DESCRIPTION: Remaps and reinitializes vidmap paging for the currently displayed terminal in PIT handler
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: remaps and reinitializes vidmap paging to physical video memory
+ */
 void remap_real()
 {
+	// remap the virtual vidmap address to the physical video memory
 	vidmap_table_entry_array[0].p_base_addr = VIDEO_ADDR/KB_4;	
 	enable_paging(directory_entry_array);
 }
 
+/*
+ * remap_shadow
+ *   DESCRIPTION: Remaps and reinitializes vidmap paging for a non-displayed terminal in PIT handler
+ *   INPUTS: uint32_t terminal - terminal to remap vidmap to
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: remaps and reinitializes vidmap paging
+ */
 void remap_shadow(uint32_t terminal)
 {
+	// based off of PIT's current terminal, remap the virtual vidmap address to the respective terminal buffer
 	switch(terminal)
 	{
 		case TERM_1:
@@ -153,35 +181,19 @@ void remap_shadow(uint32_t terminal)
 
 }
 
-void remap_real_lib()
-{
-	table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = VIDEO_ADDR/KB_4;	
-	enable_paging(directory_entry_array);
-}
-
-void remap_shadow_lib(uint32_t terminal)
-{
-	switch(terminal)
-	{
-		case TERM_1:
-			table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = TERM_VID_1/KB_4;
-			break;	
-		case TERM_2:
-			table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = TERM_VID_2/KB_4;
-			break;
-		case TERM_3:
-			table_entry_array[VIDEO_ADDR/KB_4].p_base_addr = TERM_VID_3/KB_4;
-			break;
-		default:
-			return;break;
-	}
-	
-	enable_paging(directory_entry_array);
-
-}
-
+/*
+ * reset_mapping
+ *   DESCRIPTION: resets mapping so that virtual terminal addresses point to their physical terminal buffers
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: resets terminal paging
+ */
 void reset_mapping()
 {
+	/*	terminal 1 memory is at 0xB9000, in other words in index TERM_VID_1/KB_4 of the table_entry_array, so
+	*	set the entry's present and re/write bits to 1
+	*/
 	table_entry_array[TERM_VID_1/KB_4].present = 1;
 	table_entry_array[TERM_VID_1/KB_4].read_write = 1;
 	table_entry_array[TERM_VID_1/KB_4].p_base_addr = TERM_VID_1/KB_4;			// address has to be mapped from 4 kB
@@ -198,13 +210,22 @@ void reset_mapping()
 	*/
 	table_entry_array[TERM_VID_3/KB_4].present = 1;
 	table_entry_array[TERM_VID_3/KB_4].read_write = 1;
-	table_entry_array[TERM_VID_3/KB_4].p_base_addr = TERM_VID_3/KB_4;
-	
+	table_entry_array[TERM_VID_3/KB_4].p_base_addr = TERM_VID_3/KB_4;			// address has to be mapped from 4 kB
+
 	enable_paging(directory_entry_array);
 }
 
+/*
+ * map_terminal
+ *   DESCRIPTION: maps terminals so that virtual address of currently displayed temrinal maps to physical video memory
+ *   INPUTS: uint32_t terminal - terminal that's to be displayed
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: sets the virtual address of the displayed terminal to physical video memory
+ */
 void map_terminal(uint32_t terminal)
 {
+	// based off of the currently displayed terminal, remap the virtual terminal address to the physical video memory
 	switch(terminal)
 	{
 		case TERM_1:
@@ -219,7 +240,6 @@ void map_terminal(uint32_t terminal)
 		default:
 			return;
 	}
-	
+
 	enable_paging(directory_entry_array);
 }
-

@@ -178,9 +178,8 @@ void entry(unsigned long magic, unsigned long addr) {
     printf("Enabling Interrupts\n");
     sti();
 	
-	clear();
-    //execute((unsigned char*)"shell");
-	/*while(1) {
+	/*clear();
+	while(1) {
 		execute((unsigned char*)"shell");
 	}*/
 
