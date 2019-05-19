@@ -60,21 +60,18 @@ void pit_handler_function(){
 	/* if the PIT interrupt is one of the first three when the system's booted up, boot up a base shell instead */
 	if(first_rotation==TERM_1 ||first_rotation==TERM_2|| first_rotation==TERM_3){
 
-		// store the current cursor in the terminal being left and update it to the terminal being switched to
 		terminal_array[PIT_terminal].screenx = screen_x;
 		terminal_array[PIT_terminal].screeny = screen_y;
 		screen_x = terminal_array[new_terminal].screenx;
 		screen_y = terminal_array[new_terminal].screeny;
 
-		// clear the screen when starting up the base shell for the first time
+		//clear();
 		ctrl_l();
 
-		// set the PID for the base shell of the terminal (Terminal 1 Base Shell is at Index 1 of PCB array, etc.)
 		uint8_t pid = new_terminal;
 		terminal_array[new_terminal].curr_pid = pid;
 		first_rotation++; PIT_terminal=new_terminal; 
 
-		// set the parent 
 		uint32_t kernel_stack_bottom = MB_8 - pid*KB_8;
 
 		asm volatile(
@@ -89,7 +86,6 @@ void pit_handler_function(){
 	}
 	else{
 
-		// store the current cursor in the terminal being left and update it to the terminal being switched to
 		terminal_array[PIT_terminal].screenx = screen_x;
 		terminal_array[PIT_terminal].screeny = screen_y;
 		screen_x = terminal_array[new_terminal].screenx;

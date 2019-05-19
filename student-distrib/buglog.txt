@@ -111,6 +111,3 @@ BUG LOG:
 
 			Bug: System call rtc_open() doesn’t pass through after receiving an interrupt when two programs are using RTC
 			Solution: RTC was virtualized so that each individual program has an independent rate and interrupt-tracker for one globally fixed oscillator rate in the RTC
-			
-			Bug: Fish was leaking to other terminals if you rapidly switched between a terminal that ran fish and a terminal that wasn't
-			Solution: When doing a keyboard terminal switch, remapped vidmap based on what PIT was currently working on

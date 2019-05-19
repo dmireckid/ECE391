@@ -26,7 +26,6 @@ uint32_t curr_addr = TERM_VID_1;
  *	SIDE EFFECTS: set all global variables affiliated with terminal programs to start in terminal 1
  */
 void init_terminal(){
-	/* initialize data in all terminal structures */
 	int i;
 	int j;
 	for (i = 0; i < TERM_3+1; i++) {
@@ -37,8 +36,6 @@ void init_terminal(){
 		terminal_array[i].screenx = 0;
 		terminal_array[i].screeny = 0;
 	}
-	
-	/* set the global line buffer and physical video mapping to terminal 1 */
 	line_buffer = terminal_array[1].keyboard;
 	buffer_count = &terminal_array[1].buf_count;
 	map_terminal(1);
@@ -53,7 +50,6 @@ void init_terminal(){
  *	SIDE EFFECTS: remaps the terminal's virtual addresses and transfers the vid memory of old and new terminal
  */
 void switch_terminal(uint8_t keycode) {
-	/* retrieve the terminal number to switch to, determine whether it's already being displayed, and retrive its virtual address */
 	uint32_t new_term_num = keycode-F1_P+1;
 	uint32_t new_addr;
 	switch (keycode) {
@@ -76,29 +72,27 @@ void switch_terminal(uint8_t keycode) {
 			return;
 	}
 
-	/* critical section */
 	cli();
 
-	/* transfer video memory between terminal buffers, remap terminal's virtual addresses, and update virtual address of terminal being displayed */
+	/* transfer video memory and remap terminal's virtual addresses */
 	reset_mapping();
 	memcpy((uint32_t*)curr_addr, (uint32_t*)VIDEO_ADDR, KB_4);
 	memcpy((uint32_t*)VIDEO_ADDR, (uint32_t*)new_addr, KB_4);
 	map_terminal(new_term_num);
 	curr_addr = new_addr;
 
-	/* change line buffer pointer to newly displayed terminal */
+	/* store keyboard stuff from kernel vid memory to vid memory of terminal being left */
+	//terminal_array[PIT_terminal].screenx = screen_x;
+	//terminal_array[PIT_terminal].screeny = screen_y;
+
+	/* move keyboard stuff from vid memory of terminal being entered to kernel vid memory */
 	line_buffer = terminal_array[new_term_num].keyboard;
 	buffer_count = &terminal_array[new_term_num].buf_count;
+	//screen_x = terminal_array[new_term_num].screenx;
+	//screen_y = terminal_array[new_term_num].screeny;
 
-	/* update the number of currently displayed terminal */
 	curr_term_num = new_term_num;
 	display_cursor(terminal_array[curr_term_num].screenx, terminal_array[curr_term_num].screeny);
-	
-	/* update the vidmap mapping in case PIT is currently working on a different program when the switch happens */
-	if (PIT_terminal != curr_term_num)
-		remap_shadow(PIT_terminal);
-	else
-		remap_real();
 
 	sti();
 }
@@ -109,24 +103,18 @@ void switch_terminal(uint8_t keycode) {
  *	INPUTS: uint32_t old_terminal - terminal the scheduler is leaving
  *	OUTPUTS: none
  *	RETURN VALUE: none
- *	SIDE EFFECTS: remaps vidmap virtual address and sets lib.c video pointer for the next program on the scheduler
+ *	SIDE EFFECTS: remaps vid_map virtual address and sets lib.c video pointer for the next program on the scheduler
  */
 void schedule_terminal(uint32_t old_terminal) {
-	/* determine which terminal is PIT going to switch to */
 	uint32_t new_terminal = old_terminal + 1;
 	if(new_terminal==TERM_3+1) new_terminal=1;
 
-	/* set lib.c to point to new virtual terminal address, and if terminal to switch to is the one being displayed,
-	*  set mapping of vidmap to physical video memory, otherwise set it to the respective temrinal buffer
-	*/
 	if(curr_term_num == new_terminal)
 	{
-		remap_real();
-		set_vidmem(new_terminal);
+		remap_real();set_vidmem(new_terminal);
 	}
 	else
 	{
-		remap_shadow(new_terminal);
-		set_vidmem(new_terminal);
+		remap_shadow(new_terminal);set_vidmem(new_terminal);
 	}
 }
