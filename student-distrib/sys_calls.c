@@ -335,7 +335,7 @@ int32_t read (int32_t fd, void* buf, int32_t nbytes)
  *
  *	INPUTS: int32_t fd - file descriptor
  *	OUTPUTS: none
- *	RETURN VALUE: flags of specified fd
+ *	RETURN VALUE: flags
  *	SIDE EFFECTS: none
  */
 uint32_t get_flags(int32_t fd){
@@ -346,12 +346,13 @@ uint32_t get_flags(int32_t fd){
  *
  *	INPUTS: int32_t fd - file descriptor
  *	OUTPUTS: none
- *	RETURN VALUE: value of inode of specified fd
+ *	RETURN VALUE: value of inode
  *	SIDE EFFECTS: none
  */
 uint32_t get_inode(int32_t fd){
 	return pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[fd].inode;
 }
+
 /*
  *	get_fp
  *
@@ -369,7 +370,7 @@ uint32_t get_fp(int32_t fd){
  *	INPUTS: int32_t fd - file descriptor
  *	OUTPUTS: none
  *	RETURN VALUE: 
- *	SIDE EFFECTS: changes fp of specified fd
+ *	SIDE EFFECTS: changes fp
  */
 void set_fp(int32_t fd,uint32_t fp){
 	pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[fd].fp = fp;
@@ -380,19 +381,20 @@ void set_fp(int32_t fd,uint32_t fp){
  *	INPUTS: int32_t fd - file descriptor
  *	OUTPUTS: none
  *	RETURN VALUE: none
- *	SIDE EFFECTS: clears fp of specified fd
+ *	SIDE EFFECTS: clears fp
  */
 void clear_fp(int32_t fd){
 	pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[fd].fp = 0;
 	return;
 }
+
 /*
  *	fp_plus
  *
  *	INPUTS: int32_t fd - file descriptor
  *	OUTPUTS: none
  *	RETURN VALUE: none
- *	SIDE EFFECTS: increment fp of specified fd
+ *	SIDE EFFECTS: increment fp
  */
 void fp_plus(int32_t fd){
 	pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[fd].fp++;
@@ -512,7 +514,6 @@ int32_t close (int32_t fd)
 		return -1;
 	}
 	
-	// set the flag of the now-closed fd to NOT_IN_USE
 	pcb_array[terminal_array[PIT_terminal].curr_pid].fd_array[fd].flags = NOT_IN_USE_FLAG;
     return 0;
 }
@@ -531,11 +532,10 @@ int32_t close (int32_t fd)
  */
 int32_t getargs (uint8_t* buf, int32_t nbytes)
 {
-	// check if buffer pointer is NULL or if the args buffer in the pcb is empty
 	if (buf == NULL) return -1;
 	if(nbytes < LINE_BUFFER_SIZE || pcb_array[terminal_array[PIT_terminal].curr_pid].args[0] =='\0' ) return -1;
 
-	// insert the args buffer into the argument buffer
+
     int32_t i = 0;
     while (pcb_array[terminal_array[PIT_terminal].curr_pid].args[i]!= '\0' && i<LINE_BUFFER_SIZE) {
         buf[i] = pcb_array[terminal_array[PIT_terminal].curr_pid].args[i];
@@ -563,10 +563,6 @@ int32_t vidmap (uint8_t** screen_start)
 	
 	// map the video memory to a virtual address that permits access to user
 	vid_page();
-	// if the terminal that will vidmap is not currently being displayed, remap vidmap so that it points to the buffer instead
-	if (curr_term_num != PIT_terminal) {
-		remap_shadow(PIT_terminal);
-	}
 	*screen_start = (uint8_t*)VID_MAP_ADDR;
     return 0;
 }
