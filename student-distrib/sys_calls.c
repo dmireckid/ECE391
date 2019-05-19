@@ -37,6 +37,12 @@ static pcb_t pcb_array[MAX_PROCESSES+1];
  */
 int32_t halt (uint8_t status){
 
+	int j;
+	for (j = 0; j<LINE_BUFFER_SIZE; j++) {
+		terminal_array[PIT_terminal].keyboard[j] = '\0';
+	}
+	terminal_array[PIT_terminal].buf_count = 0;
+
     if(terminal_array[PIT_terminal].curr_pid==1 ||terminal_array[PIT_terminal].curr_pid==2|| terminal_array[PIT_terminal].curr_pid==3)
     {
         num_processes--;
@@ -249,19 +255,6 @@ int32_t execute (const uint8_t* command)
 	cli();
     //printf("\nexecute2: %x %x %x\n",tss.esp0,new_pid,pcb_array[current_pid].parent_kernel_esp);
 	context_switch(user_ds, iret_esp, user_cs, entry);
-
-/*    asm volatile(
-        "pushl $USER_DS"				//push USER_DS
-        "pushl $PROGRAM_VIRTUAL_END"	//push value of 132MB-1
-        "pushfl"						//push all flags
-        "pushl $USER_CS"				//push USER_CS
-        "pushl %%eax"					//push entry point
-        "IRET" 
-        : 
-        : "a"(entry) 
-        : "memory"
-
-    );*/
 
     return 0;
 }
