@@ -18,7 +18,7 @@ bootblock_t* super_block;
  *								 initialized
  */
 void init_filesystem(uint32_t fs_addr){
-	uint32_t size = 4096;	//4kB, size of data block
+	uint32_t size = DATA_BLOCK_SIZE;	//4kB, size of data block
 	location_fs = fs_addr;
 	location_i = fs_addr + size;
 	super_block = (bootblock_t*)fs_addr;
@@ -85,7 +85,7 @@ int32_t read_dentry_by_index(uint32_t index, dentry_t* dentry){
 int32_t read_data(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length){
 	//printf("Got to read data\n");
 	uint32_t i, start, end;
-	uint32_t size = 4096;	//4kB size of a block
+	uint32_t size = DATA_BLOCK_SIZE;	//4kB size of a block
 	uint32_t retval = 0;
 	start = offset / size;		//set start and end points for loop
 	end = (offset+length)/size;
@@ -224,7 +224,7 @@ int32_t read_d(int32_t fd, uint8_t* buf, int32_t count){
 	int len = 1;
     while (buf[len-1] != '\0' && buf[len-1] != '\n')
 	{
-		if(len==32)break;
+		if(len==FILENAME_LEN)break;
         len++;
 	}
 	return len;

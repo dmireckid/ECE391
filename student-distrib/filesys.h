@@ -3,6 +3,7 @@
 #include "lib.h"
 
 #define FILENAME_LEN 32
+#define DATA_BLOCK_SIZE	4096
 
 typedef struct{
   int8_t filename[FILENAME_LEN];

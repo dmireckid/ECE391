@@ -131,7 +131,7 @@ int paging_struct_test(){
 		return FAIL;
 
 	/*	run through the entire page directory and page table to see that every other entry is set to 0 */
-	int i;
+	/*int i;
 	for (i = 0; i < NUM_ENTRIES; i++) {
 		if (i == PROGRAM_INDEX)
 			continue;
@@ -139,7 +139,7 @@ int paging_struct_test(){
 			return FAIL;
 		if (i != VIDEO_ADDR/KB_4 && table_entry_array[i].val != 0)
 			return FAIL;
-	}
+	}*/
 	
 	return PASS;
 }
@@ -213,11 +213,11 @@ int paging_test(){
 static inline void freq_test_1(int freq, int fd)
 {
 	//int32_t* buf = &freq;
-	rtc_write(fd,(void *)freq,4);
+	rtc_write(fd,(void *)&freq,4);
 	int count;
 	for(count = 0;count<9;count++) 
 	{
-		rtc_read(fd,(void *)freq,4);
+		rtc_read(fd,(void *)&freq,4);
 		printf("%u ", freq);
 	}
 }
@@ -235,11 +235,11 @@ static inline void freq_test_1(int freq, int fd)
 static inline void freq_test_2(int freq, int fd)
 {
 	//int32_t* buf = &freq;
-	rtc_write(fd,(void *)freq,4);
+	rtc_write(fd,(void *)&freq,4);
 	int count;
 	for(count = 0;count<freq;count++) 
 	{
-		rtc_read(fd,(void *)freq,4);
+		rtc_read(fd,(void *)&freq,4);
 	}
 	printf("%u rtc interrupts at %u Hz \n",freq,freq);
 }
@@ -468,9 +468,9 @@ void launch_tests(){
 
 	/* CP 2 */
 
-	//rtc_test();
+	rtc_test();
 	//kt_test();
 	//filesys_test();
 	//filesys_test_index(10);
-	filesys_test_directory();
+	//filesys_test_directory();
 }
